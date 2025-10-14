@@ -38,6 +38,7 @@ android {
         }
     }
 }
+apply plugin: 'com.google.gms.google-services'
 
 flutter {
     source = "../.."
