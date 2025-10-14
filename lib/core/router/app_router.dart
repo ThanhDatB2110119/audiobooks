@@ -1,3 +1,4 @@
+import 'package:audiobooks/presentation/features/auth/view/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audiobooks/presentation/features/home/pages/home_page.dart';
@@ -14,6 +15,14 @@ final GoRouter router = GoRouter(
         return MainShell(navigationShell: navigationShell);
       },
       branches: [
+        // StatefulShellBranch(
+        //   routes: [
+        //     GoRoute(
+        //       path: '/login',
+        //       builder: (context, state) => const LoginPage(),
+        //     ),
+        //   ],
+        // ),
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -27,7 +36,7 @@ final GoRouter router = GoRouter(
           routes: [
             GoRoute(
               path: '/page2',
-              builder: (context, state) =>  Scaffold(
+              builder: (context, state) => Scaffold(
                 appBar: AppBar(title: Text('Page 2')),
                 body: Center(child: Text('Welcome to Page 2!')),
               ),
@@ -39,7 +48,7 @@ final GoRouter router = GoRouter(
           routes: [
             GoRoute(
               path: '/page3',
-              builder: (context, state) =>  Scaffold(
+              builder: (context, state) => Scaffold(
                 appBar: AppBar(title: Text('Page 3')),
                 body: Center(child: Text('Welcome to Page 3!')),
               ),
@@ -51,7 +60,7 @@ final GoRouter router = GoRouter(
           routes: [
             GoRoute(
               path: '/page4',
-              builder: (context, state) =>  Scaffold(
+              builder: (context, state) => Scaffold(
                 appBar: AppBar(title: Text('Page 4')),
                 body: Center(child: Text('Welcome to Page 4!')),
               ),
@@ -65,6 +74,5 @@ final GoRouter router = GoRouter(
     //   path: '/introduction',
     //   builder: (context, state) => const IntroductionPage(),
     // ),
-
   ],
 );
