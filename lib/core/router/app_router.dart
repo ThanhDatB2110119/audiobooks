@@ -8,21 +8,21 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShell(navigationShell: navigationShell);
       },
       branches: [
-        // StatefulShellBranch(
-        //   routes: [
-        //     GoRoute(
-        //       path: '/login',
-        //       builder: (context, state) => const LoginPage(),
-        //     ),
-        //   ],
-        // ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/login',
+              builder: (context, state) => const LoginPage(),
+            ),
+          ],
+        ),
         StatefulShellBranch(
           routes: [
             GoRoute(
