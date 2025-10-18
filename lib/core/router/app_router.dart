@@ -1,4 +1,4 @@
-import 'package:audiobooks/presentation/features/auth/view/login_page.dart';
+import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audiobooks/presentation/features/home/pages/home_page.dart';
