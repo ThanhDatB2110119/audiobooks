@@ -1,8 +1,11 @@
 // lib/features/auth/data/repositories/auth_repository_impl.dart
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../datasources/auth_remote_data_source.dart';
 import '../../domain/repositories/auth_repository.dart';
 
+
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 

@@ -1,5 +1,6 @@
 // lib/features/auth/data/datasources/auth_remote_data_source.dart
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRemoteDataSource {
@@ -8,11 +9,16 @@ abstract class AuthRemoteDataSource {
   Session? get currentUserSession;
 }
 
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final SupabaseClient _supabaseClient;
-  final GoogleSignIn _googleSignIn;
+const String serverClientId =
+    "432156197463-ketob3jpn2lnqes1pp5lgmetoq5g95ti.apps.googleusercontent.com";
 
-  AuthRemoteDataSourceImpl(this._supabaseClient, this._googleSignIn);
+@LazySingleton(as: AuthRemoteDataSource)
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final SupabaseClient _supabaseClient = Supabase.instance.client;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: serverClientId,
+  );
+  AuthRemoteDataSourceImpl();
 
   @override
   Session? get currentUserSession => _supabaseClient.auth.currentSession;
@@ -22,10 +28,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       // 1. Bắt đầu quá trình đăng nhập Google
       final googleUser = await _googleSignIn.authenticate();
-      
 
       // 2. Lấy thông tin xác thực (idToken, accessToken)
-      final googleAuth =  googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final accessToken = googleAuth.idToken;
       final idToken = googleAuth.idToken;
 

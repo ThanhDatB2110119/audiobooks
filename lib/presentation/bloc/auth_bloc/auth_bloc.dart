@@ -1,6 +1,7 @@
 import 'package:audiobooks/domain/repositories/auth_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -19,7 +20,7 @@ part 'auth_bloc.freezed.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import '../../domain/repositories/auth_repository.dart';
 // import 'auth_state.dart';
-
+@injectable
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 

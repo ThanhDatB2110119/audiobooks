@@ -1,5 +1,8 @@
+import 'package:audiobooks/core/injection/injection_container.dart';
+import 'package:audiobooks/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audiobooks/presentation/features/home/pages/home_page.dart';
 import 'package:audiobooks/presentation/shell/main_shell.dart';
@@ -19,7 +22,10 @@ final GoRouter router = GoRouter(
           routes: [
             GoRoute(
               path: '/login',
-              builder: (context, state) => const LoginPage(),
+              builder: (context, state) => BlocProvider(
+                create: (context) => getIt<AuthCubit>(),
+                child: const LoginPage(),
+              ),
             ),
           ],
         ),
