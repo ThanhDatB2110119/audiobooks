@@ -21,14 +21,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AuthResponse> signInWithGoogle() async {
     try {
       // 1. Bắt đầu quá trình đăng nhập Google
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        throw 'Đăng nhập Google đã bị hủy.';
-      }
+      final googleUser = await _googleSignIn.authenticate();
+      
 
       // 2. Lấy thông tin xác thực (idToken, accessToken)
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
+      final googleAuth =  googleUser.authentication;
+      final accessToken = googleAuth.idToken;
       final idToken = googleAuth.idToken;
 
       if (accessToken == null) {
