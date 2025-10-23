@@ -15,7 +15,10 @@ const String serverClientId =
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance.;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+    // DÁN WEB CLIENT ID BẠN LẤY TỪ GOOGLE CLOUD CONSOLE VÀO ĐÂY
+ 
+
   AuthRemoteDataSourceImpl();
 
   @override
@@ -25,7 +28,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AuthResponse> signInWithGoogle() async {
     try {
       // 1. Bắt đầu quá trình đăng nhập Google
-      final googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
       // 2. Lấy thông tin xác thực (idToken, accessToken)
       final googleAuth = googleUser.authentication;

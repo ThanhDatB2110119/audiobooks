@@ -50,8 +50,9 @@ dependencies:
   logger: ^2.6.1
   dartz: ^0.10.1
   flutter_svg: ^2.2.1
-  google_sign_in: ^7.2.0
   supabase_flutter: ^2.10.3
+  google_sign_in: ^7.2.0
+  
 
 dev_dependencies:
   flutter_test:
