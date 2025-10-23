@@ -15,9 +15,7 @@ const String serverClientId =
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: serverClientId,
-  );
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance.;
   AuthRemoteDataSourceImpl();
 
   @override
