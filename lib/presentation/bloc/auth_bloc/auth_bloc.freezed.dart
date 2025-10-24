@@ -55,11 +55,12 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _GoogleSignInRequested value)?  googleSignInRequested,TResult Function( _SignOutRequested value)?  signOutRequested,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _Started() when started != null:
-return started(_that);case _:
+case _GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested(_that);case _SignOutRequested() when signOutRequested != null:
+return signOutRequested(_that);case _:
   return orElse();
 
 }
@@ -77,11 +78,12 @@ return started(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _GoogleSignInRequested value)  googleSignInRequested,required TResult Function( _SignOutRequested value)  signOutRequested,}){
 final _that = this;
 switch (_that) {
-case _Started():
-return started(_that);case _:
+case _GoogleSignInRequested():
+return googleSignInRequested(_that);case _SignOutRequested():
+return signOutRequested(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -98,11 +100,12 @@ return started(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _GoogleSignInRequested value)?  googleSignInRequested,TResult? Function( _SignOutRequested value)?  signOutRequested,}){
 final _that = this;
 switch (_that) {
-case _Started() when started != null:
-return started(_that);case _:
+case _GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested(_that);case _SignOutRequested() when signOutRequested != null:
+return signOutRequested(_that);case _:
   return null;
 
 }
@@ -119,10 +122,11 @@ return started(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  googleSignInRequested,TResult Function()?  signOutRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _Started() when started != null:
-return started();case _:
+case _GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested();case _SignOutRequested() when signOutRequested != null:
+return signOutRequested();case _:
   return orElse();
 
 }
@@ -140,10 +144,11 @@ return started();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  googleSignInRequested,required TResult Function()  signOutRequested,}) {final _that = this;
 switch (_that) {
-case _Started():
-return started();case _:
+case _GoogleSignInRequested():
+return googleSignInRequested();case _SignOutRequested():
+return signOutRequested();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -160,10 +165,11 @@ return started();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  googleSignInRequested,TResult? Function()?  signOutRequested,}) {final _that = this;
 switch (_that) {
-case _Started() when started != null:
-return started();case _:
+case _GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested();case _SignOutRequested() when signOutRequested != null:
+return signOutRequested();case _:
   return null;
 
 }
@@ -174,8 +180,8 @@ return started();case _:
 /// @nodoc
 
 
-class _Started implements AuthEvent {
-  const _Started();
+class _GoogleSignInRequested implements AuthEvent {
+  const _GoogleSignInRequested();
   
 
 
@@ -185,7 +191,7 @@ class _Started implements AuthEvent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Started);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GoogleSignInRequested);
 }
 
 
@@ -194,7 +200,39 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AuthEvent.started()';
+  return 'AuthEvent.googleSignInRequested()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _SignOutRequested implements AuthEvent {
+  const _SignOutRequested();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SignOutRequested);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.signOutRequested()';
 }
 
 
@@ -323,12 +361,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String userId)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( UserEntity user)?  authenticated,TResult Function()?  unauthenticated,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Authenticated() when authenticated != null:
-return authenticated(_that.userId);case _Unauthenticated() when unauthenticated != null:
+return authenticated(_that.user);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
@@ -348,12 +386,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String userId)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( UserEntity user)  authenticated,required TResult Function()  unauthenticated,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Authenticated():
-return authenticated(_that.userId);case _Unauthenticated():
+return authenticated(_that.user);case _Unauthenticated():
 return unauthenticated();case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
@@ -372,12 +410,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String userId)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( UserEntity user)?  authenticated,TResult? Function()?  unauthenticated,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Authenticated() when authenticated != null:
-return authenticated(_that.userId);case _Unauthenticated() when unauthenticated != null:
+return authenticated(_that.user);case _Unauthenticated() when unauthenticated != null:
 return unauthenticated();case _Error() when error != null:
 return error(_that.message);case _:
   return null;
@@ -455,10 +493,10 @@ String toString() {
 
 
 class _Authenticated implements AuthState {
-  const _Authenticated(this.userId);
+  const _Authenticated({required this.user});
   
 
- final  String userId;
+ final  UserEntity user;
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
@@ -470,16 +508,16 @@ _$AuthenticatedCopyWith<_Authenticated> get copyWith => __$AuthenticatedCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Authenticated&&(identical(other.userId, userId) || other.userId == userId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Authenticated&&(identical(other.user, user) || other.user == user));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,userId);
+int get hashCode => Object.hash(runtimeType,user);
 
 @override
 String toString() {
-  return 'AuthState.authenticated(userId: $userId)';
+  return 'AuthState.authenticated(user: $user)';
 }
 
 
@@ -490,7 +528,7 @@ abstract mixin class _$AuthenticatedCopyWith<$Res> implements $AuthStateCopyWith
   factory _$AuthenticatedCopyWith(_Authenticated value, $Res Function(_Authenticated) _then) = __$AuthenticatedCopyWithImpl;
 @useResult
 $Res call({
- String userId
+ UserEntity user
 });
 
 
@@ -507,10 +545,10 @@ class __$AuthenticatedCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? userId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? user = null,}) {
   return _then(_Authenticated(
-null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,
+user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as UserEntity,
   ));
 }
 
@@ -553,7 +591,7 @@ String toString() {
 
 
 class _Error implements AuthState {
-  const _Error(this.message);
+  const _Error({required this.message});
   
 
  final  String message;
@@ -607,7 +645,7 @@ class __$ErrorCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(
-null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

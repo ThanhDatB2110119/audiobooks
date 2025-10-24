@@ -23,7 +23,7 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: '/login',
               builder: (context, state) => BlocProvider(
-                create: (context) => getIt<AuthCubit>(),
+                create: (context) => getIt<AuthBloc>(), 
                 child: const LoginPage(),
               ),
             ),

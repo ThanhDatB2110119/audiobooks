@@ -1,4 +1,5 @@
-import 'package:audiobooks/domain/repositories/auth_repository.dart';
+import 'package:audiobooks/domain/entities/user_entity.dart';
+import 'package:audiobooks/domain/usecases/google_sign_in_usecase.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -7,50 +8,48 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 part 'auth_bloc.freezed.dart';
 
-// class AuthBloc extends Bloc<AuthEvent, AuthState> {
-//   AuthBloc() : super(_Initial()) {
-//     on<AuthEvent>((event, emit) {
-//       // TODO: implement event handler
-//     });
-//   }
-// }
-// lib/features/auth/presentation/bloc/auth_bloc.dart
+@injectable // Hoặc @factory
+class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  // BLoC phụ thuộc vào Use Cases, không phải Repository
+  final GoogleSignInUseCase _googleSignInUseCase;
+  // final SignOutUseCase _signOutUseCase; // Sẽ thêm sau
 
-// ??
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import '../../domain/repositories/auth_repository.dart';
-// import 'auth_state.dart';
-@injectable
-class AuthCubit extends Cubit<AuthState> {
-  final AuthRepository _authRepository;
-
-  AuthCubit(this._authRepository) : super(const AuthState.initial()) {
-    // Kiểm tra trạng thái đăng nhập ngay khi khởi tạo
-    final currentUser = _authRepository.currentUser;
-    if (currentUser != null) {
-      emit(AuthState.authenticated(currentUser.id));
-    } else {
-      emit(const AuthState.unauthenticated());
-    }
+  AuthBloc(this._googleSignInUseCase) : super(const AuthState.initial()) {
+    on<_GoogleSignInRequested>(_onGoogleSignInRequested);
+    // on<_SignOutRequested>(_onSignOutRequested);
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<void> _onGoogleSignInRequested(
+    _GoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    // 1. Chuyển sang trạng thái loading
     emit(const AuthState.loading());
-    try {
-      final user = await _authRepository.signInWithGoogle();
-      if (user != null) {
-        emit(AuthState.authenticated(user.id));
-      } else {
-        emit(const AuthState.unauthenticated());
-      }
-    } catch (e) {
-      emit(AuthState.error(e.toString()));
-    }
+
+    // 2. Gọi Use Case
+    final result = await _googleSignInUseCase(); // Use Case trả về Either
+
+    // 3. Xử lý kết quả từ Either bằng `fold`
+    result.fold(
+      // Trường hợp bên Trái (Left), là Failure
+      (failure) => emit(AuthState.error(message: failure.message)),
+      // Trường hợp bên Phải (Right), là dữ liệu thành công (UserEntity)
+      (user) => emit(AuthState.authenticated(user: user)),
+    );
   }
 
-  Future<void> signOut() async {
+  /*
+  // Đây là cách bạn sẽ implement signOut
+  Future<void> _onSignOutRequested(
+    _SignOutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(const AuthState.loading());
-    await _authRepository.signOut();
-    emit(const AuthState.unauthenticated());
+    final result = await _signOutUseCase();
+    result.fold(
+      (failure) => emit(AuthState.error(message: failure.message)),
+      (_) => emit(const AuthState.unauthenticated()), // thành công thì về unauthenticated
+    );
   }
+  */
 }
