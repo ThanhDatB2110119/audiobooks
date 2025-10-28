@@ -19,6 +19,7 @@ import '../../data/datasources/auth_remote_data_source.dart' as _i716;
 import '../../data/repositories/auth_repository_impl.dart' as _i895;
 import '../../domain/repositories/auth_repository.dart' as _i1073;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
+import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
 import 'register_module.dart' as _i291;
 
@@ -47,8 +48,14 @@ _i174.GetIt init(
   gh.lazySingleton<_i971.GoogleSignInUseCase>(
     () => _i971.GoogleSignInUseCase(gh<_i1073.AuthRepository>()),
   );
+  gh.lazySingleton<_i514.GoogleSignOutUseCase>(
+    () => _i514.GoogleSignOutUseCase(gh<_i1073.AuthRepository>()),
+  );
   gh.lazySingleton<_i224.AuthCubit>(
-    () => _i224.AuthCubit(gh<_i971.GoogleSignInUseCase>()),
+    () => _i224.AuthCubit(
+      gh<_i971.GoogleSignInUseCase>(),
+      gh<_i514.GoogleSignOutUseCase>(),
+    ),
   );
   return getIt;
 }

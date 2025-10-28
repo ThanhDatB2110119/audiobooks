@@ -44,8 +44,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> signOut() {
-    // TODO: implement signOut
-    throw UnimplementedError();
+  Future<Either<Failure, void>> signOut() async {
+    try {
+      await remoteDataSource.signOut();
+      return const Right(null); // Trả về Right(null) để báo hiệu thành công
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
   }
 }

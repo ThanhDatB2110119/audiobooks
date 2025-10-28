@@ -1,5 +1,6 @@
 import 'package:audiobooks/domain/entities/user_entity.dart';
 import 'package:audiobooks/domain/usecases/google_sign_in_usecase.dart';
+import 'package:audiobooks/domain/usecases/google_sign_out_usecase.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
@@ -9,7 +10,8 @@ part 'auth_state.dart';
 @lazySingleton
 class AuthCubit extends Cubit<AuthState> {
   final GoogleSignInUseCase _googleSignInUseCase;
-  AuthCubit(this._googleSignInUseCase) : super(AuthInitial());
+  final GoogleSignOutUseCase _googleSignOutUseCase;
+  AuthCubit(this._googleSignInUseCase, this._googleSignOutUseCase) : super(AuthInitial());
 
   Future<void> googleSignInRequested() async {
     emit(AuthLoading());
@@ -32,6 +34,25 @@ class AuthCubit extends Cubit<AuthState> {
       }
     });
   }
+Future<void> signOutRequested(
+   
+  ) async {
+    emit(AuthLoading()); // Chuyển sang trạng thái loading
 
+    final result = await _googleSignOutUseCase();
+
+    result.fold(
+      (failure) {
+        // Nếu đăng xuất thất bại, có thể hiển thị lỗi
+        // nhưng vẫn giữ người dùng ở trạng thái đăng nhập.
+        // Hoặc đơn giản là chuyển về unauthenticated với thông báo lỗi.
+        emit(AuthUnauthenticated());
+      },
+      (_) {
+        // Nếu đăng xuất thành công, chuyển sang trạng thái unauthenticated
+        emit(AuthUnauthenticated());
+      },
+    );
+  }
   
 }

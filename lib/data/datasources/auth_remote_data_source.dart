@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthResponse> signInWithGoogle();
+  Future<void> signOut();
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -65,6 +66,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       // Bắt các lỗi khác và ném ra ServerException
       throw ServerException(e.toString());
+    }
+  }
+  
+  @override
+  Future<void> signOut() async {
+    try {
+      // Đăng xuất khỏi cả Supabase và Google
+      await googleSignIn.signOut();
+      await supabaseClient.auth.signOut();
+    } catch (e) {
+      throw ServerException('Failed to sign out: ${e.toString()}');
     }
   }
 }
