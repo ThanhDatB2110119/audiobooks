@@ -39,15 +39,13 @@ dependencies:
   go_router: ^16.2.1
   get_it: ^8.2.0
   injectable: ^2.5.1
-  freezed: ^3.2.3
-  freezed_annotation: ^3.1.0
   dio: ^5.9.0
   build_runner: ^2.7.1
   injectable_generator: ^2.8.1
   json_serializable: ^6.11.0
   bloc: ^9.0.0
   google_fonts: ^6.3.1
-  logger: ^2.6.1
+  logger: ^2.6.2
   dartz: ^0.10.1
   flutter_svg: ^2.2.1
   supabase_flutter: ^2.10.3
