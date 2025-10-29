@@ -1,7 +1,5 @@
 // lib/features/auth/data/datasources/auth_remote_data_source.dart
 import 'package:audiobooks/core/error/exceptions.dart';
-import 'package:audiobooks/core/utils/logger.dart';
-import 'package:audiobooks/domain/entities/user_entity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
