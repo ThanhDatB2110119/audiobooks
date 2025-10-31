@@ -9,4 +9,4 @@ final getIt = GetIt.instance;
   preferRelativeImports: true,
   asExtension: false,
 )
-void configureDependencies() => init(getIt);
+void configureDependencies({required String environment}) => init(getIt, environment: environment);

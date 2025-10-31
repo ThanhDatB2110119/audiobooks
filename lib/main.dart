@@ -1,4 +1,5 @@
 import 'package:audiobooks/core/injection/injection_container.dart' as di;
+import 'package:audiobooks/data/repositories/mock_book_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:audiobooks/app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,7 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  di.configureDependencies();
+  di.configureDependencies(environment: Env.dev);
 
   await Supabase.initialize(
     url: 'https://hlajxecxlkegmeacnveg.supabase.co', 
