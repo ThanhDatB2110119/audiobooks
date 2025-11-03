@@ -119,11 +119,13 @@ class HomePage extends StatelessWidget {
                     style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
                     print('Nhấn vào Khung 3');
                     // TODO: Thêm navigation đến page 3
                     },
+
+                    icon: const FaIcon(FontAwesomeIcons.bookOpen, color: Colors.black),
                     style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white.withOpacity(0.9),
                     shape: RoundedRectangleBorder(
@@ -131,16 +133,17 @@ class HomePage extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.all(8.0),
                     ),
-                    child: const Text(
+                    label: const Text(
                     'Khung 3',
                     style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
                     print('Nhấn vào Khung 4');
                     // TODO: Thêm navigation đến page 4
                     },
+                    icon: const FaIcon(FontAwesomeIcons.textSlash, color: Colors.black),
                     style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white.withOpacity(0.9),
                     shape: RoundedRectangleBorder(
@@ -148,7 +151,7 @@ class HomePage extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.all(8.0),
                     ),
-                    child: const Text(
+                    label: const Text(
                     'Khung 4',
                     style: TextStyle(fontSize: 14, color: Colors.black),
                     ),
