@@ -2,8 +2,11 @@ import 'package:audiobooks/presentation/features/auth/widgets/sign_out_button.da
 import 'package:audiobooks/presentation/features/home/cubit/home_cubit.dart';
 import 'package:audiobooks/presentation/features/home/cubit/home_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shimmer/shimmer.dart';
 
 // class HomePage extends StatelessWidget {
 //   const HomePage({super.key});
@@ -32,89 +35,200 @@ class HomePage extends StatelessWidget {
     return BlocProvider(
       create: (_) => GetIt.instance<HomeCubit>()..fetchBooks(),
       child: Scaffold(
-        appBar: AppBar(
-          // Giữ nguyên AppBar của bạn, có thể đổi title cho phù hợp hơn
-          title: const Text('Thư viện sách nói'),
-          actions: const [
-            SignOutButton(), // Giữ nguyên nút SignOut của bạn
-          ],
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(150.0), // Tăng chiều cao AppBar
+          child: AppBar(
+            backgroundColor: Colors.blue, // Thêm màu nền xanh cho AppBar
+            // Giữ nguyên AppBar của bạn, có thể đổi title cho phù hợp hơn
+            title: const Text('Thư viện sách nói'),
+            actions: const [
+              SignOutButton(), // Giữ nguyên nút SignOut của bạn
+            ],
+          ),
         ),
         // 2. Sử dụng BlocBuilder để lắng nghe sự thay đổi state từ HomeCubit
         //    và rebuild UI tương ứng.
         body: BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
             // 3. Xử lý các trạng thái khác nhau của UI
-            
+
             // Trạng thái đang tải dữ liệu
             if (state is HomeLoading) {
-              return const Center(child: CircularProgressIndicator());
+              //return const Center(child: CircularProgressIndicator());
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(color: Colors.white),
+              ).animate().shimmer(duration: 800.ms);
             }
 
             // Trạng thái tải dữ liệu thành công
             if (state is HomeLoaded) {
-              // Xử lý trường hợp không có sách nào
-              if (state.books.isEmpty) {
-              return Center(
-                child: Container(
+              // Hiển thị danh sách sách
+              return Column(
+              children: [
+                // Container độc lập phía dưới AppBar - luôn hiển thị
+                Container(
+                height: 250,
+                margin: const EdgeInsets.all(16.0),
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.black,
                   borderRadius: BorderRadius.circular(40),
                 ),
-                child: const Text(
-                  'Hiện chưa có sách nào trong thư viện.',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8.0,
+                  mainAxisSpacing: 8.0,
+                  childAspectRatio: 1.5,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(8.0),
+                  children: [
+                    ElevatedButton.icon(
+                    onPressed: () {
+                    print('Nhấn vào Khung 1');
+                    // TODO: Thêm navigation đến page 1
+                    },
+                    icon: const FaIcon(FontAwesomeIcons.link, color: Colors.black),
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    ),
+                    label: const Text(
+                    'Nhập link',
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                    ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                    print('Nhấn vào Khung 2');
+                    // TODO: Thêm navigation đến page 2
+                    },
+                    icon: const FaIcon(FontAwesomeIcons.folderOpen, color: Colors.black),
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    ),
+                    label: const Text(
+                    'Khung 2',
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                    print('Nhấn vào Khung 3');
+                    // TODO: Thêm navigation đến page 3
+                    },
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    ),
+                    child: const Text(
+                    'Khung 3',
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                    print('Nhấn vào Khung 4');
+                    // TODO: Thêm navigation đến page 4
+                    },
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    ),
+                    child: const Text(
+                    'Khung 4',
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                  ),
+                  ],
                 ),
                 ),
-              );
-              }
-              
-              // Hiển thị danh sách sách bằng ListView.builder để tối ưu hiệu năng
-              return ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: state.books.length,
-                itemBuilder: (context, index) {
-                  final book = state.books[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(10.0),
-                      leading: AspectRatio(
-                        aspectRatio: 2 / 3, // Tỉ lệ phổ biến của bìa sách
+                // Danh sách sách hoặc thông báo không có sách
+                Expanded(
+                child: state.books.isEmpty
+                  ? Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: const Text(
+                      'Hiện chưa có sách nào trong thư viện.',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                    )
+                  : ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: state.books.length,
+                    itemBuilder: (context, index) {
+                      final book = state.books[index];
+                      return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(10.0),
+                        leading: AspectRatio(
+                        aspectRatio: 2 / 3,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4.0),
                           child: Image.network(
-                            book.coverImageUrl,
-                            fit: BoxFit.cover,
-                            // Hiển thị placeholder trong lúc tải ảnh
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(child: CircularProgressIndicator());
+                          book.coverImageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder:
+                            (context, child, loadingProgress) {
+                              if (loadingProgress == null)
+                              return child;
+                              return Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(color: Colors.white),
+                              ).animate().shimmer(duration: 800.ms);
                             },
-                            // Hiển thị icon lỗi nếu không tải được ảnh
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.book, size: 40, color: Colors.grey);
-                            },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                            Icons.book,
+                            size: 40,
+                            color: Colors.grey,
+                            );
+                          },
                           ),
                         ),
-                      ),
-                      title: Text(
+                        ),
+                        title: Text(
                         book.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(book.author),
-                      onTap: () {
-                        // TODO: Điều hướng đến màn hình Player
-                        // Ví dụ: GoRouter.of(context).push('/player/${book.id}');
+                        ),
+                        subtitle: Text(book.author),
+                        onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Bạn đã chọn: ${book.title}')),
+                          SnackBar(
+                          content: Text('Bạn đã chọn: ${book.title}'),
+                          ),
                         );
-                      },
+                        },
+                      ),
+                      );
+                    },
                     ),
-                  );
-                },
+                ),
+              ],
               );
             }
 
