@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:audiobooks/presentation/features/auth/widgets/sign_out_button.dart';
 import 'package:audiobooks/presentation/features/home/cubit/home_cubit.dart';
 import 'package:audiobooks/presentation/features/home/cubit/home_state.dart';
-import 'package:audiobooks/presentation/features/home/widgets/text_input_dialog.dart';
-import 'package:audiobooks/presentation/features/home/widgets/url_input_dialog.dart';
+import 'package:audiobooks/presentation/features/creator/widgets/text_input_dialog.dart';
+import 'package:audiobooks/presentation/features/creator/widgets/url_input_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:audiobooks/presentation/features/home/widgets/file_picker_dialog.dart';
+import 'package:audiobooks/presentation/features/creator/widgets/file_picker_dialog.dart';
 
 // class HomePage extends StatelessWidget {
 //   const HomePage({super.key});
