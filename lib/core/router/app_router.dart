@@ -10,9 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:audiobooks/presentation/features/home/pages/home_page.dart';
 import 'package:audiobooks/presentation/shell/main_shell.dart';
 
-
 class AppRouter {
-  static final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   // Tạo router như một static getter để có thể truy cập context
   static GoRouter get router => _router;
@@ -68,9 +68,7 @@ class AppRouter {
     ],
 
     // Luồng lắng nghe sự thay đổi trạng thái
-    refreshListenable: GoRouterRefreshStream(
-      di.getIt<AuthCubit>().stream,
-    ),
+    refreshListenable: GoRouterRefreshStream(di.getIt<AuthCubit>().stream),
 
     // Hàm redirect sẽ chạy mỗi khi có một yêu cầu điều hướng mới
     redirect: (BuildContext context, GoRouterState state) {
@@ -78,7 +76,9 @@ class AppRouter {
       final authState = context.read<AuthCubit>().state;
       final location = state.matchedLocation;
 
-      appLogger.i('redirect: Trạng thái xác thực: $authState, Địa chỉ hiện tại: $location');
+      appLogger.i(
+        'redirect: Trạng thái xác thực: $authState, Địa chỉ hiện tại: $location',
+      );
 
       // Kiểm tra các trường hợp:
       // 1. Nếu đang loading hoặc initial, không làm gì cả, chờ trạng thái tiếp theo.
@@ -121,7 +121,9 @@ class GoRouterRefreshStream extends ChangeNotifier {
     appLogger.i('Khởi tạo GoRouterRefreshStream');
     notifyListeners();
     _subscription = stream.asBroadcastStream().listen((_) {
-      appLogger.i('GoRouterRefreshStream nhận sự kiện mới, thông báo listeners');
+      appLogger.i(
+        'GoRouterRefreshStream nhận sự kiện mới, thông báo listeners',
+      );
       notifyListeners();
     });
   }
@@ -133,3 +135,175 @@ class GoRouterRefreshStream extends ChangeNotifier {
     super.dispose();
   }
 }
+
+
+
+// CẬP NHẬT MỚI CHO SPLASH SCREEN VÀ CÁC ROUTE CON
+
+
+// class AppRouter {
+//   static final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
+//   static GoRouter get router => _router;
+
+//   static final GoRouter _router = GoRouter(
+//     navigatorKey: _rootNavigatorKey,
+//     // THAY ĐỔI 1: Bắt đầu từ Splash Screen
+//     initialLocation: '/',
+//     routes: [
+//       // Route cho Splash Screen
+//       GoRoute(
+//         path: '/',
+//         name: 'splash',
+//         builder: (context, state) {
+//           appLogger.i('Điều hướng tới trang Splash');
+//           return const SplashPage();
+//         },
+//       ),
+
+//       // Route cho Login Screen (nằm ngoài shell)
+//       GoRoute(
+//         path: '/login',
+//         name: 'login',
+//         builder: (context, state) {
+//           appLogger.i('Điều hướng tới trang Đăng nhập');
+//           return const LoginPage();
+//         },
+//       ),
+
+//       // THAY ĐỔI 2: Cập nhật các branch cho StatefulShellRoute
+//       StatefulShellRoute.indexedStack(
+//         builder: (context, state, navigationShell) {
+//           appLogger.i('Tạo MainShell với navigationShell');
+//           return MainShell(navigationShell: navigationShell);
+//         },
+//         branches: [
+//           // Branch 1: Home và các sub-route
+//           StatefulShellBranch(
+//             routes: [
+//               GoRoute(
+//                 path: '/home',
+//                 name: 'home',
+//                 builder: (context, state) => const HomePage(),
+//                 // Các route con của Home
+//                 routes: [
+//                   GoRoute(
+//                     // Path với tham số bookId
+//                     path: 'details/:bookId',
+//                     name: 'bookDetails',
+//                     builder: (context, state) {
+//                       final bookId = state.pathParameters['bookId']!;
+//                       return BookDetailsPage(bookId: bookId);
+//                     },
+//                   ),
+//                   GoRoute(
+//                     path: 'search',
+//                     name: 'search',
+//                     builder: (context, state) => const SearchPage(),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+
+//           // Branch 2: Creator
+//           StatefulShellBranch(
+//             routes: [
+//               GoRoute(
+//                 path: '/creator',
+//                 name: 'creator',
+//                 builder: (context, state) => const CreatorPage(),
+//               ),
+//             ],
+//           ),
+          
+//           // Branch 3: Library
+//           StatefulShellBranch(
+//             routes: [
+//               GoRoute(
+//                 path: '/library',
+//                 name: 'library',
+//                 builder: (context, state) => const LibraryPage(),
+//               ),
+//             ],
+//           ),
+
+//           // Branch 4: Settings và các sub-route
+//           StatefulShellBranch(
+//             routes: [
+//               GoRoute(
+//                 path: '/settings',
+//                 name: 'settings',
+//                 builder: (context, state) => const SettingsPage(),
+//                 routes: [
+//                    GoRoute(
+//                     path: 'profile',
+//                     name: 'profileEdit',
+//                     builder: (context, state) => const ProfileEditPage(),
+//                   ),
+//                 ]
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     ],
+
+//     refreshListenable: GoRouterRefreshStream(
+//       di.getIt<AuthCubit>().stream,
+//     ),
+
+//     // THAY ĐỔI 3: Cập nhật logic redirect để xử lý Splash Screen
+//     redirect: (BuildContext context, GoRouterState state) {
+//       final authState = context.read<AuthCubit>().state;
+//       final location = state.matchedLocation;
+
+//       appLogger.i('redirect: AuthState: $authState, Location: $location');
+
+//       final isLoading = authState is AuthLoading || authState is AuthInitial;
+//       if (isLoading) {
+//         // Nếu đang tải, cứ ở yên tại Splash Screen
+//         return location == '/' ? null : '/';
+//       }
+
+//       final isLoggedIn = authState is AuthAuthenticated;
+//       final isAtSplash = location == '/';
+//       final isAtLogin = location == '/login';
+      
+//       // Nếu chưa đăng nhập và không ở trang Login -> chuyển về Login.
+//       // Splash screen sẽ tự động chuyển hướng khi trạng thái auth thay đổi.
+//       if (!isLoggedIn && !isAtLogin) {
+//         return '/login';
+//       }
+
+//       // Nếu đã đăng nhập và đang ở trang Login hoặc Splash -> chuyển vào Home.
+//       if (isLoggedIn && (isAtLogin || isAtSplash)) {
+//         return '/home';
+//       }
+
+//       // Các trường hợp khác giữ nguyên.
+//       return null;
+//     },
+//   );
+// }
+
+// // Giữ nguyên class này
+// class GoRouterRefreshStream extends ChangeNotifier {
+//   late final StreamSubscription<dynamic> _subscription;
+
+//   GoRouterRefreshStream(Stream<dynamic> stream) {
+//     appLogger.i('Khởi tạo GoRouterRefreshStream');
+//     notifyListeners();
+//     _subscription = stream.asBroadcastStream().listen((_) {
+//       appLogger.i('GoRouterRefreshStream nhận sự kiện mới, thông báo listeners');
+//       notifyListeners();
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     appLogger.i('Hủy GoRouterRefreshStream');
+//     _subscription.cancel();
+//     super.dispose();
+//   }
+// }
