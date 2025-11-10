@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  di.configureDependencies(environment: Env.dev);
+  di.configureDependencies(environment: Env.prod);
 
   await Supabase.initialize(
     url: 'https://hlajxecxlkegmeacnveg.supabase.co',

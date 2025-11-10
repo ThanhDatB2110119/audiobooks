@@ -27,9 +27,22 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       return (response as List)
           .map((bookJson) => BookModel.fromJson(bookJson))
           .toList();
-
-    } catch (e) {
-      // Ghi log lỗi ở đây
+    } on PostgrestException catch (e, stackTrace) {
+      // ignore: avoid_print
+      print('========== SUPABASE ERROR ==========');
+      print('Message: ${e.message}');
+      print('Code: ${e.code}');
+      print('Details: ${e.details}');
+      print('Hint: ${e.hint}');
+      print('StackTrace: $stackTrace');
+      print('====================================');
+      throw ServerException('Failed to fetch books: ${e.message}');
+    } catch (e, stackTrace) {
+      print('========== UNEXPECTED ERROR ==========');
+      print('Error: $e');
+      print('Type: ${e.runtimeType}');
+      print('StackTrace: $stackTrace');
+      print('======================================');
       throw ServerException('Failed to fetch books: $e');
     }
   }
