@@ -7,12 +7,12 @@ part of 'book_model.dart';
 // **************************************************************************
 
 BookModel _$BookModelFromJson(Map<String, dynamic> json) => BookModel(
-  id: json['id'] as String,
+  id: (json['id'] as num).toInt(),
   title: json['title'] as String,
   author: json['author'] as String,
   description: json['description'] as String,
   coverImageUrl: json['cover_image_url'] as String,
-  categoryId: json['category_id'] as String,
+  categoryId: (json['category_id'] as num).toInt(),
 );
 
 Map<String, dynamic> _$BookModelToJson(BookModel instance) => <String, dynamic>{
