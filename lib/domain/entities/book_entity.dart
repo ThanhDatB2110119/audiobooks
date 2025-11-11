@@ -7,6 +7,7 @@ class BookEntity extends Equatable {
   final String description;
   final String coverImageUrl;
   final int categoryId;
+  final String categoryName;
 
   const BookEntity({
     required this.id,
@@ -15,6 +16,7 @@ class BookEntity extends Equatable {
     required this.description,
     required this.coverImageUrl,
     required this.categoryId,
+    required this.categoryName,
   });
 
   @override
@@ -25,5 +27,6 @@ class BookEntity extends Equatable {
     description,
     coverImageUrl,
     categoryId,
+    categoryName
   ];
 }

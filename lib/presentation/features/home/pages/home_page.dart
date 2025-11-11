@@ -10,6 +10,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/file_picker_dialog.dart';
 
@@ -342,6 +343,7 @@ class HomePage extends StatelessWidget {
                                     ),
                                     subtitle: Text(book.author),
                                     onTap: () {
+                                      context.push('/home/details/${book.id.toString()}');
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(

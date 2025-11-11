@@ -23,9 +23,12 @@ import '../../data/repositories/mock_book_repository_impl.dart' as _i1005;
 import '../../domain/repositories/auth_repository.dart' as _i1073;
 import '../../domain/repositories/book_repository.dart' as _i135;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
+import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
+import '../../presentation/features/book_detail/cubit/book_details_cubit.dart'
+    as _i970;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
 import 'register_module.dart' as _i291;
 
@@ -79,6 +82,12 @@ _i174.GetIt init(
   );
   gh.lazySingleton<_i813.GetAllBooksUsecase>(
     () => _i813.GetAllBooksUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i494.GetBookDetailsUsecase>(
+    () => _i494.GetBookDetailsUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.factory<_i970.BookDetailsCubit>(
+    () => _i970.BookDetailsCubit(gh<_i494.GetBookDetailsUsecase>()),
   );
   gh.factory<_i900.HomeCubit>(
     () => _i900.HomeCubit(gh<_i813.GetAllBooksUsecase>()),

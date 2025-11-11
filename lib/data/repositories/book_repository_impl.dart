@@ -22,4 +22,14 @@ class BookRepositoryImpl implements BookRepository {
       return Left(ServerFailure('Failed to fetch books from server'));
     }
   }
+
+  @override
+  Future<Either<Failure, BookEntity>> getBookById(int id) async {
+    try {
+      final bookModel = await remoteDataSource.getBookById(id.toString());
+      return Right(bookModel);
+    } on ServerException {
+      return Left(ServerFailure('Failed to fetch book details from server'));
+    }
+  }
 }

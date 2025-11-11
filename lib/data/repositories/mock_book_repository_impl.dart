@@ -20,4 +20,19 @@ class MockBookRepositoryImpl implements BookRepository {
     // Trả về dữ liệu giả
     return Right(mockBooks);
   }
+
+  @override
+  Future<Either<Failure, BookEntity>> getBookById(int id) async {
+    // Giả lập độ trễ mạng
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    try {
+      // Tìm cuốn sách đầu tiên trong danh sách mock có id trùng khớp
+      final book = mockBooks.firstWhere((book) => book.id == id);
+      return Right(book);
+    } catch (e) {
+      // Nếu không tìm thấy sách, trả về một lỗi
+      return Left(ServerFailure('Book with id $id not found'));
+    }
+  }
 }

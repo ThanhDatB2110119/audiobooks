@@ -4,6 +4,7 @@ import 'package:audiobooks/core/injection/injection_container.dart' as di;
 import 'package:audiobooks/core/utils/logger.dart';
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
+import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -44,6 +45,32 @@ class AppRouter {
                   appLogger.i('Điều hướng tới trang Home');
                   return const HomePage();
                 },
+
+                routes: [
+                  GoRoute(
+                    // Path sẽ là '/home/details/:bookId'
+                    path: 'details/:bookId', // `details/:bookId` là phần nối tiếp của `/home`
+                    name: 'bookDetails',
+                    builder: (context, state) {
+                      // Lấy tham số `bookId` từ URL
+                      final String? bookId = state.pathParameters['bookId'];
+                      
+                      // Kiểm tra null để đảm bảo an toàn
+                      if (bookId == null) {
+                        // Nếu không có ID, có thể trả về một trang lỗi hoặc quay lại home
+                        // Ở đây ta đơn giản là trả về một Scaffold báo lỗi
+                        return const Scaffold(
+                          body: Center(
+                            child: Text('Lỗi: Không tìm thấy ID sách.'),
+                          ),
+                        );
+                      }
+
+                      appLogger.i('Điều hướng tới trang Chi tiết sách với ID: $bookId');
+                      return BookDetailsPage(bookId: bookId);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

@@ -8,6 +8,7 @@ final List<BookEntity> mockBooks = [
     // Dùng ảnh placeholder từ một dịch vụ online
     coverImageUrl: 'https://picsum.photos/seed/1/200/300', 
     categoryId: 1,
+    categoryName: 'Fiction',
   ),
   const BookEntity(
     id: 2,
@@ -16,6 +17,7 @@ final List<BookEntity> mockBooks = [
     description: 'Nghệ thuật giao tiếp và ứng xử.',
     coverImageUrl: 'https://picsum.photos/seed/2/200/300',
     categoryId: 2,
+    categoryName: 'Self-Help',
   ),
   const BookEntity(
     id: 3,
@@ -24,6 +26,7 @@ final List<BookEntity> mockBooks = [
     description: 'Hành trình tiến hóa của loài người.',
     coverImageUrl: 'https://picsum.photos/seed/3/200/300',
     categoryId: 3,
+    categoryName: 'History',
   ),
   const BookEntity(
     id: 4,
@@ -32,5 +35,6 @@ final List<BookEntity> mockBooks = [
     description: 'Một tác phẩm kinh điển của văn học Mỹ.',
     coverImageUrl: 'https://picsum.photos/seed/4/200/300',
     categoryId: 1,
+    categoryName: 'Fiction',
   ),
 ];
