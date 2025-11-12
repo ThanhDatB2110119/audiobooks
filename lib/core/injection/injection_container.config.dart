@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:just_audio/just_audio.dart' as _i501;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 
 import '../../data/datasources/auth_remote_data_source.dart' as _i716;
@@ -30,6 +31,7 @@ import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
 import '../../presentation/features/book_detail/cubit/book_details_cubit.dart'
     as _i970;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
+import '../../presentation/features/player/cubit/player_cubit.dart' as _i949;
 import 'register_module.dart' as _i291;
 
 const String _dev = 'dev';
@@ -43,6 +45,7 @@ _i174.GetIt init(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final registerModule = _$RegisterModule();
+  gh.factory<_i501.AudioPlayer>(() => registerModule.audioPlayer);
   gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
   gh.lazySingleton<_i454.SupabaseClient>(() => registerModule.supabaseClient);
   gh.lazySingleton<_i116.GoogleSignIn>(() => registerModule.googleSignIn);
@@ -73,6 +76,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i135.BookRepository>(
     () => _i83.BookRepositoryImpl(gh<_i971.BookRemoteDataSource>()),
     registerFor: {_prod},
+  );
+  gh.factory<_i949.PlayerCubit>(
+    () => _i949.PlayerCubit(gh<_i501.AudioPlayer>()),
   );
   gh.lazySingleton<_i224.AuthCubit>(
     () => _i224.AuthCubit(

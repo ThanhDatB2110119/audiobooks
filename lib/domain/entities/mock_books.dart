@@ -9,6 +9,7 @@ final List<BookEntity> mockBooks = [
     coverImageUrl: 'https://picsum.photos/seed/1/200/300', 
     categoryId: 1,
     categoryName: 'Fiction',
+    audioUrl: 'http://www.hochmuth.com/mp3/Bloch_Prayer.mp3',
   ),
   const BookEntity(
     id: 2,
@@ -18,6 +19,7 @@ final List<BookEntity> mockBooks = [
     coverImageUrl: 'https://picsum.photos/seed/2/200/300',
     categoryId: 2,
     categoryName: 'Self-Help',
+    audioUrl: 'http://www.hochmuth.com/mp3/Haydn_Cello_Concerto_D-1.mp3',
   ),
   const BookEntity(
     id: 3,
@@ -27,6 +29,7 @@ final List<BookEntity> mockBooks = [
     coverImageUrl: 'https://picsum.photos/seed/3/200/300',
     categoryId: 3,
     categoryName: 'History',
+    audioUrl: 'http://www.hochmuth.com/mp3/Haydn_Cello_Concerto_D-1.mp3',
   ),
   const BookEntity(
     id: 4,
@@ -36,5 +39,6 @@ final List<BookEntity> mockBooks = [
     coverImageUrl: 'https://picsum.photos/seed/4/200/300',
     categoryId: 1,
     categoryName: 'Fiction',
+    audioUrl: 'http://www.hochmuth.com/mp3/Bloch_Prayer.mp3',
   ),
 ];

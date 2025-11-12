@@ -16,5 +16,6 @@ Map<String, dynamic> _$BookModelToJson(BookModel instance) => <String, dynamic>{
   'coverImageUrl': instance.coverImageUrl,
   'categoryId': instance.categoryId,
   'categoryName': instance.categoryName,
+  'audioUrl': instance.audioUrl,
   'props': instance.props,
 };

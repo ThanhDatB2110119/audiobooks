@@ -42,6 +42,7 @@ class BookModel extends BookEntity {
     required super.coverImageUrl,
     required super.categoryId,
     required super.categoryName,
+    required super.audioUrl,
   });
 
   // ========================================================================
@@ -67,7 +68,8 @@ class BookModel extends BookEntity {
       //   -> Nếu kết quả cuối cùng là null, gán giá trị mặc định là 'Không rõ'
       categoryName:
           (json['categories'] as Map<String, dynamic>?)?['name'] as String? ??
-              'Không rõ',
+          'Không rõ',
+      audioUrl: json['content_text_url'] as String? ?? 'Null',
     );
   }
 

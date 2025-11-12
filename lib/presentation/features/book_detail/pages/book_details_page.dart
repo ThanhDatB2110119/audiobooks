@@ -3,6 +3,7 @@ import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 
 class BookDetailsPage extends StatelessWidget {
   final String bookId;
@@ -97,6 +98,7 @@ class BookDetailsPage extends StatelessWidget {
                         ),
                         onPressed: () {
                           // TODO: Điều hướng tới màn hình Player
+                          context.push('/player', extra: book);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Sẽ mở màn hình Player...'),

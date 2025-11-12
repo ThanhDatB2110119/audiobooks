@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:audiobooks/core/injection/injection_container.dart' as di;
 import 'package:audiobooks/core/utils/logger.dart';
+import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
+import 'package:audiobooks/presentation/features/player/pages/player_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -28,6 +30,28 @@ class AppRouter {
         builder: (context, state) {
           appLogger.i('Điều hướng tới trang Đăng nhập');
           return const LoginPage();
+        },
+      ),
+
+      GoRoute(
+        path: '/player',
+        name: 'player',
+        builder: (context, state) {
+          // Lấy object `book` được truyền qua tham số `extra` khi gọi `context.push`.
+          // Đây là cách để truyền các đối tượng phức tạp mà không cần đưa lên URL.
+          final book = state.extra as BookEntity?;
+
+          // Kiểm tra để đảm bảo dữ liệu sách đã được truyền qua.
+          if (book == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('Lỗi: Dữ liệu sách không hợp lệ.'),
+              ),
+            );
+          }
+          
+          appLogger.i('Điều hướng tới trang Player với sách: ${book.title}');
+          return PlayerPage(book: book);
         },
       ),
       StatefulShellRoute.indexedStack(
