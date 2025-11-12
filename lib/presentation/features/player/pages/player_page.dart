@@ -9,19 +9,17 @@ import 'package:get_it/get_it.dart';
 class PlayerPage extends StatelessWidget {
   final BookEntity book;
 
-  const PlayerPage({
-    super.key,
-    required this.book,
-  });
+  const PlayerPage({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => GetIt.instance<PlayerCubit>()..loadAudio(book.audioUrl),
+      //create: (context) => GetIt.instance<PlayerCubit>()..loadAudio(book.audioUrl),
+      create: (context) =>
+          GetIt.instance<PlayerCubit>()
+            ..loadAudio(book.audioUrl, autoplay: true),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(book.title),
-        ),
+        appBar: AppBar(title: Text(book.title)),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -42,7 +40,9 @@ class PlayerPage extends StatelessWidget {
                 // Tên sách và tác giả
                 Text(
                   book.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -60,9 +60,14 @@ class PlayerPage extends StatelessWidget {
                         Slider(
                           min: 0.0,
                           max: state.duration.inSeconds.toDouble(),
-                          value: state.position.inSeconds.toDouble().clamp(0.0, state.duration.inSeconds.toDouble()),
+                          value: state.position.inSeconds.toDouble().clamp(
+                            0.0,
+                            state.duration.inSeconds.toDouble(),
+                          ),
                           onChanged: (value) {
-                            context.read<PlayerCubit>().seek(Duration(seconds: value.toInt()));
+                            context.read<PlayerCubit>().seek(
+                              Duration(seconds: value.toInt()),
+                            );
                           },
                         ),
                         Padding(
@@ -90,7 +95,9 @@ class PlayerPage extends StatelessWidget {
                     final isPlaying = state.status == PlayerStatus.playing;
                     return IconButton(
                       icon: Icon(
-                        isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                        isPlaying
+                            ? Icons.pause_circle_filled
+                            : Icons.play_circle_filled,
                         size: 70.0,
                       ),
                       onPressed: () {
