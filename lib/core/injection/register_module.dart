@@ -20,6 +20,6 @@ abstract class RegisterModule {
     // WEB CLIENT ID bạn lấy từ Google Cloud Console
     serverClientId: '259713517157-fqf7486mgfq5vmdufm4hcf89kalot63l.apps.googleusercontent.com',
   );
-  @factory
+  @lazySingleton
   AudioPlayer get audioPlayer => AudioPlayer();
 }

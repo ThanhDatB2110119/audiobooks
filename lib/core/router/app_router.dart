@@ -39,19 +39,21 @@ class AppRouter {
         builder: (context, state) {
           // Lấy object `book` được truyền qua tham số `extra` khi gọi `context.push`.
           // Đây là cách để truyền các đối tượng phức tạp mà không cần đưa lên URL.
-          final book = state.extra as BookEntity?;
+          final extraData = state.extra as Map<String, dynamic>?;
 
-          // Kiểm tra để đảm bảo dữ liệu sách đã được truyền qua.
-          if (book == null) {
+          if (extraData == null) {
             return const Scaffold(
-              body: Center(
-                child: Text('Lỗi: Dữ liệu sách không hợp lệ.'),
-              ),
+              body: Center(child: Text('Lỗi: Dữ liệu sách không hợp lệ.')),
             );
           }
-          
-          appLogger.i('Điều hướng tới trang Player với sách: ${book.title}');
-          return PlayerPage(book: book);
+
+          final books = extraData['books'] as List<BookEntity>;
+          final initialIndex = extraData['index'] as int;
+          appLogger.i('Điều hướng tới trang Player với sách: ${books[initialIndex].title}');
+          return PlayerPage(
+            books: books,
+            initialIndex: initialIndex,
+          );
         },
       ),
       StatefulShellRoute.indexedStack(
@@ -73,25 +75,30 @@ class AppRouter {
                 routes: [
                   GoRoute(
                     // Path sẽ là '/home/details/:bookId'
-                    path: 'details/:bookId', // `details/:bookId` là phần nối tiếp của `/home`
+                    path:
+                        'details/:bookId', // `details/:bookId` là phần nối tiếp của `/home`
                     name: 'bookDetails',
                     builder: (context, state) {
                       // Lấy tham số `bookId` từ URL
                       final String? bookId = state.pathParameters['bookId'];
-                      
+                      final extraData = state.extra as Map<String, dynamic>?;
                       // Kiểm tra null để đảm bảo an toàn
-                      if (bookId == null) {
-                        // Nếu không có ID, có thể trả về một trang lỗi hoặc quay lại home
-                        // Ở đây ta đơn giản là trả về một Scaffold báo lỗi
+                      if (bookId == null || extraData == null) {
                         return const Scaffold(
                           body: Center(
-                            child: Text('Lỗi: Không tìm thấy ID sách.'),
+                            child: Text('Lỗi: Thiếu thông tin sách.'),
                           ),
                         );
                       }
 
-                      appLogger.i('Điều hướng tới trang Chi tiết sách với ID: $bookId');
-                      return BookDetailsPage(bookId: bookId);
+                      appLogger.i(
+                        'Điều hướng tới trang Chi tiết sách với ID: $bookId',
+                      );
+                      return BookDetailsPage(
+                        bookId: bookId,
+                        books: extraData['books'] as List<BookEntity>,
+                        currentIndex: extraData['index'] as int,
+                      );
                     },
                   ),
                 ],

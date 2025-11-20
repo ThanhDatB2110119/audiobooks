@@ -45,10 +45,10 @@ _i174.GetIt init(
 }) {
   final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
   final registerModule = _$RegisterModule();
-  gh.factory<_i501.AudioPlayer>(() => registerModule.audioPlayer);
   gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
   gh.lazySingleton<_i454.SupabaseClient>(() => registerModule.supabaseClient);
   gh.lazySingleton<_i116.GoogleSignIn>(() => registerModule.googleSignIn);
+  gh.lazySingleton<_i501.AudioPlayer>(() => registerModule.audioPlayer);
   gh.lazySingleton<_i971.BookRemoteDataSource>(
     () => _i971.BookRemoteDataSourceImpl(gh<_i454.SupabaseClient>()),
   );

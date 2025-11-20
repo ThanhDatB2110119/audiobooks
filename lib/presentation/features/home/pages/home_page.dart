@@ -343,7 +343,14 @@ class HomePage extends StatelessWidget {
                                     ),
                                     subtitle: Text(book.author),
                                     onTap: () {
-                                      context.push('/home/details/${book.id.toString()}');
+                                      //context.push('/home/details/${book.id.toString()}');
+                                      context.push(
+                                        '/home/details/${book.id}',
+                                        extra: {
+                                          'books': state.books,
+                                          'index': index,
+                                        },
+                                      );
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(

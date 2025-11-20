@@ -1,3 +1,4 @@
+import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_cubit.dart';
 import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_state.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,15 @@ import 'package:go_router/go_router.dart';
 class BookDetailsPage extends StatelessWidget {
   final String bookId;
 
-  const BookDetailsPage({super.key, required this.bookId});
+  final List<BookEntity> books;
+  final int currentIndex;
+
+  const BookDetailsPage({
+    super.key,
+    required this.bookId,
+    required this.books,
+    required this.currentIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +107,10 @@ class BookDetailsPage extends StatelessWidget {
                         ),
                         onPressed: () {
                           // TODO: Điều hướng tới màn hình Player
-                          context.push('/player', extra: book);
+                          context.push(
+                            '/player',
+                            extra: {'books': books, 'index': currentIndex},
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Sẽ mở màn hình Player...'),

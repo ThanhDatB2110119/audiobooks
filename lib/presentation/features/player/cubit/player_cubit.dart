@@ -20,16 +20,20 @@ class PlayerCubit extends Cubit<PlayerState> {
 
   void _listenToPlayerChanges() {
     // Đoạn code này giữ nguyên
-    _playerStateSubscription = _audioPlayer.playerStateStream.listen((playerState) {
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen((
+      playerState,
+    ) {
       final isPlaying = playerState.playing;
       final processingState = playerState.processingState;
 
-      if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
+      if (processingState == ProcessingState.loading ||
+          processingState == ProcessingState.buffering) {
         emit(state.copyWith(status: PlayerStatus.loading));
       } else if (!isPlaying) {
         // Chỉ cập nhật thành paused nếu audio đã sẵn sàng (không phải initial/completed)
-        if(processingState != ProcessingState.completed && processingState != ProcessingState.idle){
-           emit(state.copyWith(status: PlayerStatus.paused));
+        if (processingState != ProcessingState.completed &&
+            processingState != ProcessingState.idle) {
+          emit(state.copyWith(status: PlayerStatus.paused));
         }
       } else if (processingState != ProcessingState.completed) {
         emit(state.copyWith(status: PlayerStatus.playing));
@@ -37,7 +41,12 @@ class PlayerCubit extends Cubit<PlayerState> {
         // Khi audio chạy xong, seek về đầu và pause
         _audioPlayer.seek(Duration.zero);
         _audioPlayer.pause();
-        emit(state.copyWith(status: PlayerStatus.completed, position: Duration.zero));
+        emit(
+          state.copyWith(
+            status: PlayerStatus.completed,
+            position: Duration.zero,
+          ),
+        );
       }
     });
 
@@ -61,13 +70,16 @@ class PlayerCubit extends Cubit<PlayerState> {
   //     emit(state.copyWith(status: PlayerStatus.error, errorMessage: 'Không thể tải audio.'));
   //   }
   // }
-  
+
   // File mới:
   Future<void> loadAudio(String url, {bool autoplay = false}) async {
     try {
       emit(state.copyWith(status: PlayerStatus.loading));
+
+      await _audioPlayer.stop();
+
       await _audioPlayer.setUrl(url);
-      
+
       // Nếu autoplay là true, gọi play() ngay lập tức
       if (autoplay) {
         _audioPlayer.play();
@@ -77,11 +89,15 @@ class PlayerCubit extends Cubit<PlayerState> {
         emit(state.copyWith(status: PlayerStatus.loaded));
       }
     } catch (e) {
-      emit(state.copyWith(status: PlayerStatus.error, errorMessage: 'Không thể tải audio.'));
+      emit(
+        state.copyWith(
+          status: PlayerStatus.error,
+          errorMessage: 'Không thể tải audio.',
+        ),
+      );
     }
   }
   // ========================================================================================
-
 
   // Các phương thức còn lại giữ nguyên
   void play() {
@@ -96,12 +112,31 @@ class PlayerCubit extends Cubit<PlayerState> {
     _audioPlayer.seek(position);
   }
 
+  void seekForward() {
+    final newPosition = _audioPlayer.position + const Duration(seconds: 5);
+    // Đảm bảo không tua quá thời lượng của audio
+    if (newPosition < (_audioPlayer.duration ?? Duration.zero)) {
+      _audioPlayer.seek(newPosition);
+    }
+  }
+
+  /// Tua lùi 5 giây.
+  void seekBackward() {
+    final newPosition = _audioPlayer.position - const Duration(seconds: 5);
+    // Đảm bảo không tua về trước thời điểm 0
+    if (newPosition > Duration.zero) {
+      _audioPlayer.seek(newPosition);
+    } else {
+      _audioPlayer.seek(Duration.zero);
+    }
+  }
+
   @override
   Future<void> close() {
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
-    _audioPlayer.dispose();
+    
     return super.close();
   }
 }
