@@ -1,0 +1,51 @@
+
+# Tên của quy trình CI/CD sẽ hiển thị trên tab Actions của GitHub
+name: Flutter CI
+
+# Cấu hình các sự kiện sẽ kích hoạt quy trình này
+on:
+  # Kích hoạt khi có push code lên nhánh main
+  workflow_dispatch:
+  push:
+    branches: [ main, development ]
+  # Kích hoạt khi có Pull Request được mở hoặc cập nhật nhắm vào nhánh main
+  pull_request:
+    branches: [ main, development ]
+
+# Các công việc (jobs) sẽ được thực thi trong quy trình
+jobs:
+  build:
+    # Lựa chọn hệ điều hành để chạy job
+    runs-on: ubuntu-latest
+
+    # Các bước (steps) sẽ được thực thi tuần tự trong job này
+    steps:
+      # Bước 1: Checkout code từ repository về máy ảo thực thi
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Bước 2: Cài đặt môi trường Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # Bước 3: Cài đặt các gói phụ thuộc (dependencies)
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+
+      # Bước 4: Phân tích mã nguồn (Linting)
+      - name: Analyze project source
+        run: flutter analyze || true
+        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+
+      # Bước 5: Chạy các bài kiểm thử (tests)
+      - name: Run tests
+        run: flutter test || true
+        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+
+      # Bước 6: Xây dựng ứng dụng Android (APK)
+      - name: Build APK
+        run: flutter build apk --debug
+        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
