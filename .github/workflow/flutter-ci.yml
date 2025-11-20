@@ -33,19 +33,19 @@ jobs:
       # Bước 3: Cài đặt các gói phụ thuộc (dependencies)
       - name: Install dependencies
         run: flutter pub get
-        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+         # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
 
       # Bước 4: Phân tích mã nguồn (Linting)
       - name: Analyze project source
         run: flutter analyze || true
-        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+         # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
 
       # Bước 5: Chạy các bài kiểm thử (tests)
       - name: Run tests
         run: flutter test || true
-        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+         # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
 
       # Bước 6: Xây dựng ứng dụng Android (APK)
       - name: Build APK
         run: flutter build apk --debug
-        working-directory: my_cusc # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
+         # ĐÂY LÀ ĐƯỜNG DẪN ĐÚNG
