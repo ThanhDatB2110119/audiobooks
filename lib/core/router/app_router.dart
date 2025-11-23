@@ -6,6 +6,7 @@ import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
+import 'package:audiobooks/presentation/features/creator/pages/creator_page.dart';
 import 'package:audiobooks/presentation/features/player/pages/player_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -108,14 +109,11 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/page2',
-                name: 'page2',
+                path: '/creator',
+                name: 'creator',
                 builder: (context, state) {
-                  appLogger.i('Điều hướng tới trang Page 2');
-                  return Scaffold(
-                    appBar: AppBar(title: const Text('Page 2')),
-                    body: const Center(child: Text('Welcome to Page 2!')),
-                  );
+                  appLogger.i('Điều hướng tới trang Creator');
+                  return const  CreatorPage();
                 },
               ),
             ],

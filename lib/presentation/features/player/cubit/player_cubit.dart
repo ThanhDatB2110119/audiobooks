@@ -131,12 +131,19 @@ class PlayerCubit extends Cubit<PlayerState> {
     }
   }
 
+  void replay() {
+    // Sử dụng seek để quay về vị trí 0 giây
+    _audioPlayer.seek(Duration.zero);
+    // Sau khi seek xong, ra lệnh phát
+    _audioPlayer.play();
+  }
+
   @override
   Future<void> close() {
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
-    
+
     return super.close();
   }
 }

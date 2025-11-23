@@ -54,7 +54,7 @@ class MainShell extends StatelessWidget {
         child: Row(
           children: [
             _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
-            _buildNavItem(Icons.search, Icons.search, 'Page 2', 1),
+            _buildNavItem(Icons.search, Icons.search, 'Creator', 1),
             // const SizedBox(width: 40),
             _buildNavItem(Icons.bookmark_border, Icons.bookmark, 'Page 3', 2),
             _buildNavItem(Icons.person_outline, Icons.person, 'Page 4', 3),

@@ -152,6 +152,18 @@ class _PlayerPageState extends State<PlayerPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
+                          icon: const Icon(
+                            Icons.replay_circle_filled,
+                            size: 32.0,
+                          ), // Icon nhỏ hơn nút chính
+                          // Tooltip để người dùng biết chức năng của nút
+                          tooltip: 'Phát lại từ đầu',
+                          onPressed: () {
+                            context.read<PlayerCubit>().replay();
+                          },
+                        ),
+
+                        IconButton(
                           icon: const Icon(Icons.skip_previous, size: 40.0),
                           onPressed: currentIndex > 0
                               ? () => _changeTrack(-1)
@@ -181,6 +193,9 @@ class _PlayerPageState extends State<PlayerPage> {
                               ? () => _changeTrack(1)
                               : null,
                         ),
+                        const SizedBox(
+                          width: 34,
+                        ), // Icon size (32) + padding (16)
                       ],
                     );
                   },
