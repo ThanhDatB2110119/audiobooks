@@ -32,6 +32,7 @@ import '../../domain/repositories/personal_document_repository.dart' as _i538;
 import '../../domain/usecases/create_document_from_text_usecase.dart' as _i631;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
 import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
+import '../../domain/usecases/get_user_documents_usecase.dart' as _i1060;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
@@ -39,6 +40,7 @@ import '../../presentation/features/book_detail/cubit/book_details_cubit.dart'
     as _i970;
 import '../../presentation/features/creator/cubit/creator_cubit.dart' as _i2;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
+import '../../presentation/features/library/cubit/library_cubit.dart' as _i592;
 import '../../presentation/features/player/cubit/player_cubit.dart' as _i949;
 import 'register_module.dart' as _i291;
 
@@ -117,6 +119,10 @@ _i174.GetIt init(
       gh<_i538.PersonalDocumentRepository>(),
     ),
   );
+  gh.lazySingleton<_i1060.GetUserDocumentsUsecase>(
+    () =>
+        _i1060.GetUserDocumentsUsecase(gh<_i538.PersonalDocumentRepository>()),
+  );
   gh.factory<_i2.CreatorCubit>(
     () => _i2.CreatorCubit(gh<_i631.CreateDocumentFromTextUsecase>()),
   );
@@ -125,6 +131,9 @@ _i174.GetIt init(
   );
   gh.factory<_i900.HomeCubit>(
     () => _i900.HomeCubit(gh<_i813.GetAllBooksUsecase>()),
+  );
+  gh.factory<_i592.LibraryCubit>(
+    () => _i592.LibraryCubit(gh<_i1060.GetUserDocumentsUsecase>()),
   );
   return getIt;
 }

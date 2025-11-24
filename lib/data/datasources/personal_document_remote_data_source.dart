@@ -25,10 +25,28 @@ class PersonalDocumentRemoteDataSourceImpl
 
   @override
   Future<List<PersonalDocumentModel>> getUserDocuments() async {
-    // Chúng ta sẽ triển khai logic đầy đủ cho chức năng này sau ở màn hình Library.
-    // Tạm thời, chúng ta sẽ throw một lỗi để báo rằng nó chưa được làm.
-    // Đây là một cách làm rất phổ biến và đúng đắn.
-    throw UnimplementedError('Hàm lấy tài liệu cá nhân chưa được triển khai.');
+    try {
+      final user = supabaseClient.auth.currentUser;
+      if (user == null) {
+        // Trả về danh sách rỗng nếu người dùng chưa đăng nhập
+        return [];
+      }
+
+      final response = await supabaseClient
+          .from('personal_documents')
+          .select()
+          .eq('user_id', user.id)
+          .order(
+            'created_at',
+            ascending: false,
+          ); // Sắp xếp theo ngày tạo mới nhất
+
+      return (response as List)
+          .map((data) => PersonalDocumentModel.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
   }
 
   @override
@@ -84,10 +102,3 @@ class PersonalDocumentRemoteDataSourceImpl
     }
   }
 }
-
-// **QUAN TRỌNG:** Đăng ký Uuid trong `register_module.dart`
-// @module
-// abstract class RegisterModule {
-//   @lazySingleton
-//   Uuid get uuid => const Uuid();
-// }

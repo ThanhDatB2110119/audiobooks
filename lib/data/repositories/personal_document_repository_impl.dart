@@ -1,6 +1,5 @@
 // data/repositories/personal_document_repository_impl.dart
 
-
 import 'package:audiobooks/core/error/exceptions.dart';
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/data/datasources/personal_document_remote_data_source.dart';
@@ -16,9 +15,14 @@ class PersonalDocumentRepositoryImpl implements PersonalDocumentRepository {
   PersonalDocumentRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<Either<Failure, List<PersonalDocumentEntity>>> getUserDocuments() {
-    // ... code cũ (nếu có)
-    throw UnimplementedError();
+  Future<Either<Failure, List<PersonalDocumentEntity>>>
+  getUserDocuments() async {
+    try {
+      final documents = await remoteDataSource.getUserDocuments();
+      return Right(documents);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
   }
 
   // ======================= TRIỂN KHAI PHƯƠNG THỨC MỚI TẠI ĐÂY =======================
@@ -31,5 +35,6 @@ class PersonalDocumentRepositoryImpl implements PersonalDocumentRepository {
       return Left(ServerFailure(e.message));
     }
   }
+
   // ===============================================================================
 }

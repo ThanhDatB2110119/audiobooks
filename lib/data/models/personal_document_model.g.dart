@@ -10,28 +10,28 @@ PersonalDocumentModel _$PersonalDocumentModelFromJson(
   Map<String, dynamic> json,
 ) => PersonalDocumentModel(
   id: json['id'] as String,
-  userId: json['user_id'] as String,
+  userId: json['userId'] as String,
   title: json['title'] as String,
-  sourceType: $enumDecode(_$SourceTypeEnumMap, json['source_type']),
-  originalSource: json['original_source'] as String,
-  extractedTextUrl: json['extracted_text_url'] as String?,
-  generatedAudioUrl: json['generated_audio_url'] as String?,
+  sourceType: $enumDecode(_$SourceTypeEnumMap, json['sourceType']),
+  originalSource: json['originalSource'] as String,
+  extractedTextUrl: json['extractedTextUrl'] as String?,
+  generatedAudioUrl: json['generatedAudioUrl'] as String?,
   status: $enumDecode(_$ProcessingStatusEnumMap, json['status']),
-  createdAt: DateTime.parse(json['created_at'] as String),
+  createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
 Map<String, dynamic> _$PersonalDocumentModelToJson(
   PersonalDocumentModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'user_id': instance.userId,
+  'userId': instance.userId,
   'title': instance.title,
-  'source_type': _$SourceTypeEnumMap[instance.sourceType]!,
-  'original_source': instance.originalSource,
-  'extracted_text_url': instance.extractedTextUrl,
-  'generated_audio_url': instance.generatedAudioUrl,
+  'sourceType': _$SourceTypeEnumMap[instance.sourceType]!,
+  'originalSource': instance.originalSource,
+  'extractedTextUrl': instance.extractedTextUrl,
+  'generatedAudioUrl': instance.generatedAudioUrl,
   'status': _$ProcessingStatusEnumMap[instance.status]!,
-  'created_at': instance.createdAt.toIso8601String(),
+  'createdAt': instance.createdAt.toIso8601String(),
 };
 
 const _$SourceTypeEnumMap = {
