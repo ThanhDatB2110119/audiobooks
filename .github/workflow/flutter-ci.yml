@@ -4,11 +4,10 @@ name: Flutter CI
 
 # Cấu hình các sự kiện sẽ kích hoạt quy trình này
 on:
-  # Kích hoạt khi có push code lên nhánh main
-  workflow_dispatch:
+  # Kích hoạt khi có push code lên nhánh main hoặc development
   push:
     branches: [ main, development ]
-  # Kích hoạt khi có Pull Request được mở hoặc cập nhật nhắm vào nhánh main
+  # Kích hoạt khi có Pull Request được mở hoặc cập nhật nhắm vào nhánh main hoặc development
   pull_request:
     branches: [ main, development ]
 
