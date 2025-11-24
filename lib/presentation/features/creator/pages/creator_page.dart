@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:audiobooks/presentation/features/creator/cubit/creator_cubit.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/file_picker_dialog.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/text_input_dialog.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/url_input_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CreatorPage extends StatelessWidget {
@@ -33,7 +35,7 @@ class CreatorPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: 200,
+                  height: 190,
                   margin: const EdgeInsets.all(16.0),
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -147,7 +149,9 @@ class CreatorPage extends StatelessWidget {
                               onConfirm: (submittedText) {
                                 // Tại đây, bạn có thể gọi Cubit/Bloc để xử lý logic
                                 // Ví dụ: context.read<CreatorCubit>().createTextAudiobook(submittedText);
-
+                                context.read<CreatorCubit>().createFromText(
+                                  submittedText,
+                                );
                                 print('Văn bản đã nhập: $submittedText');
 
                                 // Hiển thị một SnackBar để xác nhận

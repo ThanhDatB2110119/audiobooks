@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:uuid/uuid.dart';
 
 @module
 abstract class RegisterModule {
@@ -21,4 +22,7 @@ abstract class RegisterModule {
   );
   @lazySingleton
   AudioPlayer get audioPlayer => AudioPlayer();
+
+  @lazySingleton
+  Uuid get uuid => const Uuid();
 }
