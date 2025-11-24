@@ -7,7 +7,9 @@ import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
 import 'package:audiobooks/presentation/features/creator/pages/creator_page.dart';
+import 'package:audiobooks/presentation/features/library/pages/library_page.dart';
 import 'package:audiobooks/presentation/features/player/pages/player_page.dart';
+import 'package:audiobooks/presentation/features/settings/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -50,11 +52,10 @@ class AppRouter {
 
           final books = extraData['books'] as List<BookEntity>;
           final initialIndex = extraData['index'] as int;
-          appLogger.i('Điều hướng tới trang Player với sách: ${books[initialIndex].title}');
-          return PlayerPage(
-            books: books,
-            initialIndex: initialIndex,
+          appLogger.i(
+            'Điều hướng tới trang Player với sách: ${books[initialIndex].title}',
           );
+          return PlayerPage(books: books, initialIndex: initialIndex);
         },
       ),
       StatefulShellRoute.indexedStack(
@@ -113,7 +114,32 @@ class AppRouter {
                 name: 'creator',
                 builder: (context, state) {
                   appLogger.i('Điều hướng tới trang Creator');
-                  return const  CreatorPage();
+                  return const CreatorPage();
+                },
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/library',
+                name: 'library',
+                builder: (context, state) {
+                  appLogger.i('Điều hướng tới trang Library');
+                  return const LibraryPage();
+                },
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: 'settings',
+                builder: (context, state) {
+                  appLogger.i('Điều hướng tới trang Settings');
+                  return const SettingsPage();
                 },
               ),
             ],
@@ -274,15 +300,15 @@ class GoRouterRefreshStream extends ChangeNotifier {
 //           ),
           
 //           // Branch 3: Library
-//           StatefulShellBranch(
-//             routes: [
-//               GoRoute(
-//                 path: '/library',
-//                 name: 'library',
-//                 builder: (context, state) => const LibraryPage(),
-//               ),
-//             ],
-//           ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: '/library',
+          //       name: 'library',
+          //       builder: (context, state) => const LibraryPage(),
+          //     ),
+          //   ],
+          // ),
 
 //           // Branch 4: Settings và các sub-route
 //           StatefulShellBranch(
