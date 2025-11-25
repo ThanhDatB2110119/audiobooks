@@ -133,7 +133,10 @@ _i174.GetIt init(
     () => _i900.HomeCubit(gh<_i813.GetAllBooksUsecase>()),
   );
   gh.factory<_i592.LibraryCubit>(
-    () => _i592.LibraryCubit(gh<_i1060.GetUserDocumentsUsecase>()),
+    () => _i592.LibraryCubit(
+      gh<_i1060.GetUserDocumentsUsecase>(),
+      gh<_i454.SupabaseClient>(),
+    ),
   );
   return getIt;
 }

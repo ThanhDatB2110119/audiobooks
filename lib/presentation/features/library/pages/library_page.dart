@@ -35,31 +35,37 @@ class _LibraryPageState extends State<LibraryPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Thư viện của bạn'),
-        bottom: TabBar(
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(150.0), // Tăng chiều cao AppBar
+          child: AppBar(
+            backgroundColor: Colors.blue,
+            title: const Text('Thư viện của bạn'),
+            bottom: TabBar(
+              controller: _tabController,
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor: Colors.grey[600],
+              indicatorColor: Theme.of(context).colorScheme.primary,
+              indicatorWeight: 3.0,
+              tabs: const [
+                Tab(icon: Icon(Icons.bookmark_added), text: 'Sách đã lưu'),
+                Tab(icon: Icon(Icons.mic_external_on), text: 'Sách của tôi'),
+              ],
+            ),
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          labelColor: Theme.of(context).colorScheme.primary,
-          unselectedLabelColor: Colors.grey[600],
-          indicatorColor: Theme.of(context).colorScheme.primary,
-          indicatorWeight: 3.0,
-          tabs: const [
-            Tab(icon: Icon(Icons.bookmark_added), text: 'Sách đã lưu'),
-            Tab(icon: Icon(Icons.mic_external_on), text: 'Sách của tôi'),
+          children: const [
+            SavedBooksTabView(),
+            // ======================= THAY ĐỔI: WRAP MyBooksTabView TRONG BLOCPROVIDER =======================
+            // Cung cấp LibraryCubit cho tab "Sách của tôi".
+            // Cubit sẽ được tạo và gọi fetchUserDocuments() ngay khi người dùng chuyển đến tab này.
+            _MyBooksTabContainer(),
+            // ==============================================================================================
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          SavedBooksTabView(),
-          // ======================= THAY ĐỔI: WRAP MyBooksTabView TRONG BLOCPROVIDER =======================
-          // Cung cấp LibraryCubit cho tab "Sách của tôi".
-          // Cubit sẽ được tạo và gọi fetchUserDocuments() ngay khi người dùng chuyển đến tab này.
-          _MyBooksTabContainer(),
-          // ==============================================================================================
-        ],
       ),
     );
   }
