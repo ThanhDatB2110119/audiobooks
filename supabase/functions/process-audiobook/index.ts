@@ -32,7 +32,7 @@
 */
 
 // supabase/functions/process-audiobook/index.ts
-// Test commit to trigger deployment
+
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -45,7 +45,12 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 /**
  * Cập nhật trạng thái của một document trong database.
  */
-async function updateDocumentStatus(supabaseAdmin: SupabaseClient, documentId: string, status: string, data: object = {}) {
+async function updateDocumentStatus(
+  supabaseAdmin: SupabaseClient,
+  documentId: string,
+  status: string,
+  data: object = {},
+) {
   const { error } = await supabaseAdmin
     .from("personal_documents")
     .update({ status, ...data })
@@ -56,7 +61,9 @@ async function updateDocumentStatus(supabaseAdmin: SupabaseClient, documentId: s
 /**
  * Sử dụng Gemini để tạo tựa đề và mô tả từ văn bản.
  */
-async function generateTitleAndDescription(text: string): Promise<{ title: string; description: string }> {
+async function generateTitleAndDescription(
+  text: string,
+): Promise<{ title: string; description: string }> {
   if (!GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
@@ -94,33 +101,36 @@ async function textToSpeech(text: string): Promise<Blob> {
   // Hiện tại, Google chưa cung cấp API TTS chính thức cho Gemini.
   // Bạn cần sử dụng một dịch vụ TTS khác ở đây.
   // VÍ DỤ: Google Cloud Text-to-Speech, OpenAI TTS, FPT.AI, Viettel AI...
-  
+
   // --- VÍ DỤ VỚI OPENAI TTS (bạn cần thêm OPENAI_API_KEY vào secrets) ---
   const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiApiKey) throw new Error("TTS service (e.g., OpenAI) API key is not set.");
-  
-  const response = await fetch('https://api.openai.com/v1/audio/speech', {
-    method: 'POST',
+  if (!openaiApiKey) {
+    throw new Error("TTS service (e.g., OpenAI) API key is not set.");
+  }
+
+  const response = await fetch("https://api.openai.com/v1/audio/speech", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
-      'Content-Type': 'application/json',
+      "Authorization": `Bearer ${openaiApiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: 'tts-1',
+      model: "tts-1",
       input: text.substring(0, 4096), // Giới hạn của OpenAI TTS là 4096 ký tự
-      voice: 'alloy', // Giọng đọc
-      response_format: 'mp3'
+      voice: "alloy", // Giọng đọc
+      response_format: "mp3",
     }),
   });
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`TTS API failed with status ${response.status}: ${errorBody}`);
+    throw new Error(
+      `TTS API failed with status ${response.status}: ${errorBody}`,
+    );
   }
-  
+
   return await response.blob();
 }
-
 
 // --- MAIN FUNCTION ---
 
@@ -128,9 +138,9 @@ serve(async (req) => {
   // Khởi tạo Supabase Admin Client
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    SUPABASE_SERVICE_ROLE_KEY!
+    SUPABASE_SERVICE_ROLE_KEY!,
   );
-  
+
   let documentId: string | null = null;
 
   try {
@@ -151,12 +161,16 @@ serve(async (req) => {
 
     // 3. Tải nội dung text từ Supabase Storage
     const textResponse = await fetch(textUrl);
-    if (!textResponse.ok) throw new Error(`Failed to download text file from ${textUrl}`);
+    if (!textResponse.ok) {
+      throw new Error(`Failed to download text file from ${textUrl}`);
+    }
     const originalText = await textResponse.text();
     console.log("Text downloaded successfully.");
 
     // 4. (AI BƯỚC 1) Gọi Gemini để tạo tựa đề và mô tả
-    const { title, description } = await generateTitleAndDescription(originalText);
+    const { title, description } = await generateTitleAndDescription(
+      originalText,
+    );
     console.log(`Generated Title: ${title}`);
     console.log(`Generated Description: ${description}`);
 
@@ -167,10 +181,13 @@ serve(async (req) => {
     // 6. Upload file audio lên Storage
     const audioFileName = `${crypto.randomUUID()}.mp3`;
     const audioStoragePath = `${userId}/${audioFileName}`;
-    
+
     const { error: uploadError } = await supabaseAdmin.storage
       .from("personal-audios")
-      .upload(audioStoragePath, audioBlob, { contentType: "audio/mpeg", upsert: false });
+      .upload(audioStoragePath, audioBlob, {
+        contentType: "audio/mpeg",
+        upsert: false,
+      });
 
     if (uploadError) throw uploadError;
     console.log("Audio uploaded to storage.");
@@ -188,11 +205,13 @@ serve(async (req) => {
     });
     console.log(`Document ID: ${documentId} processed successfully!`);
 
-    return new Response(JSON.stringify({ success: true, message: "Processing complete." }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify({ success: true, message: "Processing complete." }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     console.error("Error processing document:", error);
 
