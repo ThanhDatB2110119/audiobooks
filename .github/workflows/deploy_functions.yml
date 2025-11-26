@@ -1,32 +1,25 @@
 # .github/workflows/deploy_functions.yml
 
-name: Deploy Supabase Functions (from developer branch)
+name: Deploy Supabase Functions
 
 on:
-  # ======================= THAY ĐỔI QUAN TRỌNG TẠI ĐÂY =======================
-  # Workflow này sẽ được kích hoạt mỗi khi có code mới được đẩy lên
-  # nhánh 'developer'.
   push:
     branches:
-      - developer # <-- Sửa từ 'main' thành 'developer'
-    paths:
-      # Workflow cũng chỉ chạy nếu có sự thay đổi bên trong thư mục 'supabase/functions/'.
-      # Điều này giúp tiết kiệm tài nguyên, không chạy lại khi bạn chỉ sửa code Flutter.
-      - 'supabase/functions/**'
-  # ========================================================================
-  
-  # Dòng này cho phép bạn có thể chạy workflow này một cách thủ công từ
-  # tab "Actions" trên GitHub, rất tiện lợi để deploy lại khi cần.
+      # Chỉ chạy khi push lên nhánh 'developer'
+      - developer
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-functions: # Đổi tên job cho rõ ràng hơn
     runs-on: ubuntu-latest
 
+    # Chỉ chạy job này nếu có thay đổi trong thư mục functions
+    # Đây là một cách tối ưu hóa tốt
+    if: "contains(github.event.head_commit.message, '[deploy-fn]') || github.event_name == 'workflow_dispatch' || contains(toJson(github.event.commits), 'supabase/functions/')"
+
     steps:
-      - name: Checkout code
-        # Bước này sẽ checkout code từ nhánh 'developer'
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4 # Cập nhật lên phiên bản mới nhất
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -35,9 +28,9 @@ jobs:
 
       - name: Deploy Supabase Functions
         env:
-          # Sử dụng các secret bạn đã tạo trên GitHub (SUPABASE_PROJECT_ID, SUPABASE_ACCESS_TOKEN)
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          # Lệnh deploy vẫn giữ nguyên
+          echo "Deploying functions..."
           supabase functions deploy --project-id $SUPABASE_PROJECT_ID
+          echo "Deployment command finished."
