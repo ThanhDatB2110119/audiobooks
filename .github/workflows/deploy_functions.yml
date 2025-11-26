@@ -40,4 +40,4 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           # Lệnh deploy vẫn giữ nguyên
-          supabase functions deploy --project-id $SUPABASE_PROJECT_ID
+          supabase functions deploy --project-ref $SUPABASE_PROJECT_ID
