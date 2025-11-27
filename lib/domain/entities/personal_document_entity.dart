@@ -1,7 +1,7 @@
-
 import 'package:equatable/equatable.dart';
 
 enum SourceType { file, url, text }
+
 enum ProcessingStatus { pending, processing, completed, error }
 
 class PersonalDocumentEntity extends Equatable {
@@ -12,6 +12,7 @@ class PersonalDocumentEntity extends Equatable {
   final String originalSource;
   final String? extractedTextUrl;
   final String? generatedAudioUrl;
+  final String? description;
   final ProcessingStatus status;
   final DateTime createdAt;
 
@@ -23,10 +24,22 @@ class PersonalDocumentEntity extends Equatable {
     required this.originalSource,
     this.extractedTextUrl,
     this.generatedAudioUrl,
+    this.description,
     required this.status,
     required this.createdAt,
   });
 
   @override
-  List<Object?> get props => [id, userId, title, sourceType, originalSource, extractedTextUrl, generatedAudioUrl, status, createdAt];
+  List<Object?> get props => [
+    id,
+    userId,
+    title,
+    sourceType,
+    originalSource,
+    extractedTextUrl,
+    generatedAudioUrl,
+    description,
+    status,
+    createdAt,
+  ];
 }

@@ -6,23 +6,11 @@ part of 'personal_document_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-PersonalDocumentModel _$PersonalDocumentModelFromJson(
-  Map<String, dynamic> json,
-) => PersonalDocumentModel(
-  id: json['id'] as String,
-  userId: json['userId'] as String,
-  title: json['title'] as String,
-  sourceType: $enumDecode(_$SourceTypeEnumMap, json['sourceType']),
-  originalSource: json['originalSource'] as String,
-  extractedTextUrl: json['extractedTextUrl'] as String?,
-  generatedAudioUrl: json['generatedAudioUrl'] as String?,
-  status: $enumDecode(_$ProcessingStatusEnumMap, json['status']),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
-
 Map<String, dynamic> _$PersonalDocumentModelToJson(
   PersonalDocumentModel instance,
 ) => <String, dynamic>{
+  'stringify': instance.stringify,
+  'hashCode': instance.hashCode,
   'id': instance.id,
   'userId': instance.userId,
   'title': instance.title,
@@ -30,8 +18,10 @@ Map<String, dynamic> _$PersonalDocumentModelToJson(
   'originalSource': instance.originalSource,
   'extractedTextUrl': instance.extractedTextUrl,
   'generatedAudioUrl': instance.generatedAudioUrl,
+  'description': instance.description,
   'status': _$ProcessingStatusEnumMap[instance.status]!,
   'createdAt': instance.createdAt.toIso8601String(),
+  'props': instance.props,
 };
 
 const _$SourceTypeEnumMap = {

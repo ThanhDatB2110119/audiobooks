@@ -68,8 +68,8 @@ async function generateTitleAndDescription(
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+  //gemini-2.5-pro
   const prompt = `
     Dựa vào đoạn văn bản sau, hãy tạo ra một tựa đề ngắn gọn (dưới 10 từ) và một đoạn mô tả hấp dẫn (dưới 50 từ).
     Hãy trả lời bằng một đối tượng JSON hợp lệ, không có bất kỳ văn bản nào khác bao quanh.
