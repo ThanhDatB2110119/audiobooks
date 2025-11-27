@@ -174,7 +174,7 @@ async function textToSpeech(text: string): Promise<Blob> {
       console.log(
         "Waiting for 2 seconds for FPT.AI to process the audio file...",
       );
-      await delay(10000);
+      await delay(20000);
       console.log(`Downloading audio from: ${audioUrl}`);
       const audioResponse = await fetch(audioUrl);
       if (!audioResponse.ok) {
