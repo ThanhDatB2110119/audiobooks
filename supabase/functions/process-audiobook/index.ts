@@ -82,7 +82,20 @@ async function generateTitleAndDescription(
 
   const result = await model.generateContent(prompt);
   const response = result.response;
-  const jsonString = response.text();
+  let jsonString = response.text();
+  console.log("Raw response from Gemini:", jsonString);
+
+// Logic để "dọn dẹp" chuỗi trả về từ Gemini
+  // Tìm kiếm chuỗi bắt đầu bằng '{' và kết thúc bằng '}'
+  const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+
+  if (jsonMatch) {
+    // Nếu tìm thấy, lấy chuỗi JSON đó
+    jsonString = jsonMatch[0];
+  } else {
+    // Nếu không tìm thấy JSON, báo lỗi
+    throw new Error("Could not extract valid JSON from Gemini's response.");
+  }
 
   // Parse chuỗi JSON
   const parsedResult = JSON.parse(jsonString);
