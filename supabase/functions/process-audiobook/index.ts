@@ -41,6 +41,9 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 // --- HELPER FUNCTIONS ---
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Cập nhật trạng thái của một document trong database.
@@ -85,7 +88,7 @@ async function generateTitleAndDescription(
   let jsonString = response.text();
   console.log("Raw response from Gemini:", jsonString);
 
-// Logic để "dọn dẹp" chuỗi trả về từ Gemini
+  // Logic để "dọn dẹp" chuỗi trả về từ Gemini
   // Tìm kiếm chuỗi bắt đầu bằng '{' và kết thúc bằng '}'
   const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
 
@@ -135,47 +138,66 @@ async function textToSpeech(text: string): Promise<Blob> {
     textChunks.push(currentChunk);
   }
 
-  console.log(`Text split into ${textChunks.length} chunks for TTS processing.`);
+  console.log(
+    `Text split into ${textChunks.length} chunks for TTS processing.`,
+  );
 
   // Mảng để lưu các file audio nhỏ (dưới dạng ArrayBuffer)
   const audioBuffers: ArrayBuffer[] = [];
 
   for (const chunk of textChunks) {
     console.log(`Processing chunk of ${chunk.length} characters...`);
-    const response = await fetch('https://api.fpt.ai/hmi/tts/v5', {
-      method: 'POST',
+    const response = await fetch("https://api.fpt.ai/hmi/tts/v5", {
+      method: "POST",
       headers: {
-        'api-key': fptApiKey,
-        'Content-Type': 'application/json',
+        "api-key": fptApiKey,
+        "Content-Type": "application/json",
         // Chọn giọng đọc. 'banmai' là giọng nữ miền Bắc.
         // Bạn có thể đổi thành 'leminh' (nam Bắc), 'myan' (nữ Nam), 'giaan' (nam Nam)...
-        'voice': 'banmai' 
+        "voice": "banmai",
       },
       body: chunk, // API của FPT.AI nhận text trực tiếp trong body
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`FPT.AI API failed with status ${response.status}: ${errorBody}`);
+      throw new Error(
+        `FPT.AI API failed with status ${response.status}: ${errorBody}`,
+      );
     }
 
     // FPT.AI trả về JSON chứa link audio. Chúng ta cần tải link đó về.
     const resultJson = await response.json();
     if (resultJson.async) {
       const audioUrl = resultJson.async;
+
+      console.log(
+        "Waiting for 2 seconds for FPT.AI to process the audio file...",
+      );
+      await delay(3000);
+      console.log(`Downloading audio from: ${audioUrl}`);
       const audioResponse = await fetch(audioUrl);
       if (!audioResponse.ok) {
-        throw new Error(`Failed to download audio from FPT.AI URL: ${audioUrl}`);
+        throw new Error(
+          `Failed to download audio from FPT.AI URL: ${audioUrl}`,
+        );
       }
       const buffer = await audioResponse.arrayBuffer();
       audioBuffers.push(buffer);
     } else {
-       throw new Error(`FPT.AI did not return a valid audio URL. Response: ${JSON.stringify(resultJson)}`);
+      throw new Error(
+        `FPT.AI did not return a valid audio URL. Response: ${
+          JSON.stringify(resultJson)
+        }`,
+      );
     }
   }
 
   // Nối tất cả các file audio nhỏ lại thành một file duy nhất
-  const totalLength = audioBuffers.reduce((sum, buffer) => sum + buffer.byteLength, 0);
+  const totalLength = audioBuffers.reduce(
+    (sum, buffer) => sum + buffer.byteLength,
+    0,
+  );
   const combined = new Uint8Array(totalLength);
   let offset = 0;
   for (const buffer of audioBuffers) {
