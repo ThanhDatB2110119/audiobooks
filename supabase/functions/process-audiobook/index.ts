@@ -166,33 +166,46 @@ async function textToSpeech(text: string): Promise<Blob> {
       );
     }
 
-    // FPT.AI trả về JSON chứa link audio. Chúng ta cần tải link đó về.
-    const resultJson = await response.json();
-    if (resultJson.async) {
-      const audioUrl = resultJson.async;
+    // Kiểm tra loại nội dung trả về từ FPT.AI
+    const contentType = response.headers.get("Content-Type");
 
-      console.log(
-        "Waiting for 2 seconds for FPT.AI to process the audio file...",
-      );
-      await delay(20000);
-      console.log(`Downloading audio from: ${audioUrl}`);
-      const audioResponse = await fetch(audioUrl);
-      if (!audioResponse.ok) {
-        throw new Error(
-          `Failed to download audio from FPT.AI URL: ${audioUrl}`,
-        );
-      }
-      const buffer = await audioResponse.arrayBuffer();
+    if (contentType && contentType.includes("audio/mpeg")) {
+      // TRƯỜNG HỢP 1: THÀNH CÔNG - FPT.AI trả về dữ liệu audio trực tiếp
+      console.log("Received audio data directly (synchronous response).");
+      const buffer = await response.arrayBuffer();
       audioBuffers.push(buffer);
+
+    } else if (contentType && contentType.includes("application/json")) {
+      // TRƯỜNG HỢP 2: FPT.AI trả về JSON với link async (luồng cũ đang bị lỗi)
+      console.log("Received async URL. This path is unreliable and may fail.");
+      const resultJson = await response.json();
+      if (resultJson.async) {
+        // Chúng ta vẫn sẽ thử tải từ link này, nhưng đây không phải là cách được ưu tiên
+        const audioUrl = resultJson.async;
+        await delay(2000); // Thêm một độ trễ nhỏ để phòng hờ
+        
+        console.log(`Attempting to download from async URL: ${audioUrl}`);
+        const audioResponse = await fetch(audioUrl);
+        if (!audioResponse.ok) {
+          // Ghi nhận lỗi nhưng có thể tiếp tục với các chunk khác nếu muốn
+          console.error(`Failed to download audio from FPT.AI async URL: ${audioUrl}`);
+          throw new Error(`Failed to download audio from FPT.AI async URL: ${audioUrl}`);
+        }
+        const buffer = await audioResponse.arrayBuffer();
+        audioBuffers.push(buffer);
+      } else {
+        throw new Error(`FPT.AI returned JSON but no async URL. Response: ${JSON.stringify(resultJson)}`);
+      }
     } else {
-      throw new Error(
-        `FPT.AI did not return a valid audio URL. Response: ${
-          JSON.stringify(resultJson)
-        }`,
-      );
+      // Trường hợp không xác định
+      throw new Error(`Unexpected Content-Type from FPT.AI: ${contentType}`);
     }
   }
 
+
+  if (audioBuffers.length === 0) {
+    throw new Error("No audio chunks were successfully processed.");
+  }
   // Nối tất cả các file audio nhỏ lại thành một file duy nhất
   const totalLength = audioBuffers.reduce(
     (sum, buffer) => sum + buffer.byteLength,
