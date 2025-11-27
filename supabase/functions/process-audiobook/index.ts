@@ -106,45 +106,86 @@ async function generateTitleAndDescription(
 }
 
 /**
- * (Placeholder) Chuyển văn bản thành audio.
- * TODO: Thay thế bằng dịch vụ TTS thực tế.
+ * Chuyển văn bản thành audio bằng FPT.AI.
  */
 async function textToSpeech(text: string): Promise<Blob> {
-  // --- !! QUAN TRỌNG !! ---
-  // Hiện tại, Google chưa cung cấp API TTS chính thức cho Gemini.
-  // Bạn cần sử dụng một dịch vụ TTS khác ở đây.
-  // VÍ DỤ: Google Cloud Text-to-Speech, OpenAI TTS, FPT.AI, Viettel AI...
-
-  // --- VÍ DỤ VỚI OPENAI TTS (bạn cần thêm OPENAI_API_KEY vào secrets) ---
-  const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiApiKey) {
-    throw new Error("TTS service (e.g., OpenAI) API key is not set.");
+  const fptApiKey = Deno.env.get("FPT_AI_API_KEY");
+  if (!fptApiKey) {
+    throw new Error("FPT_AI_API_KEY is not set in environment variables.");
   }
 
-  const response = await fetch("https://api.openai.com/v1/audio/speech", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${openaiApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "tts-1",
-      input: text.substring(0, 4096), // Giới hạn của OpenAI TTS là 4096 ký tự
-      voice: "alloy", // Giọng đọc
-      response_format: "mp3",
-    }),
-  });
+  // API của FPT.AI có giới hạn khoảng 5000 ký tự mỗi lần gọi.
+  // Chúng ta cần chia văn bản dài thành các đoạn nhỏ hơn.
+  const MAX_CHARS = 4500; // Để một khoảng an toàn
+  const textChunks: string[] = [];
+  let currentChunk = "";
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(
-      `TTS API failed with status ${response.status}: ${errorBody}`,
-    );
+  // Chia văn bản theo dấu chấm câu để các đoạn audio nghe tự nhiên hơn
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+
+  for (const sentence of sentences) {
+    if ((currentChunk + sentence).length > MAX_CHARS) {
+      textChunks.push(currentChunk);
+      currentChunk = sentence;
+    } else {
+      currentChunk += sentence;
+    }
+  }
+  if (currentChunk) {
+    textChunks.push(currentChunk);
   }
 
-  return await response.blob();
+  console.log(`Text split into ${textChunks.length} chunks for TTS processing.`);
+
+  // Mảng để lưu các file audio nhỏ (dưới dạng ArrayBuffer)
+  const audioBuffers: ArrayBuffer[] = [];
+
+  for (const chunk of textChunks) {
+    console.log(`Processing chunk of ${chunk.length} characters...`);
+    const response = await fetch('https://api.fpt.ai/hmi/tts/v5', {
+      method: 'POST',
+      headers: {
+        'api-key': fptApiKey,
+        'Content-Type': 'application/json',
+        // Chọn giọng đọc. 'banmai' là giọng nữ miền Bắc.
+        // Bạn có thể đổi thành 'leminh' (nam Bắc), 'myan' (nữ Nam), 'giaan' (nam Nam)...
+        'voice': 'banmai' 
+      },
+      body: chunk, // API của FPT.AI nhận text trực tiếp trong body
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`FPT.AI API failed with status ${response.status}: ${errorBody}`);
+    }
+
+    // FPT.AI trả về JSON chứa link audio. Chúng ta cần tải link đó về.
+    const resultJson = await response.json();
+    if (resultJson.async) {
+      const audioUrl = resultJson.async;
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error(`Failed to download audio from FPT.AI URL: ${audioUrl}`);
+      }
+      const buffer = await audioResponse.arrayBuffer();
+      audioBuffers.push(buffer);
+    } else {
+       throw new Error(`FPT.AI did not return a valid audio URL. Response: ${JSON.stringify(resultJson)}`);
+    }
+  }
+
+  // Nối tất cả các file audio nhỏ lại thành một file duy nhất
+  const totalLength = audioBuffers.reduce((sum, buffer) => sum + buffer.byteLength, 0);
+  const combined = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const buffer of audioBuffers) {
+    combined.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  }
+
+  // Trả về file audio đã nối dưới dạng Blob
+  return new Blob([combined], { type: "audio/mpeg" });
 }
-
 // --- MAIN FUNCTION ---
 
 serve(async (req) => {
