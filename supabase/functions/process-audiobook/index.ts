@@ -125,7 +125,7 @@ async function textToSpeech(text: string): Promise<Blob> {
     },
     voice: {
       languageCode: "vi-VN",
-      name: "vi-VN-Standard-A",
+      name: "vi-VN-Standard-D",
     },
     audioConfig: {
       audioEncoding: "MP3",
