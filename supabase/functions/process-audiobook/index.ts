@@ -38,12 +38,13 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+const GOOGLE_TTS_API_KEY = Deno.env.get("GOOGLE_TTS_API_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 // --- HELPER FUNCTIONS ---
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// function delay(ms: number) {
+//   return new Promise((resolve) => setTimeout(resolve, ms));
+// }
 
 /**
  * Cập nhật trạng thái của một document trong database.
@@ -109,117 +110,56 @@ async function generateTitleAndDescription(
 }
 
 /**
- * Chuyển văn bản thành audio bằng FPT.AI.
+ * Chuyển văn bản thành audio sử dụng Google Cloud Text-to-Speech.
  */
 async function textToSpeech(text: string): Promise<Blob> {
-  const fptApiKey = Deno.env.get("FPT_AI_API_KEY");
-  if (!fptApiKey) {
-    throw new Error("FPT_AI_API_KEY is not set in environment variables.");
+  if (!GOOGLE_TTS_API_KEY) {
+    throw new Error("GOOGLE_TTS_API_KEY is not set in environment variables.");
   }
 
-  // API của FPT.AI có giới hạn khoảng 5000 ký tự mỗi lần gọi.
-  // Chúng ta cần chia văn bản dài thành các đoạn nhỏ hơn.
-  const MAX_CHARS = 4500; // Để một khoảng an toàn
-  const textChunks: string[] = [];
-  let currentChunk = "";
+  const API_ENDPOINT = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
 
-  // Chia văn bản theo dấu chấm câu để các đoạn audio nghe tự nhiên hơn
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const requestBody = {
+    input: {
+      text: text.substring(0, 5000),
+    },
+    voice: {
+      languageCode: "vi-VN",
+      name: "vi-VN-Standard-A",
+    },
+    audioConfig: {
+      audioEncoding: "MP3",
+    },
+  };
 
-  for (const sentence of sentences) {
-    if ((currentChunk + sentence).length > MAX_CHARS) {
-      textChunks.push(currentChunk);
-      currentChunk = sentence;
-    } else {
-      currentChunk += sentence;
-    }
-  }
-  if (currentChunk) {
-    textChunks.push(currentChunk);
-  }
+  const response = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+  });
 
-  console.log(
-    `Text split into ${textChunks.length} chunks for TTS processing.`,
-  );
-
-  // Mảng để lưu các file audio nhỏ (dưới dạng ArrayBuffer)
-  const audioBuffers: ArrayBuffer[] = [];
-
-  for (const chunk of textChunks) {
-    console.log(`Processing chunk of ${chunk.length} characters...`);
-    const response = await fetch("https://api.fpt.ai/hmi/tts/v5", {
-      method: "POST",
-      headers: {
-        "api-key": fptApiKey,
-        "Content-Type": "application/json",
-        // Chọn giọng đọc. 'banmai' là giọng nữ miền Bắc.
-        // Bạn có thể đổi thành 'leminh' (nam Bắc), 'myan' (nữ Nam), 'giaan' (nam Nam)...
-        "voice": "banmai",
-      },
-      body: chunk, // API của FPT.AI nhận text trực tiếp trong body
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(
-        `FPT.AI API failed with status ${response.status}: ${errorBody}`,
-      );
-    }
-
-    // Kiểm tra loại nội dung trả về từ FPT.AI
-    const contentType = response.headers.get("Content-Type");
-
-    if (contentType && contentType.includes("audio/mpeg")) {
-      // TRƯỜNG HỢP 1: THÀNH CÔNG - FPT.AI trả về dữ liệu audio trực tiếp
-      console.log("Received audio data directly (synchronous response).");
-      const buffer = await response.arrayBuffer();
-      audioBuffers.push(buffer);
-
-    } else if (contentType && contentType.includes("application/json")) {
-      // TRƯỜNG HỢP 2: FPT.AI trả về JSON với link async (luồng cũ đang bị lỗi)
-      console.log("Received async URL. This path is unreliable and may fail.");
-      const resultJson = await response.json();
-      if (resultJson.async) {
-        // Chúng ta vẫn sẽ thử tải từ link này, nhưng đây không phải là cách được ưu tiên
-        const audioUrl = resultJson.async;
-        await delay(2000); // Thêm một độ trễ nhỏ để phòng hờ
-        
-        console.log(`Attempting to download from async URL: ${audioUrl}`);
-        const audioResponse = await fetch(audioUrl);
-        if (!audioResponse.ok) {
-          // Ghi nhận lỗi nhưng có thể tiếp tục với các chunk khác nếu muốn
-          console.error(`Failed to download audio from FPT.AI async URL: ${audioUrl}`);
-          throw new Error(`Failed to download audio from FPT.AI async URL: ${audioUrl}`);
-        }
-        const buffer = await audioResponse.arrayBuffer();
-        audioBuffers.push(buffer);
-      } else {
-        throw new Error(`FPT.AI returned JSON but no async URL. Response: ${JSON.stringify(resultJson)}`);
-      }
-    } else {
-      // Trường hợp không xác định
-      throw new Error(`Unexpected Content-Type from FPT.AI: ${contentType}`);
-    }
+  if (!response.ok) {
+    const errorBody = await response.json();
+    throw new Error(`Google TTS API failed: ${JSON.stringify(errorBody)}`);
   }
 
+  const responseData = await response.json();
+  const audioContent = responseData.audioContent; // Đây là chuỗi Base64
 
-  if (audioBuffers.length === 0) {
-    throw new Error("No audio chunks were successfully processed.");
-  }
-  // Nối tất cả các file audio nhỏ lại thành một file duy nhất
-  const totalLength = audioBuffers.reduce(
-    (sum, buffer) => sum + buffer.byteLength,
-    0,
-  );
-  const combined = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const buffer of audioBuffers) {
-    combined.set(new Uint8Array(buffer), offset);
-    offset += buffer.byteLength;
+  if (!audioContent) {
+    throw new Error("Google TTS API returned a successful response but with no audio content.");
   }
 
-  // Trả về file audio đã nối dưới dạng Blob
-  return new Blob([combined], { type: "audio/mpeg" });
+  // Tạo một "Data URL" từ chuỗi Base64.
+  // Đây là một URL đặc biệt chứa toàn bộ dữ liệu của file.
+  const dataUrl = `data:audio/mpeg;base64,${audioContent}`;
+
+  // Sử dụng `fetch` để "tải" data URL này.
+  // Bước này sẽ chuyển đổi Base64 thành dữ liệu nhị phân một cách an toàn.
+  const audioResponse = await fetch(dataUrl);
+
+  // Lấy dữ liệu dưới dạng Blob và trả về.
+  return await audioResponse.blob();
 }
 // --- MAIN FUNCTION ---
 
