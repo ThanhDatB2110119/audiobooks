@@ -117,11 +117,12 @@ async function textToSpeech(text: string): Promise<Blob> {
     throw new Error("GOOGLE_TTS_API_KEY is not set in environment variables.");
   }
 
-  const API_ENDPOINT = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+  const API_ENDPOINT =
+    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
 
   const requestBody = {
     input: {
-      text: text.substring(0, 5000),
+      text: text.substring(0, 20000),
     },
     voice: {
       languageCode: "vi-VN",
@@ -133,8 +134,8 @@ async function textToSpeech(text: string): Promise<Blob> {
   };
 
   const response = await fetch(API_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
   });
 
@@ -147,7 +148,9 @@ async function textToSpeech(text: string): Promise<Blob> {
   const audioContent = responseData.audioContent; // Đây là chuỗi Base64
 
   if (!audioContent) {
-    throw new Error("Google TTS API returned a successful response but with no audio content.");
+    throw new Error(
+      "Google TTS API returned a successful response but with no audio content.",
+    );
   }
 
   // Tạo một "Data URL" từ chuỗi Base64.

@@ -52,6 +52,8 @@ class _PlayerPageState extends State<PlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Kiểm tra xem đây có phải là sách cá nhân không dựa vào đường dẫn ảnh
+    final bool isPersonalBook = currentBook.coverImageUrl.startsWith('assets/');
     // ======================= THAY ĐỔI 3: DÙNG BLOCPROVIDER.VALUE =======================
     // Chúng ta không `create` cubit mới nữa, mà `cung cấp` (provide)
     // cubit mà chúng ta đã tạo trong initState.
@@ -63,152 +65,15 @@ class _PlayerPageState extends State<PlayerPage> {
           appBar: AppBar(
             title: Text(currentBook.title, overflow: TextOverflow.ellipsis),
           ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        // child: Image.network(
-                        //   currentBook.coverImageUrl,
-                        //   height: 300,
-                        //   width: 300,
-                        //   fit: BoxFit.cover,
-                        // ),
-                      ),
-                      SizedBox(
-                        height: 100,
-                        width: 100,
-                        // Sử dụng Builder để có context hợp lệ
-                        child: Builder(
-                          builder: (overlayContext) {
-                            return _buildSeekOverlay(overlayContext);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  _buildCoverImage(currentBook.coverImageUrl),
-                  const SizedBox(height: 32),
-                  Text(
-                    currentBook.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    currentBook.author,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  BlocBuilder<PlayerCubit, PlayerState>(
-                    builder: (context, state) {
-                      return Column(
-                        children: [
-                          Slider(
-                            min: 0.0,
-                            max: state.duration.inSeconds.toDouble(),
-                            value: state.position.inSeconds.toDouble().clamp(
-                              0.0,
-                              state.duration.inSeconds.toDouble(),
-                            ),
-                            onChanged: (value) {
-                              context.read<PlayerCubit>().seek(
-                                Duration(seconds: value.toInt()),
-                              );
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_formatDuration(state.position)),
-                                Text(_formatDuration(state.duration)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  BlocBuilder<PlayerCubit, PlayerState>(
-                    builder: (context, state) {
-                      if (state.status == PlayerStatus.loading ||
-                          state.status == PlayerStatus.loaded) {
-                        return const SizedBox(
-                          height: 70,
-                          width: 70,
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      final isPlaying = state.status == PlayerStatus.playing;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.replay_circle_filled,
-                              size: 32.0,
-                            ), // Icon nhỏ hơn nút chính
-                            // Tooltip để người dùng biết chức năng của nút
-                            tooltip: 'Phát lại từ đầu',
-                            onPressed: () {
-                              context.read<PlayerCubit>().replay();
-                            },
-                          ),
-
-                          IconButton(
-                            icon: const Icon(Icons.skip_previous, size: 40.0),
-                            onPressed: currentIndex > 0
-                                ? () => _changeTrack(-1)
-                                : null,
-                          ),
-                          const SizedBox(width: 20),
-                          IconButton(
-                            icon: Icon(
-                              isPlaying
-                                  ? Icons.pause_circle_filled
-                                  : Icons.play_circle_filled,
-                              size: 70.0,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: () {
-                              if (isPlaying) {
-                                context.read<PlayerCubit>().pause();
-                              } else {
-                                context.read<PlayerCubit>().play();
-                              }
-                            },
-                          ),
-                          const SizedBox(width: 20),
-                          IconButton(
-                            icon: const Icon(Icons.skip_next, size: 40.0),
-                            onPressed: currentIndex < widget.books.length - 1
-                                ? () => _changeTrack(1)
-                                : null,
-                          ),
-                          const SizedBox(
-                            width: 34,
-                          ), // Icon size (32) + padding (16)
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
             ),
+            // Dựa vào loại sách để build layout tương ứng
+            child: isPersonalBook
+                ? _buildPersonalBookLayout(context) // Layout cho sách cá nhân
+                : _buildStandardBookLayout(context), // Layout cho sách có sẵn
           ),
         ),
       ),
@@ -267,6 +132,211 @@ class _PlayerPageState extends State<PlayerPage> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Layout này có phần mô tả cuộn được và các thành phần khác được cố định.
+  Widget _buildPersonalBookLayout(BuildContext context) {
+    return Column(
+      children: [
+        // --- PHẦN CỐ ĐỊNH Ở TRÊN ---
+        const SizedBox(height: 20),
+        Text(
+          currentBook.title,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          currentBook.author, // 'Tài liệu cá nhân'
+          style: Theme.of(context).textTheme.titleMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+
+        // --- PHẦN MÔ TẢ CÓ THỂ CUỘN ---
+        Expanded(
+          // Bọc Container trong một Stack
+          child: Stack(
+            children: [
+              // Lớp dưới: Nội dung mô tả
+              Container(
+                width:
+                    double.infinity, // Đảm bảo container chiếm hết chiều rộng
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    currentBook.description,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(height: 1.6),
+                  ),
+                ),
+              ),
+              // Lớp trên: Lớp phủ GestureDetector để tua tới/lui
+              // Chúng ta gọi lại hàm _buildSeekOverlay đã có sẵn
+              Builder(
+                builder: (overlayContext) {
+                  return _buildSeekOverlay(overlayContext);
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // --- PHẦN ĐIỀU KHIỂN CỐ ĐỊNH Ở DƯỚI ---
+        _buildSeekBar(context),
+        const SizedBox(height: 16),
+        _buildPlayerControls(context),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  /// Layout này hiển thị ảnh bìa và đã được fix lỗi khoảng trống thừa.
+  Widget _buildStandardBookLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        // Xóa mainAxisAlignment để nội dung bắt đầu từ trên cùng
+        children: [
+          const SizedBox(height: 20),
+          _buildCoverImage(currentBook.coverImageUrl),
+          const SizedBox(height: 32),
+          Text(
+            currentBook.title,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            currentBook.author,
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          _buildSeekBar(context),
+          const SizedBox(height: 16),
+          _buildPlayerControls(context),
+        ],
+      ),
+    );
+  }
+
+  /// Widget cho thanh trượt và hiển thị thời gian
+  Widget _buildSeekBar(BuildContext context) {
+    return BlocBuilder<PlayerCubit, PlayerState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            Slider(
+              min: 0.0,
+              max: state.duration.inSeconds.toDouble(),
+              value: state.position.inSeconds.toDouble().clamp(
+                0.0,
+                state.duration.inSeconds.toDouble(),
+              ),
+              onChanged: (value) {
+                _playerCubit.seek(Duration(seconds: value.toInt()));
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_formatDuration(state.position)),
+                  Text(_formatDuration(state.duration)),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Widget cho các nút Play/Pause, Next, Previous...
+  Widget _buildPlayerControls(BuildContext context) {
+    return BlocBuilder<PlayerCubit, PlayerState>(
+      builder: (context, state) {
+        if (state.status == PlayerStatus.loading ||
+            state.status == PlayerStatus.loaded) {
+          return const SizedBox(
+            height: 70,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final isPlaying = state.status == PlayerStatus.playing;
+        return Row(
+          // Sử dụng MainAxisAlignment.spaceAround để phân bổ không gian đều
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Nút Replay
+            IconButton(
+              icon: const Icon(Icons.replay_circle_filled, size: 32.0),
+              tooltip: 'Phát lại từ đầu',
+              onPressed: () => _playerCubit.replay(),
+            ),
+
+            // Nút Previous
+            IconButton(
+              icon: const Icon(Icons.skip_previous, size: 40.0),
+              onPressed: currentIndex > 0 ? () => _changeTrack(-1) : null,
+            ),
+
+            // Nút Play/Pause
+            IconButton(
+              icon: Icon(
+                isPlaying
+                    ? Icons.pause_circle_filled
+                    : Icons.play_circle_filled,
+                size: 70.0,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              onPressed: () {
+                if (isPlaying) {
+                  _playerCubit.pause();
+                } else {
+                  _playerCubit.play();
+                }
+              },
+            ),
+
+            // Nút Next
+            IconButton(
+              icon: const Icon(Icons.skip_next, size: 40.0),
+              onPressed: currentIndex < widget.books.length - 1
+                  ? () => _changeTrack(1)
+                  : null,
+            ),
+
+            // Nút Placeholder để cân bằng.
+            // Chúng ta sẽ dùng Opacity để làm cho nó vô hình nhưng vẫn chiếm không gian.
+            Opacity(
+              opacity: 0.0,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.help,
+                  size: 32.0,
+                ), // Cùng kích thước với nút Replay
+                onPressed: null, // Vô hiệu hóa nút
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
