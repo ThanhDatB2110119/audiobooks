@@ -1,9 +1,10 @@
 // presentation/features/creator/pages/creator_page.dart
 
-
 import 'package:audiobooks/presentation/features/creator/cubit/creator_cubit.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_state.dart';
+import 'package:audiobooks/presentation/features/creator/widgets/file_picker_dialog.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/text_input_dialog.dart';
+import 'package:audiobooks/presentation/features/creator/widgets/url_input_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -60,7 +61,7 @@ class CreatorPage extends StatelessWidget {
                     }
                     // --- Xử lý trạng thái Error ---
                     else if (state is CreatorError) {
-                       if (Navigator.of(context, rootNavigator: true).canPop()) {
+                      if (Navigator.of(context, rootNavigator: true).canPop()) {
                         Navigator.of(context, rootNavigator: true).pop();
                       }
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -97,9 +98,68 @@ class CreatorPage extends StatelessWidget {
                               shrinkWrap: true,
                               children: [
                                 // Nút Nhập link
-                                ElevatedButton.icon(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.link, color: Colors.black), style: ElevatedButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), padding: const EdgeInsets.all(8.0)), label: const Text('Nhập link', style: TextStyle(fontSize: 14, color: Colors.black))),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    showInputDialog(
+                                      context: builderContext,
+                                      title: 'Nhập link tài liệu',
+                                      hintText: 'Nhập URL tại đây',
+                                      confirmButtonText: 'Xác nhận',
+                                      cancelButtonText: 'Hủy',
+                                      initialValue: '',
+                                    );
+                                  },
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.link,
+                                    color: Colors.black,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withOpacity(
+                                      0.9,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                  ),
+                                  label: const Text(
+                                    'Nhập link',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                                 // Nút Chọn file
-                                ElevatedButton.icon(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.folderOpen, color: Colors.black), style: ElevatedButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), padding: const EdgeInsets.all(8.0)), label: const Text('Chọn file', style: TextStyle(fontSize: 14, color: Colors.black))),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    showUploadFileDialog(builderContext).then((
+                                      selectedFile,
+                                    ) {
+                                      if (selectedFile != null) {}
+                                    });
+                                  },
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.folderOpen,
+                                    color: Colors.black,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withOpacity(
+                                      0.9,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                  ),
+                                  label: const Text(
+                                    'Chọn file',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                                 // Nút Nhập văn bản
                                 ElevatedButton.icon(
                                   onPressed: () {
@@ -107,16 +167,57 @@ class CreatorPage extends StatelessWidget {
                                       context: builderContext,
                                       title: 'Tạo sách nói từ văn bản',
                                       onConfirm: (submittedText) {
-                                        builderContext.read<CreatorCubit>().createFromText(submittedText);
+                                        builderContext
+                                            .read<CreatorCubit>()
+                                            .createFromText(submittedText);
                                       },
                                     );
                                   },
-                                  icon: const FaIcon(FontAwesomeIcons.bookOpen, color: Colors.black),
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), padding: const EdgeInsets.all(8.0)),
-                                  label: const Text('Nhập văn bản', style: TextStyle(fontSize: 14, color: Colors.black)),
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.bookOpen,
+                                    color: Colors.black,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withOpacity(
+                                      0.9,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                  ),
+                                  label: const Text(
+                                    'Nhập văn bản',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                 ),
                                 // Nút Khung 4
-                                ElevatedButton.icon(onPressed: () {}, icon: const FaIcon(FontAwesomeIcons.textSlash, color: Colors.black), style: ElevatedButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), padding: const EdgeInsets.all(8.0)), label: const Text('Khung 4', style: TextStyle(fontSize: 14, color: Colors.black))),
+                                ElevatedButton.icon(
+                                  onPressed: () {},
+                                  icon: const FaIcon(
+                                    FontAwesomeIcons.textSlash,
+                                    color: Colors.black,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withOpacity(
+                                      0.9,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.all(8.0),
+                                  ),
+                                  label: const Text(
+                                    'Khung 4',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
