@@ -36,7 +36,6 @@
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { MP3Cat } from "mp3cat";
 
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -114,39 +113,38 @@ async function generateTitleAndDescription(
 /**
  * Chuyển văn bản thành audio sử dụng Google Cloud Text-to-Speech.
  */
+/**
+ * Chuyển văn bản dài thành audio, chia nhỏ và ghép lại thủ công.
+ */
 async function textToSpeech(text: string): Promise<Blob> {
   if (!GOOGLE_TTS_API_KEY) {
     throw new Error("GOOGLE_TTS_API_KEY is not set in environment variables.");
   }
-  
-  const API_ENDPOINT = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
-  const CHUNK_LIMIT_BYTES = 4800; // Giới hạn an toàn, dưới 5000 bytes
 
-  // 1. Chia văn bản thành các đoạn nhỏ
+  const API_ENDPOINT =
+    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+  const CHUNK_LIMIT_BYTES = 4800;
+
+  // 1. Chia văn bản thành các đoạn nhỏ (logic này giữ nguyên)
   const textEncoder = new TextEncoder();
   const textChunks: string[] = [];
   let currentChunk = "";
-  // Tách văn bản theo câu để tránh cắt giữa chừng
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
 
   for (const sentence of sentences) {
     const potentialChunk = currentChunk + sentence;
     if (textEncoder.encode(potentialChunk).length > CHUNK_LIMIT_BYTES) {
-      if (currentChunk) {
-        textChunks.push(currentChunk);
-      }
+      if (currentChunk) textChunks.push(currentChunk);
       currentChunk = sentence;
     } else {
       currentChunk = potentialChunk;
     }
   }
-  if (currentChunk) {
-    textChunks.push(currentChunk);
-  }
-  
+  if (currentChunk) textChunks.push(currentChunk);
+
   console.log(`Text split into ${textChunks.length} chunks.`);
 
-  // 2. Gọi API TTS cho từng đoạn và thu thập dữ liệu audio
+  // 2. Gọi API TTS cho từng đoạn và thu thập dữ liệu audio dưới dạng Uint8Array
   const audioDataParts: Uint8Array[] = [];
   for (let i = 0; i < textChunks.length; i++) {
     console.log(`Processing audio chunk ${i + 1}/${textChunks.length}...`);
@@ -157,8 +155,8 @@ async function textToSpeech(text: string): Promise<Blob> {
     };
 
     const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
 
@@ -171,19 +169,37 @@ async function textToSpeech(text: string): Promise<Blob> {
     const audioContent = responseData.audioContent;
     if (!audioContent) continue;
 
-    // Sử dụng fetch với data URL để giải mã base64
     const dataUrl = `data:audio/mpeg;base64,${audioContent}`;
     const audioResponse = await fetch(dataUrl);
     const audioArrayBuffer = await audioResponse.arrayBuffer();
     audioDataParts.push(new Uint8Array(audioArrayBuffer));
   }
 
-  // 3. Ghép các file audio lại
-  console.log("Concatenating audio parts...");
-  const concatenatedMp3 = await MP3Cat.join(audioDataParts);
+  if (audioDataParts.length === 0) {
+    throw new Error("No audio parts were generated.");
+  }
+
+  // 3. Ghép các file audio lại (thay thế mp3cat)
+  console.log("Concatenating audio parts manually...");
+
+  // Tính tổng độ dài của tất cả các phần
+  const totalLength = audioDataParts.reduce(
+    (acc, part) => acc + part.length,
+    0,
+  );
+
+  // Tạo một mảng Uint8Array lớn duy nhất
+  const concatenatedMp3 = new Uint8Array(totalLength);
+
+  // Copy dữ liệu từ từng phần vào mảng lớn
+  let offset = 0;
+  for (const part of audioDataParts) {
+    concatenatedMp3.set(part, offset);
+    offset += part.length;
+  }
 
   // 4. Tạo Blob từ file đã ghép
-  return new Blob([concatenatedMp3], { type: "audio/mpeg" });
+  return new Blob([concatenatedMp3.buffer], { type: "audio/mpeg" });
 }
 // --- MAIN FUNCTION ---
 

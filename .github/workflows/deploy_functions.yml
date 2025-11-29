@@ -13,7 +13,6 @@ on:
       # Workflow cũng chỉ chạy nếu có sự thay đổi bên trong thư mục 'supabase/functions/'.
       # Điều này giúp tiết kiệm tài nguyên, không chạy lại khi bạn chỉ sửa code Flutter.
       - "supabase/functions/**"
-      - 'supabase/deno.json'
   # ========================================================================
 
   # Dòng này cho phép bạn có thể chạy workflow này một cách thủ công từ
@@ -43,4 +42,4 @@ jobs:
         run: |
           # Lệnh deploy vẫn giữ nguyên
           echo "Deploying function..."
-          supabase functions deploy --project-ref $SUPABASE_PROJECT_ID --import-map supabase/deno.json
+          supabase functions deploy --project-ref $SUPABASE_PROJECT_ID
