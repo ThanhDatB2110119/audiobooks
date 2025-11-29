@@ -36,6 +36,8 @@
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { MP3Cat } from "mp3cat";
+
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GOOGLE_TTS_API_KEY = Deno.env.get("GOOGLE_TTS_API_KEY");
@@ -116,53 +118,72 @@ async function textToSpeech(text: string): Promise<Blob> {
   if (!GOOGLE_TTS_API_KEY) {
     throw new Error("GOOGLE_TTS_API_KEY is not set in environment variables.");
   }
+  
+  const API_ENDPOINT = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+  const CHUNK_LIMIT_BYTES = 4800; // Giới hạn an toàn, dưới 5000 bytes
 
-  const API_ENDPOINT =
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+  // 1. Chia văn bản thành các đoạn nhỏ
+  const textEncoder = new TextEncoder();
+  const textChunks: string[] = [];
+  let currentChunk = "";
+  // Tách văn bản theo câu để tránh cắt giữa chừng
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
 
-  const requestBody = {
-    input: {
-      text: text.substring(0, 20000),
-    },
-    voice: {
-      languageCode: "vi-VN",
-      name: "vi-VN-Standard-D",
-    },
-    audioConfig: {
-      audioEncoding: "MP3",
-    },
-  };
+  for (const sentence of sentences) {
+    const potentialChunk = currentChunk + sentence;
+    if (textEncoder.encode(potentialChunk).length > CHUNK_LIMIT_BYTES) {
+      if (currentChunk) {
+        textChunks.push(currentChunk);
+      }
+      currentChunk = sentence;
+    } else {
+      currentChunk = potentialChunk;
+    }
+  }
+  if (currentChunk) {
+    textChunks.push(currentChunk);
+  }
+  
+  console.log(`Text split into ${textChunks.length} chunks.`);
 
-  const response = await fetch(API_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody),
-  });
+  // 2. Gọi API TTS cho từng đoạn và thu thập dữ liệu audio
+  const audioDataParts: Uint8Array[] = [];
+  for (let i = 0; i < textChunks.length; i++) {
+    console.log(`Processing audio chunk ${i + 1}/${textChunks.length}...`);
+    const requestBody = {
+      input: { text: textChunks[i] },
+      voice: { languageCode: "vi-VN", name: "vi-VN-Standard-A" },
+      audioConfig: { audioEncoding: "MP3" },
+    };
 
-  if (!response.ok) {
-    const errorBody = await response.json();
-    throw new Error(`Google TTS API failed: ${JSON.stringify(errorBody)}`);
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json();
+      throw new Error(`Google TTS API failed: ${JSON.stringify(errorBody)}`);
+    }
+
+    const responseData = await response.json();
+    const audioContent = responseData.audioContent;
+    if (!audioContent) continue;
+
+    // Sử dụng fetch với data URL để giải mã base64
+    const dataUrl = `data:audio/mpeg;base64,${audioContent}`;
+    const audioResponse = await fetch(dataUrl);
+    const audioArrayBuffer = await audioResponse.arrayBuffer();
+    audioDataParts.push(new Uint8Array(audioArrayBuffer));
   }
 
-  const responseData = await response.json();
-  const audioContent = responseData.audioContent; // Đây là chuỗi Base64
+  // 3. Ghép các file audio lại
+  console.log("Concatenating audio parts...");
+  const concatenatedMp3 = await MP3Cat.join(audioDataParts);
 
-  if (!audioContent) {
-    throw new Error(
-      "Google TTS API returned a successful response but with no audio content.",
-    );
-  }
-
-  // Tạo một "Data URL" từ chuỗi Base64.
-  // Đây là một URL đặc biệt chứa toàn bộ dữ liệu của file.
-  const dataUrl = `data:audio/mpeg;base64,${audioContent}`;
-
-  // Sử dụng `fetch` để "tải" data URL này.
-  // Bước này sẽ chuyển đổi Base64 thành dữ liệu nhị phân một cách an toàn.
-  const audioResponse = await fetch(dataUrl);
-
-  // Lấy dữ liệu dưới dạng Blob và trả về.
-  return await audioResponse.blob();
+  // 4. Tạo Blob từ file đã ghép
+  return new Blob([concatenatedMp3], { type: "audio/mpeg" });
 }
 // --- MAIN FUNCTION ---
 
