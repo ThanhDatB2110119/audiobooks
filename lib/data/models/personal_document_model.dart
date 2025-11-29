@@ -7,7 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 // Nếu không, bạn cần tự viết fromJson và toJson
 part 'personal_document_model.g.dart';
 
-@JsonSerializable(createFactory: false) 
+@JsonSerializable(createFactory: false)
 // ========================================================================
 class PersonalDocumentModel extends PersonalDocumentEntity {
   const PersonalDocumentModel({
@@ -30,12 +30,12 @@ class PersonalDocumentModel extends PersonalDocumentEntity {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       title: json['title'] as String,
-      
+
       // Xử lý null an toàn cho các trường String?
       extractedTextUrl: json['extracted_text_url'] as String?,
       generatedAudioUrl: json['generated_audio_url'] as String?,
       description: json['description'] as String?,
-      
+
       // Xử lý an toàn cho trường originalSource, nếu null thì trả về chuỗi rỗng
       originalSource: json['original_source'] as String? ?? '',
 

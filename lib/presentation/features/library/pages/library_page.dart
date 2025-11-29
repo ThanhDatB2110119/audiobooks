@@ -1,12 +1,14 @@
 // presentation/features/library/pages/library_page.dart
 
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
+import 'package:audiobooks/presentation/features/library/utils/mapper.dart';
 import 'package:flutter/material.dart';
 // ======================= THÊM CÁC IMPORT CẦN THIẾT =======================
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_cubit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart'; // Package để format ngày tháng
 // ========================================================================
 
@@ -167,7 +169,11 @@ class MyBooksTabView extends StatelessWidget {
               itemCount: state.myDocuments.length,
               itemBuilder: (context, index) {
                 final doc = state.myDocuments[index];
-                return _MyBookListItem(document: doc);
+                return _MyBookListItem(
+                  document: doc,
+                  allDocuments: state.myDocuments,
+                  currentIndex: index,
+                );
               },
             ),
           );
@@ -216,8 +222,13 @@ class _EmptyMyBooksView extends StatelessWidget {
 // Widget hiển thị cho từng item trong danh sách "Sách của tôi"
 class _MyBookListItem extends StatelessWidget {
   final PersonalDocumentEntity document;
-
-  const _MyBookListItem({required this.document});
+  final List<PersonalDocumentEntity> allDocuments;
+  final int currentIndex;
+  const _MyBookListItem({
+    required this.document,
+    required this.allDocuments,
+    required this.currentIndex,
+  });
 
   // Helper để lấy màu và icon cho từng status
   (Color, IconData) _getStatusAppearance(ProcessingStatus status) {
@@ -270,6 +281,17 @@ class _MyBookListItem extends StatelessWidget {
         ),
         onTap: isCompleted
             ? () {
+              // 1. Chuyển đổi toàn bộ danh sách PersonalDocumentEntity sang BookEntity
+                final bookEntities = allDocuments.map((doc) => doc.toBookEntity()).toList();
+
+                // 2. Điều hướng đến PlayerPage, truyền vào danh sách đã chuyển đổi và index hiện tại
+                context.push(
+                  '/player',
+                  extra: {
+                    'books': bookEntities,
+                    'index': currentIndex,
+                  },
+                );
                 // TODO: Điều hướng đến PlayerPage khi sách đã hoàn thành
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Sẽ phát sách: ${document.title}')),
