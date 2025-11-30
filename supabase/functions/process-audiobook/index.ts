@@ -154,6 +154,46 @@ async function textToSpeech(text: string): Promise<Blob> {
       audioConfig: { audioEncoding: "MP3" },
     };
 
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achernar FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achird	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algenib	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algieba	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Alnilam	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Aoede	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Autonoe	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Callirrhoe	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Charon	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Despina	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Enceladus	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Erinome	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Fenrir	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Gacrux	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Iapetus	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Kore	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Laomedeia	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Leda	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Orus	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Puck	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Pulcherrima	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Rasalgethi	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadachbia	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadaltager	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Schedar	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sulafat	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Umbriel	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Vindemiatrix	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zephyr	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zubenelgenubi	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-A	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-D	MALE	
+// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-A	FEMALE	
+// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-B	MALE	
+// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-C	FEMALE	
+// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-D	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-A	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-B	MALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-C	FEMALE	
+// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-D	MALE
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
