@@ -7,11 +7,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/error/exceptions.dart';
+import 'package:path/path.dart' as p;
 
 abstract class PersonalDocumentRemoteDataSource {
   Future<List<PersonalDocumentModel>> getUserDocuments();
   // ======================= THÊM PHƯƠNG THỨC MỚI TẠI ĐÂY =======================
   Future<void> createDocumentFromText(String text);
+  Future<void> createDocumentFromFile(File file);
   // ===========================================================================
 }
 
@@ -98,6 +100,46 @@ class PersonalDocumentRemoteDataSourceImpl
       await supabaseClient.from('personal_documents').insert(dataToInsert);
     } catch (e) {
       // Ghi log lỗi ở đây
+      throw ServerException(e.toString());
+    }
+  }
+  @override
+  Future<void> createDocumentFromFile(File file) async {
+    try {
+      final user = supabaseClient.auth.currentUser;
+      if (user == null) throw ServerException('Người dùng chưa đăng nhập');
+
+      // 1. Chuẩn bị tên file và đường dẫn
+      final originalFileName = p.basename(file.path);
+      final fileExtension = p.extension(file.path);
+      final uniqueFileName = '${uuid.v4()}$fileExtension';
+      final storagePath = '${user.id}/$uniqueFileName';
+      
+      // 2. Upload file gốc lên bucket 'personal-files-uploads'
+      // **QUAN TRỌNG**: Bạn cần tạo một bucket mới tên là `personal-files-uploads`
+      // và thiết lập Policy cho nó giống như cách bạn đã làm với `personal-texts`.
+      await supabaseClient.storage.from('personal-files-uploads').upload(
+            storagePath,
+            file,
+          );
+
+      // 3. Lấy URL công khai của file vừa upload
+      final fileUrl = supabaseClient.storage.from('personal-uploads').getPublicUrl(storagePath);
+      
+      // 4. Chèn record mới vào bảng `personal_documents`
+      final dataToInsert = {
+        'user_id': user.id,
+        'title': 'Đang xử lý file: $originalFileName',
+        'source_type': 'file',
+        // Lưu URL của file gốc vào extracted_text_url để server xử lý
+        'original_source': originalFileName, 
+        'extracted_text_url': fileUrl,
+        'status': 'pending',
+      };
+
+      await supabaseClient.from('personal_documents').insert(dataToInsert);
+
+    } catch (e) {
       throw ServerException(e.toString());
     }
   }

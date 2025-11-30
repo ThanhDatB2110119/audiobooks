@@ -1,5 +1,7 @@
 // data/repositories/personal_document_repository_impl.dart
 
+import 'dart:io';
+
 import 'package:audiobooks/core/error/exceptions.dart';
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/data/datasources/personal_document_remote_data_source.dart';
@@ -35,6 +37,14 @@ class PersonalDocumentRepositoryImpl implements PersonalDocumentRepository {
       return Left(ServerFailure(e.message));
     }
   }
-
+@override
+  Future<Either<Failure, void>> createDocumentFromFile(File file) async {
+    try {
+      await remoteDataSource.createDocumentFromFile(file);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure( e.message));
+    }
+  }
   // ===============================================================================
 }

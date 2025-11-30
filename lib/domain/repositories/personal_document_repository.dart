@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:dartz/dartz.dart';
@@ -11,5 +13,6 @@ abstract class PersonalDocumentRepository {
   /// Tạo một tài liệu sách nói từ một chuỗi văn bản.
   /// Trả về void nếu thành công, hoặc Failure nếu thất bại.
   Future<Either<Failure, void>> createDocumentFromText(String text);
+  Future<Either<Failure, void>> createDocumentFromFile(File file);
   // ========================================================================
 }

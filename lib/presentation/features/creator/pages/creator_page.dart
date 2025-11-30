@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
+
 //test
 class CreatorPage extends StatelessWidget {
   const CreatorPage({super.key});
@@ -133,10 +134,42 @@ class CreatorPage extends StatelessWidget {
                                 // Nút Chọn file
                                 ElevatedButton.icon(
                                   onPressed: () {
+                                    // Lấy instance của CreatorCubit từ context.
+                                    // Chúng ta lấy nó ra ngoài trước để không phải gọi lại trong .then()
+                                    final creatorCubit = builderContext
+                                        .read<CreatorCubit>();
+
+                                    // Gọi dialog của bạn để hiển thị trình chọn file.
+                                    // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
                                     showUploadFileDialog(builderContext).then((
                                       selectedFile,
                                     ) {
-                                      if (selectedFile != null) {}
+                                      // Sau khi dialog đóng, callback này sẽ được thực thi.
+
+                                      // Kiểm tra xem người dùng có thực sự chọn một file hay không.
+                                      if (selectedFile != null) {
+                                        // Nếu có, hãy gọi phương thức createFromFile trên Cubit
+                                        // và truyền file đã chọn vào.
+                                        creatorCubit.createFromFile(
+                                          selectedFile,
+                                        );
+
+                                        // Không cần hiển thị SnackBar ở đây nữa, vì BlocListener
+                                        // sẽ tự động xử lý việc hiển thị phản hồi (Loading, Success, Error).
+                                      } else {
+                                        // Người dùng đã nhấn nút "Hủy" hoặc đóng dialog.
+                                        // Hiển thị một SnackBar ngắn gọn để thông báo.
+                                        ScaffoldMessenger.of(
+                                          builderContext,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Đã hủy thao tác chọn file.',
+                                            ),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
                                     });
                                   },
                                   icon: const FaIcon(
