@@ -150,7 +150,7 @@ async function textToSpeech(text: string): Promise<Blob> {
     console.log(`Processing audio chunk ${i + 1}/${textChunks.length}...`);
     const requestBody = {
       input: { text: textChunks[i] },
-      voice: { languageCode: "vi-VN", name: "vi-VN-Standard-D" },
+      voice: { languageCode: "vi-VN", name: "vi-VN-Wavenet-D" },
       audioConfig: { audioEncoding: "MP3" },
     };
 
