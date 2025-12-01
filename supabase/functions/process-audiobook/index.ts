@@ -120,7 +120,7 @@ async function extractMainContent(rawText: string): Promise<string> {
   console.log("Extracting main content with Gemini...");
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
   const prompt = `
     Phân tích văn bản thô dưới đây. Nhiệm vụ của bạn là hoạt động như một bộ lọc thông minh,
