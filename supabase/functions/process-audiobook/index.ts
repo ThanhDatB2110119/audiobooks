@@ -41,6 +41,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GOOGLE_TTS_API_KEY = Deno.env.get("GOOGLE_TTS_API_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const CLOUDMERSIVE_API_KEY = Deno.env.get("CLOUDMERSIVE_API_KEY");
 
 // --- HELPER FUNCTIONS ---
 // function delay(ms: number) {
@@ -154,46 +155,46 @@ async function textToSpeech(text: string): Promise<Blob> {
       audioConfig: { audioEncoding: "MP3" },
     };
 
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achernar FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achird	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algenib	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algieba	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Alnilam	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Aoede	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Autonoe	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Callirrhoe	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Charon	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Despina	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Enceladus	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Erinome	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Fenrir	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Gacrux	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Iapetus	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Kore	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Laomedeia	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Leda	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Orus	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Puck	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Pulcherrima	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Rasalgethi	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadachbia	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadaltager	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Schedar	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sulafat	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Umbriel	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Vindemiatrix	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zephyr	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zubenelgenubi	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-A	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-D	MALE	
-// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-A	FEMALE	
-// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-B	MALE	
-// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-C	FEMALE	
-// Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-D	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-A	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-B	MALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-C	FEMALE	
-// Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-D	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achernar FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Achird	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algenib	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Algieba	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Alnilam	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Aoede	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Autonoe	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Callirrhoe	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Charon	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Despina	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Enceladus	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Erinome	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Fenrir	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Gacrux	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Iapetus	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Kore	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Laomedeia	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Leda	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Orus	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Puck	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Pulcherrima	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Rasalgethi	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadachbia	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sadaltager	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Schedar	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Sulafat	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Umbriel	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Vindemiatrix	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zephyr	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Chirp3-HD-Zubenelgenubi	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-A	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Neural2-D	MALE
+    // Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-A	FEMALE
+    // Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-B	MALE
+    // Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-C	FEMALE
+    // Vietnamese (Vietnam)	Standard	vi-VN	vi-VN-Standard-D	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-A	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-B	MALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-C	FEMALE
+    // Vietnamese (Vietnam)	Premium	vi-VN	vi-VN-Wavenet-D	MALE
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -269,12 +270,67 @@ serve(async (req) => {
     await updateDocumentStatus(supabaseAdmin, documentId, "processing");
 
     // 3. Tải nội dung text từ Supabase Storage
-    const textResponse = await fetch(textUrl);
-    if (!textResponse.ok) {
-      throw new Error(`Failed to download text file from ${textUrl}`);
+    // const textResponse = await fetch(textUrl);
+    // if (!textResponse.ok) {
+    //   throw new Error(`Failed to download text file from ${textUrl}`);
+    // }
+    // const originalText = await textResponse.text();
+    // console.log("Text downloaded successfully.");
+
+    // 3. Tải nội dung text từ Supabase Storage
+    const urlParts = textUrl.split("/");
+    const bucketName = urlParts[urlParts.length - 3];
+    const filePath = urlParts.slice(urlParts.length - 2).join("/");
+
+    console.log(`Downloading from bucket: ${bucketName}, path: ${filePath}`);
+
+    const { data: fileBlob, error: downloadError } = await supabaseAdmin.storage
+      .from(bucketName)
+      .download(filePath);
+
+    if (downloadError) throw downloadError;
+    if (!fileBlob) throw new Error("Downloaded file is null.");
+
+    console.log("Initial file downloaded successfully.");
+
+    let originalText = "";
+
+    // Phân luồng xử lý dựa trên bucket chứa file
+    if (bucketName === "personal-uploads") {
+      // LUỒNG MỚI: XỬ LÝ FILE PDF/DOCX
+      console.log("Detected uploaded file. Extracting text...");
+      if (!CLOUDMERSIVE_API_KEY) {
+        throw new Error("CLOUDMERSIVE_API_KEY is not set.");
+      }
+
+      const formData = new FormData();
+      formData.append("inputFile", fileBlob);
+
+      // Gọi API của Cloudmersive để tự động nhận diện và chuyển đổi sang text
+      const extractResponse = await fetch(
+        "https://api.cloudmersive.com/convert/autodetect/to/txt",
+        {
+          method: "POST",
+          headers: { "Apikey": CLOUDMERSIVE_API_KEY },
+          body: formData,
+        },
+      );
+
+      if (!extractResponse.ok) {
+        const errorText = await extractResponse.text();
+        throw new Error(`Cloudmersive API failed: ${errorText}`);
+      }
+
+      originalText = await extractResponse.text();
+      console.log("Text extracted from file successfully.");
+    } else if (bucketName === "personal-texts") {
+      // LUỒNG CŨ: XỬ LÝ FILE .TXT TỪ VĂN BẢN DÁN VÀO
+      console.log("Detected pasted text. Reading content...");
+      originalText = await fileBlob.text();
+      console.log("Text loaded from .txt file successfully.");
+    } else {
+      throw new Error(`Unknown or unhandled bucket: ${bucketName}`);
     }
-    const originalText = await textResponse.text();
-    console.log("Text downloaded successfully.");
 
     // 4. (AI BƯỚC 1) Gọi Gemini để tạo tựa đề và mô tả
     const { title, description } = await generateTitleAndDescription(
