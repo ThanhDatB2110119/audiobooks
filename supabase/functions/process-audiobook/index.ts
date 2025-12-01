@@ -147,10 +147,11 @@ async function textToSpeech(text: string): Promise<Blob> {
 
   // 2. Gọi API TTS cho từng đoạn và thu thập dữ liệu audio dưới dạng Uint8Array
   const audioDataParts: Uint8Array[] = [];
-  for (let i = 0; i < textChunks.length; i++) {
-    console.log(`Processing audio chunk ${i + 1}/${textChunks.length}...`);
+  const chunksToProcess = textChunks.slice(0, 3); // Giới hạn xử lý tối đa 3 đoạn để thử nghiệm
+  for (let i = 0; i < chunksToProcess.length; i++) {
+    console.log(`Processing audio chunk ${i + 1}/${chunksToProcess.length}...`);
     const requestBody = {
-      input: { text: textChunks[i] },
+      input: { text: chunksToProcess[i] },
       voice: { languageCode: "vi-VN", name: "vi-VN-Chirp3-HD-Iapetus" },
       audioConfig: { audioEncoding: "MP3" },
     };

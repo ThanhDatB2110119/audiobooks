@@ -124,7 +124,7 @@ class PersonalDocumentRemoteDataSourceImpl
           );
 
       // 3. Lấy URL công khai của file vừa upload
-      final fileUrl = supabaseClient.storage.from('personal-uploads').getPublicUrl(storagePath);
+      final fileUrl = supabaseClient.storage.from('personal-files-uploads').getPublicUrl(storagePath);
       
       // 4. Chèn record mới vào bảng `personal_documents`
       final dataToInsert = {
