@@ -296,7 +296,7 @@ serve(async (req) => {
     let originalText = "";
 
     // Phân luồng xử lý dựa trên bucket chứa file
-    if (bucketName === "personal-uploads") {
+    if (bucketName === "personal-files-uploads") {
       // LUỒNG MỚI: XỬ LÝ FILE PDF/DOCX
       console.log("Detected uploaded file. Extracting text...");
       if (!CLOUDMERSIVE_API_KEY) {
