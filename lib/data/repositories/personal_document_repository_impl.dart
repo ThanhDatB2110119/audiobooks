@@ -37,14 +37,28 @@ class PersonalDocumentRepositoryImpl implements PersonalDocumentRepository {
       return Left(ServerFailure(e.message));
     }
   }
-@override
+
+  @override
   Future<Either<Failure, void>> createDocumentFromFile(File file) async {
     try {
       await remoteDataSource.createDocumentFromFile(file);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure( e.message));
+      return Left(ServerFailure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> deleteDocument(
+    PersonalDocumentEntity document,
+  ) async {
+    try {
+      await remoteDataSource.deleteDocument(document);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+
   // ===============================================================================
 }

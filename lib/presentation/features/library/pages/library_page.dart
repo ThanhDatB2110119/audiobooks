@@ -252,10 +252,51 @@ class _MyBookListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       child: ListTile(
-        leading: Icon(
-          Icons.history_edu,
-          size: 40,
-          color: Theme.of(context).colorScheme.primary,
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Nút xóa
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: Colors.red[400]),
+              tooltip: 'Xóa sách này',
+              onPressed: () async {
+                // Hiển thị dialog xác nhận
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Xác nhận xóa'),
+                    content: Text(
+                      'Bạn có chắc chắn muốn xóa "${document.title}" không? Hành động này không thể hoàn tác.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Hủy'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text(
+                          'Xóa',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                // Nếu người dùng xác nhận, gọi cubit để xóa
+                if (confirm == true) {
+                  context.read<LibraryCubit>().deleteDocument(document);
+                }
+              },
+            ),
+            // Icon cũ
+            Icon(
+              Icons.history_edu,
+              size: 30,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ],
         ),
         title: Text(
           document.title,
@@ -281,16 +322,15 @@ class _MyBookListItem extends StatelessWidget {
         ),
         onTap: isCompleted
             ? () {
-              // 1. Chuyển đổi toàn bộ danh sách PersonalDocumentEntity sang BookEntity
-                final bookEntities = allDocuments.map((doc) => doc.toBookEntity()).toList();
+                // 1. Chuyển đổi toàn bộ danh sách PersonalDocumentEntity sang BookEntity
+                final bookEntities = allDocuments
+                    .map((doc) => doc.toBookEntity())
+                    .toList();
 
                 // 2. Điều hướng đến PlayerPage, truyền vào danh sách đã chuyển đổi và index hiện tại
                 context.push(
                   '/player',
-                  extra: {
-                    'books': bookEntities,
-                    'index': currentIndex,
-                  },
+                  extra: {'books': bookEntities, 'index': currentIndex},
                 );
                 // TODO: Điều hướng đến PlayerPage khi sách đã hoàn thành
                 ScaffoldMessenger.of(context).showSnackBar(

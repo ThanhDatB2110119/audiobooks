@@ -2,6 +2,8 @@
 
 import 'dart:async';
 
+import 'package:audiobooks/domain/entities/personal_document_entity.dart';
+import 'package:audiobooks/domain/usecases/delete_document_usecase.dart';
 import 'package:audiobooks/domain/usecases/get_user_documents_usecase.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:bloc/bloc.dart';
@@ -11,10 +13,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 @injectable
 class LibraryCubit extends Cubit<LibraryState> {
   final GetUserDocumentsUsecase _getUserDocumentsUsecase;
+  final DeleteDocumentUsecase _deleteDocumentUsecase;
   final SupabaseClient _supabaseClient;
   RealtimeChannel? _realtimeChannel;
 
-  LibraryCubit(this._getUserDocumentsUsecase, this._supabaseClient)
+  LibraryCubit(this._getUserDocumentsUsecase, this._deleteDocumentUsecase, this._supabaseClient)
     : super(LibraryInitial()) {
     _listenToDocumentChanges();
   }
@@ -45,6 +48,20 @@ class LibraryCubit extends Cubit<LibraryState> {
           },
         )
         .subscribe(); // Hàm subscribe() bây giờ được gọi ở cuối
+  }
+
+  Future<void> deleteDocument(PersonalDocumentEntity document) async {
+    // Tạm thời có thể không cần emit state loading vì Realtime sẽ tự cập nhật
+    final result = await _deleteDocumentUsecase(document);
+    
+    // Nếu xóa thất bại, chúng ta có thể emit một state lỗi riêng để UI hiển thị SnackBar
+    result.fold(
+      (failure) => emit(LibraryError(failure.message)),
+      (_) {
+        // Xóa thành công, không cần làm gì cả. 
+        // Realtime sẽ nhận được sự kiện DELETE và tự động trigger `fetchUserDocuments`.
+      },
+    );
   }
 
   @override

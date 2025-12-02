@@ -14,5 +14,7 @@ abstract class PersonalDocumentRepository {
   /// Trả về void nếu thành công, hoặc Failure nếu thất bại.
   Future<Either<Failure, void>> createDocumentFromText(String text);
   Future<Either<Failure, void>> createDocumentFromFile(File file);
+   /// Xóa một tài liệu cá nhân, bao gồm cả các file liên quan trên Storage.
+  Future<Either<Failure, void>> deleteDocument(PersonalDocumentEntity document);
   // ========================================================================
 }

@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/error/exceptions.dart';
+import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:path/path.dart' as p;
 
 abstract class PersonalDocumentRemoteDataSource {
@@ -14,6 +15,7 @@ abstract class PersonalDocumentRemoteDataSource {
   // ======================= THÊM PHƯƠNG THỨC MỚI TẠI ĐÂY =======================
   Future<void> createDocumentFromText(String text);
   Future<void> createDocumentFromFile(File file);
+  Future<void> deleteDocument(PersonalDocumentEntity document);
   // ===========================================================================
 }
 
@@ -138,6 +140,58 @@ class PersonalDocumentRemoteDataSourceImpl
       };
 
       await supabaseClient.from('personal_documents').insert(dataToInsert);
+
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+  @override
+  Future<void> deleteDocument(PersonalDocumentEntity document) async {
+    try {
+      final List<String> pathsToDelete = [];
+
+      // Hàm helper để tách đường dẫn file từ URL đầy đủ
+      String? getPathFromUrl(String? url, String bucketName) {
+        if (url == null || !url.contains('/$bucketName/')) return null;
+        return url.split('/$bucketName/')[1];
+      }
+
+      // 1. Lấy đường dẫn của file text/pdf/docx gốc
+      final originalFilePath = getPathFromUrl(document.extractedTextUrl, 
+          document.sourceType == SourceType.text ? 'personal-texts' : 'personal-files-uploads');
+      if (originalFilePath != null) {
+        pathsToDelete.add(originalFilePath);
+      }
+      
+      // 2. Lấy đường dẫn của file audio đã tạo
+      final audioFilePath = getPathFromUrl(document.generatedAudioUrl, 'personal-audios');
+      if (audioFilePath != null) {
+        pathsToDelete.add(audioFilePath);
+      }
+
+      // 3. Xóa các file trên Storage (nếu có)
+      // Chúng ta sẽ xóa file từ cả 3 bucket để đảm bảo an toàn
+      if (pathsToDelete.isNotEmpty) {
+        print('Deleting files from storage: $pathsToDelete');
+        // Supabase cho phép xóa nhiều file cùng lúc trong MỘT bucket
+        // Chúng ta cần gọi riêng cho từng loại bucket
+        final textPath = pathsToDelete.firstWhere((p) => p.contains('.txt') || p.contains('.pdf') || p.contains('.docx'), orElse: () => '');
+        final audioPath = pathsToDelete.firstWhere((p) => p.contains('.mp3'), orElse: () => '');
+
+        if(textPath.isNotEmpty) {
+           final bucketName = document.sourceType == SourceType.text ? 'personal-texts' : 'personal-uploads';
+           await supabaseClient.storage.from(bucketName).remove([textPath]);
+        }
+        if(audioPath.isNotEmpty) {
+           await supabaseClient.storage.from('personal-audios').remove([audioPath]);
+        }
+      }
+
+      // 4. Sau khi xóa file thành công, xóa record trong database
+      await supabaseClient
+          .from('personal_documents')
+          .delete()
+          .eq('id', document.id);
 
     } catch (e) {
       throw ServerException(e.toString());
