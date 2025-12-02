@@ -50,16 +50,39 @@ class LibraryCubit extends Cubit<LibraryState> {
         .subscribe(); // Hàm subscribe() bây giờ được gọi ở cuối
   }
 
-  Future<void> deleteDocument(PersonalDocumentEntity document) async {
-    // Tạm thời có thể không cần emit state loading vì Realtime sẽ tự cập nhật
+Future<void> deleteDocument(PersonalDocumentEntity document) async {
+    // Lấy state hiện tại để có thể giữ lại danh sách trong khi chờ đợi
+    final currentState = state;
+    if (currentState is! LibraryLoaded) return; // Chỉ xóa khi đã có danh sách
+
+    // 1. Lạc quan: Xóa item khỏi UI ngay lập tức để có phản hồi nhanh
+    // Tạo một danh sách mới không chứa document cần xóa
+    final optimisticList = List<PersonalDocumentEntity>.from(currentState.myDocuments)
+      ..removeWhere((d) => d.id == document.id);
+      
+    // Cập nhật UI ngay với danh sách đã được lọc
+    emit(LibraryLoaded(myDocuments: optimisticList));
+
+    // 2. Gọi API để xóa trên backend
     final result = await _deleteDocumentUsecase(document);
-    
-    // Nếu xóa thất bại, chúng ta có thể emit một state lỗi riêng để UI hiển thị SnackBar
+
     result.fold(
-      (failure) => emit(LibraryError(failure.message)),
+      (failure) {
+        // 3a. Nếu xóa thất bại:
+        // - Hiển thị lỗi
+        emit(LibraryError(failure.message));
+        // - Khôi phục lại danh sách ban đầu để người dùng biết là đã thất bại
+        emit(LibraryLoaded(myDocuments: currentState.myDocuments)); 
+      },
       (_) {
-        // Xóa thành công, không cần làm gì cả. 
-        // Realtime sẽ nhận được sự kiện DELETE và tự động trigger `fetchUserDocuments`.
+        // 3b. Nếu xóa thành công:
+        // - Phát ra state thành công để hiển thị SnackBar
+        emit(LibraryActionSuccess(
+          message: 'Đã xóa thành công!',
+          currentDocuments: optimisticList, // Truyền danh sách mới
+        ));
+        // - Giữ nguyên state LibraryLoaded với danh sách đã được lọc
+        emit(LibraryLoaded(myDocuments: optimisticList));
       },
     );
   }

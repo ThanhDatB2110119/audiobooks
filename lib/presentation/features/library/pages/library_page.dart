@@ -81,7 +81,30 @@ class _MyBooksTabContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => GetIt.instance<LibraryCubit>()..fetchUserDocuments(),
-      child: const MyBooksTabView(),
+      child: BlocListener<LibraryCubit, LibraryState>(
+        listener: (context, state) {
+          // Lắng nghe state thành công và hiển thị SnackBar
+          if (state is LibraryActionSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+          // Bạn cũng có thể bắt state LibraryError ở đây để hiển thị snackbar lỗi
+          // nếu không muốn màn hình chuyển sang giao diện lỗi hoàn toàn.
+          else if (state is LibraryError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: const MyBooksTabView(),
+      ),
     );
   }
 }

@@ -32,3 +32,16 @@ class LibraryError extends LibraryState {
   @override
   List<Object> get props => [message];
 }
+class LibraryActionSuccess extends LibraryState {
+  final String message;
+  // Giữ lại danh sách hiện tại để UI không bị gián đoạn
+  final List<PersonalDocumentEntity> currentDocuments; 
+
+  const LibraryActionSuccess({
+    required this.message,
+    required this.currentDocuments,
+  });
+
+  @override
+  List<Object> get props => [message, currentDocuments];
+}
