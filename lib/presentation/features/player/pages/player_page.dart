@@ -278,63 +278,136 @@ class _PlayerPageState extends State<PlayerPage> {
           );
         }
         final isPlaying = state.status == PlayerStatus.playing;
-        return Row(
-          // Sử dụng MainAxisAlignment.spaceAround để phân bổ không gian đều
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Nút Replay
-            IconButton(
-              icon: const Icon(Icons.replay_circle_filled, size: 32.0),
-              tooltip: 'Phát lại từ đầu',
-              onPressed: () => _playerCubit.replay(),
-            ),
-
-            // Nút Previous
-            IconButton(
-              icon: const Icon(Icons.skip_previous, size: 40.0),
-              onPressed: currentIndex > 0 ? () => _changeTrack(-1) : null,
-            ),
-
-            // Nút Play/Pause
-            IconButton(
-              icon: Icon(
-                isPlaying
-                    ? Icons.pause_circle_filled
-                    : Icons.play_circle_filled,
-                size: 70.0,
-                color: Theme.of(context).colorScheme.primary,
+        // ... trong hàm _buildPlayerControls ...
+        return FittedBox(
+          // ======================= THAY ĐỔI 1: BỌC ROW TRONG FITTEDBOX =======================
+          // FittedBox sẽ đảm bảo Row và các nút bên trong không bao giờ bị overflow.
+          // Nó sẽ tự động scale nhỏ mọi thứ lại nếu cần.
+          fit: BoxFit.scaleDown, // Đảm bảo nó chỉ scale nhỏ, không phóng to
+          // =================================================================================
+          child: Row(
+            // Sử dụng MainAxisAlignment.center và SizedBox để kiểm soát khoảng cách chính xác
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Nút Replay
+              IconButton(
+                icon: const Icon(Icons.replay, size: 28.0),
+                tooltip: 'Phát lại từ đầu',
+                onPressed: () => _playerCubit.replay(),
               ),
-              onPressed: () {
-                if (isPlaying) {
-                  _playerCubit.pause();
-                } else {
-                  _playerCubit.play();
-                }
-              },
-            ),
 
-            // Nút Next
-            IconButton(
-              icon: const Icon(Icons.skip_next, size: 40.0),
-              onPressed: currentIndex < widget.books.length - 1
-                  ? () => _changeTrack(1)
-                  : null,
-            ),
-
-            // Nút Placeholder để cân bằng.
-            // Chúng ta sẽ dùng Opacity để làm cho nó vô hình nhưng vẫn chiếm không gian.
-            Opacity(
-              opacity: 0.0,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.help,
-                  size: 32.0,
-                ), // Cùng kích thước với nút Replay
-                onPressed: null, // Vô hiệu hóa nút
+              // Nút Previous
+              IconButton(
+                icon: const Icon(Icons.skip_previous, size: 36.0),
+                onPressed: currentIndex > 0 ? () => _changeTrack(-1) : null,
               ),
-            ),
-          ],
+
+              // Thêm SizedBox để tạo khoảng cách
+              const SizedBox(width: 16),
+
+              // Nút Play/Pause
+              IconButton(
+                iconSize: 64.0, // Đặt kích thước ở đây
+                icon: Icon(
+                  isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: () {
+                  if (isPlaying) {
+                    _playerCubit.pause();
+                  } else {
+                    _playerCubit.play();
+                  }
+                },
+              ),
+
+              // Thêm SizedBox để tạo khoảng cách
+              const SizedBox(width: 16),
+
+              // Nút Next
+              IconButton(
+                icon: const Icon(Icons.skip_next, size: 36.0),
+                onPressed: currentIndex < widget.books.length - 1
+                    ? () => _changeTrack(1)
+                    : null,
+              ),
+
+              // Nút Speed
+              IconButton(
+                icon: const Icon(Icons.speed, size: 28.0),
+                tooltip: 'Thay đổi tốc độ',
+                onPressed: () {
+                  _showSpeedSelector(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Hiển thị một bottom sheet cho phép người dùng chọn tốc độ phát.
+  void _showSpeedSelector(BuildContext buildContext) {
+    // Lấy state hiện tại từ cubit
+    final cubit = buildContext.read<PlayerCubit>();
+    final currentSpeed = cubit.state.speed;
+    final speedOptions = [1.0, 1.25, 1.5, 1.75, 2.0];
+
+    showModalBottomSheet(
+      context: buildContext,
+      // Hình dạng bo tròn ở góc trên
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Chiều cao vừa đủ nội dung
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tốc độ phát',
+                style: Theme.of(buildContext).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              // Dùng Wrap để các lựa chọn tự động xuống hàng nếu không đủ chỗ
+              Wrap(
+                spacing: 12.0, // Khoảng cách ngang
+                runSpacing: 12.0, // Khoảng cách dọc
+                children: speedOptions.map((speed) {
+                  final isSelected = currentSpeed == speed;
+                  return ChoiceChip(
+                    label: Text('${speed}x'),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        cubit.setSpeed(speed);
+                        Navigator.of(
+                          sheetContext,
+                        ).pop(); // Đóng bottom sheet sau khi chọn
+                      }
+                    },
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? Theme.of(buildContext).colorScheme.onPrimary
+                          : Theme.of(buildContext).colorScheme.onSurface,
+                    ),
+                    selectedColor: Theme.of(buildContext).colorScheme.primary,
+                    backgroundColor: Theme.of(
+                      buildContext,
+                    ).colorScheme.surfaceVariant,
+                    pressElevation: 5,
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     );

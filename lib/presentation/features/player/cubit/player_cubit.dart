@@ -13,6 +13,7 @@ class PlayerCubit extends Cubit<PlayerState> {
   StreamSubscription? _durationSubscription;
   StreamSubscription? _positionSubscription;
   StreamSubscription? _playerStateSubscription;
+  StreamSubscription? _speedSubscription;
 
   PlayerCubit(this._audioPlayer) : super(const PlayerState()) {
     _listenToPlayerChanges();
@@ -57,6 +58,9 @@ class PlayerCubit extends Cubit<PlayerState> {
     _positionSubscription = _audioPlayer.positionStream.listen((position) {
       emit(state.copyWith(position: position));
     });
+    _speedSubscription = _audioPlayer.speedStream.listen((speed) {
+      emit(state.copyWith(speed: speed));
+    });
   }
 
   // ======================= THAY ĐỔI 1: CẬP NHẬT PHƯƠNG THỨC loadAudio =======================
@@ -96,6 +100,10 @@ class PlayerCubit extends Cubit<PlayerState> {
         ),
       );
     }
+  }
+
+  Future<void> setSpeed(double speed) async {
+    await _audioPlayer.setSpeed(speed);
   }
   // ========================================================================================
 
@@ -143,6 +151,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
+    _speedSubscription?.cancel();
 
     return super.close();
   }
