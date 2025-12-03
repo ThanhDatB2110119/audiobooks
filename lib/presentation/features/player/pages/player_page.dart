@@ -280,7 +280,6 @@ class _PlayerPageState extends State<PlayerPage> {
         final isPlaying = state.status == PlayerStatus.playing;
         // ... trong hàm _buildPlayerControls ...
         return FittedBox(
-          // ======================= THAY ĐỔI 1: BỌC ROW TRONG FITTEDBOX =======================
           // FittedBox sẽ đảm bảo Row và các nút bên trong không bao giờ bị overflow.
           // Nó sẽ tự động scale nhỏ mọi thứ lại nếu cần.
           fit: BoxFit.scaleDown, // Đảm bảo nó chỉ scale nhỏ, không phóng to
