@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:audiobooks/domain/usecases/create_document_from_file_usecase.dart';
 import 'package:audiobooks/domain/usecases/create_document_from_text_usecase.dart';
+import 'package:audiobooks/domain/usecases/create_document_from_url_usecase.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -12,9 +13,10 @@ import 'package:injectable/injectable.dart';
 class CreatorCubit extends Cubit<CreatorState> {
   final CreateDocumentFromTextUsecase createDocumentFromTextUsecase;
   final CreateDocumentFromFileUsecase createDocumentFromFileUsecase;
+  final CreateDocumentFromUrlUsecase createDocumentFromUrlUsecase;
   // ... inject các usecase khác sau này
 
-  CreatorCubit(this.createDocumentFromTextUsecase, this.createDocumentFromFileUsecase) : super(CreatorInitial());
+  CreatorCubit(this.createDocumentFromTextUsecase, this.createDocumentFromFileUsecase, this.createDocumentFromUrlUsecase) : super(CreatorInitial());
 
   Future<void> createFromText(String text) async {
     emit(CreatorLoading()); // Báo cho UI biết là đang xử lý
@@ -32,6 +34,15 @@ class CreatorCubit extends Cubit<CreatorState> {
     result.fold(
       (failure) => emit(CreatorError(failure.message)),
       (_) => emit(CreatorSuccess("File của bạn đã được gửi đi và đang được xử lý!")),
+    );
+  }
+
+  Future<void> createFromUrl(String url) async {
+    emit(CreatorLoading());
+    final result = await createDocumentFromUrlUsecase(url);
+    result.fold(
+      (failure) => emit(CreatorError(failure.message)),
+      (_) => emit(CreatorSuccess("Link của bạn đã được gửi đi và đang được xử lý!")),
     );
   }
 }

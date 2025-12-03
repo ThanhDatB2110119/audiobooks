@@ -16,6 +16,7 @@ abstract class PersonalDocumentRemoteDataSource {
   Future<void> createDocumentFromText(String text);
   Future<void> createDocumentFromFile(File file);
   Future<void> deleteDocument(PersonalDocumentEntity document);
+  Future<void> createDocumentFromUrl(String url);
   // ===========================================================================
 }
 
@@ -53,6 +54,30 @@ class PersonalDocumentRemoteDataSourceImpl
     }
   }
 
+@override
+  Future<void> createDocumentFromUrl(String url) async {
+    try {
+      final user = supabaseClient.auth.currentUser;
+      if (user == null) throw ServerException( 'Người dùng chưa đăng nhập');
+
+      // Chèn record mới vào bảng `personal_documents`
+      // Server sẽ tự xử lý việc tải và trích xuất text từ URL này
+      final dataToInsert = {
+        'user_id': user.id,
+        'title': 'Đang xử lý link: ${url.substring(0, 50)}...', // Tiêu đề tạm thời
+        'source_type': 'url', // Loại nguồn mới: url
+        // Lưu URL vào cột original_source
+        'original_source': url, 
+        // extracted_text_url sẽ được server điền vào sau khi trích xuất
+        'status': 'pending',
+      };
+
+      await supabaseClient.from('personal_documents').insert(dataToInsert);
+
+    } catch (e) {
+      throw ServerException( e.toString());
+    }
+  }
   @override
   Future<void> createDocumentFromText(String text) async {
     try {

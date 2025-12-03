@@ -60,5 +60,15 @@ class PersonalDocumentRepositoryImpl implements PersonalDocumentRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> createDocumentFromUrl(String url) async {
+    try {
+      await remoteDataSource.createDocumentFromUrl(url);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+
   // ===============================================================================
 }

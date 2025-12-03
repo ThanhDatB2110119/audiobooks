@@ -19,11 +19,12 @@ Future<String?> showInputDialog({
   String confirmButtonText = 'Xác nhận',
   String cancelButtonText = 'Hủy',
   String initialValue = '',
+  String? Function(String?)? validator,
 }) {
   return showDialog<String?>(
     context: context,
     // Ngăn người dùng đóng dialog bằng cách nhấn ra ngoài
-    barrierDismissible: false, 
+    barrierDismissible: false,
     builder: (BuildContext context) {
       // Sử dụng một StatefulWidget riêng để quản lý TextEditingController
       return _InputDialogContent(
@@ -32,6 +33,7 @@ Future<String?> showInputDialog({
         confirmButtonText: confirmButtonText,
         cancelButtonText: cancelButtonText,
         initialValue: initialValue,
+        validator: validator,
       );
     },
   );
@@ -44,6 +46,7 @@ class _InputDialogContent extends StatefulWidget {
   final String confirmButtonText;
   final String cancelButtonText;
   final String initialValue;
+  final String? Function(String?)? validator;
 
   const _InputDialogContent({
     required this.title,
@@ -51,6 +54,7 @@ class _InputDialogContent extends StatefulWidget {
     required this.confirmButtonText,
     required this.cancelButtonText,
     required this.initialValue,
+    this.validator,
   });
 
   @override
@@ -60,7 +64,7 @@ class _InputDialogContent extends StatefulWidget {
 class _InputDialogContentState extends State<_InputDialogContent> {
   // Controller để lấy và quản lý text từ TextField
   late final TextEditingController _textController;
-
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -78,10 +82,18 @@ class _InputDialogContentState extends State<_InputDialogContent> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
-      content: TextField(
-        controller: _textController,
-        decoration: InputDecoration(hintText: widget.hintText),
-        autofocus: true, // Tự động focus vào trường nhập liệu khi dialog mở ra
+      content: Form(
+        key: _formKey, // Gán key cho Form
+        child: TextFormField(
+          // Đổi TextField thành TextFormField
+          controller: _textController,
+          decoration: InputDecoration(hintText: widget.hintText),
+          autofocus: true,
+          validator: widget
+              .validator, // Sử dụng validator được truyền vào từ widget cha
+          autovalidateMode: AutovalidateMode
+              .onUserInteraction, // Bắt đầu validate ngay khi người dùng gõ
+        ),
       ),
       actions: <Widget>[
         // Nút Hủy
@@ -96,8 +108,9 @@ class _InputDialogContentState extends State<_InputDialogContent> {
         ElevatedButton(
           child: Text(widget.confirmButtonText),
           onPressed: () {
-            // Đóng dialog và trả về giá trị của text controller
-            Navigator.of(context).pop(_textController.text);
+            if (_formKey.currentState?.validate() ?? false) {
+              Navigator.of(context).pop(_textController.text);
+            }
           },
         ),
       ],
