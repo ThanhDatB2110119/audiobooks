@@ -278,6 +278,36 @@ async function textToSpeech(text: string): Promise<Blob> {
   // 4. Tạo Blob từ file đã ghép
   return new Blob([concatenatedMp3.buffer], { type: "audio/mpeg" });
 }
+/** Sử dụng Gemini để trích xuất văn bản từ hình ảnh.
+ */
+async function extractTextFromImage(imageBlob: Blob): Promise<string> {
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not set in environment variables.");
+  }
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  // Sử dụng model có khả năng nhận diện hình ảnh
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+
+  // Chuyển đổi Blob thành chuỗi Base64
+  const image_bytes = await imageBlob.arrayBuffer();
+  const base64Image = btoa(String.fromCharCode(...new Uint8Array(image_bytes)));
+
+  const prompt =
+    "Trích xuất tất cả văn bản có trong hình ảnh này. Chỉ trả về phần văn bản, không thêm bất kỳ lời giải thích nào. Loại bỏ các thành phần không liên quan đến nội dung văn bản.";
+
+  const imagePart = {
+    inlineData: {
+      mimeType: imageBlob.type, // e.g., "image/png" or "image/jpeg"
+      data: base64Image,
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const response = result.response;
+  const text = response.text();
+
+  return text;
+}
 // --- MAIN FUNCTION ---
 
 serve(async (req) => {
@@ -386,8 +416,20 @@ serve(async (req) => {
 
       console.log("Initial file downloaded successfully.");
 
-      // Phân luồng phụ dựa trên bucket để trích xuất text (logic này giữ nguyên)
-      if (bucketName === "personal-files-uploads") {
+      // Lấy kiểu MIME của file để phân biệt
+      const fileMimeType = fileBlob.type;
+      console.log(`Detected file MIME type: ${fileMimeType}`);
+
+      // 1. Ưu tiên kiểm tra nếu là file ảnh
+      if (fileMimeType.startsWith("image/")) {
+        // --- LUỒNG MỚI: XỬ LÝ ẢNH ---
+        console.log(
+          "Detected image file. Extracting text using Gemini Vision...",
+        );
+        rawText = await extractTextFromImage(fileBlob); // Gọi hàm helper mới
+        console.log("Text extracted from image successfully.");
+      } // Phân luồng phụ dựa trên bucket để trích xuất text (logic này giữ nguyên)
+      else if (bucketName === "personal-files-uploads") {
         console.log(
           "Detected uploaded file. Extracting text via Cloudmersive...",
         );
