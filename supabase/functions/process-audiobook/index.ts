@@ -286,7 +286,7 @@ async function extractTextFromImage(imageBlob: Blob): Promise<string> {
   }
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   // Sử dụng model có khả năng nhận diện hình ảnh
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
   // Chuyển đổi Blob thành chuỗi Base64
   const image_bytes = await imageBlob.arrayBuffer();
