@@ -36,7 +36,8 @@
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { extract } from "@extractus/article-extractor";
+import { JSDOM } from "jsdom";
+import { Readability } from "readability";
 
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -320,25 +321,39 @@ serve(async (req) => {
 
     // 3. Tải nội dung text từ Supabase Storage
     if (sourceType === "url") {
-      // --- LUỒNG MỚI: XỬ LÝ TỪ URL ---
       console.log(`Extracting content from URL: ${originalSource}`);
       try {
-        const article = await extract(originalSource);
-        if (!article || !article.content) {
-          throw new Error("Could not extract main content from the URL.");
+        // 1. Tải HTML từ URL
+        const response = await fetch(originalSource);
+        const html = await response.text();
+
+        // 2. Tạo một môi trường DOM ảo
+        const doc = new JSDOM(html, { url: originalSource });
+
+        // 3. Sử dụng Readability để trích xuất bài viết
+        const reader = new Readability(doc.window.document);
+        const article = reader.parse();
+
+        if (!article || !article.textContent) {
+          throw new Error(
+            "Could not extract main content from the URL using Readability.",
+          );
         }
-        // Chuyển đổi HTML của nội dung bài viết thành text thuần
-        rawText = article.content.replace(/<[^>]*>/g, "\n").replace(
-          /\s{2,}/g,
-          " ",
-        ).trim();
+
+        // article.textContent đã là text thuần, không cần xóa HTML
+        rawText = article.textContent;
         console.log("Content extracted from URL successfully.");
       } catch (extractError) {
-        const errorMessage = extractError instanceof Error
-          ? extractError.message
-          : String(extractError);
-        throw new Error(`Failed to extract article: ${errorMessage}`);
+        // Kiểm tra xem extractError có phải là một instance của Error hay không
+        if (extractError instanceof Error) {
+          // Nếu đúng, chúng ta có thể truy cập .message một cách an toàn
+          throw new Error(`Failed to extract article: ${extractError.message}`);
+        }
+        // Nếu không, chúng ta chuyển đổi nó thành chuỗi để báo lỗi
+        throw new Error(`Failed to extract article: ${String(extractError)}`);
       }
+
+      //*** */
     } else if (sourceType === "file") {
       // --- LUỒNG CŨ: XỬ LÝ TỪ FILE (PDF/DOCX/TXT) ---
       // Kiểm tra xem có URL file đã upload không
@@ -457,7 +472,14 @@ serve(async (req) => {
       await updateDocumentStatus(supabaseAdmin, documentId, "error");
     }
 
-    return new Response(JSON.stringify({ message: error }), {
+    let errorMessage = "An unknown error occurred.";
+    // Kiểm tra xem error có phải là một instance của Error hay không
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    // Trả về errorMessage đã được xử lý an toàn
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
