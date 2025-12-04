@@ -21,14 +21,17 @@ import '../../data/datasources/auth_remote_data_source.dart' as _i716;
 import '../../data/datasources/book_remote_data_source.dart' as _i971;
 import '../../data/datasources/personal_document_remote_data_source.dart'
     as _i992;
+import '../../data/datasources/user_profile_remote_data_source.dart' as _i493;
 import '../../data/repositories/auth_repository_impl.dart' as _i895;
 import '../../data/repositories/book_repository_impl.dart' as _i83;
 import '../../data/repositories/mock_book_repository_impl.dart' as _i1005;
 import '../../data/repositories/personal_document_repository_impl.dart'
     as _i422;
+import '../../data/repositories/user_profile_repository_impl.dart' as _i365;
 import '../../domain/repositories/auth_repository.dart' as _i1073;
 import '../../domain/repositories/book_repository.dart' as _i135;
 import '../../domain/repositories/personal_document_repository.dart' as _i538;
+import '../../domain/repositories/user_profile_repository.dart' as _i587;
 import '../../domain/usecases/create_document_from_file_usecase.dart' as _i342;
 import '../../domain/usecases/create_document_from_text_usecase.dart' as _i631;
 import '../../domain/usecases/create_document_from_url_usecase.dart' as _i218;
@@ -36,8 +39,10 @@ import '../../domain/usecases/delete_document_usecase.dart' as _i45;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
 import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
 import '../../domain/usecases/get_user_documents_usecase.dart' as _i1060;
+import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
+import '../../domain/usecases/update_user_profile_usecase.dart' as _i733;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
 import '../../presentation/features/book_detail/cubit/book_details_cubit.dart'
     as _i970;
@@ -45,6 +50,8 @@ import '../../presentation/features/creator/cubit/creator_cubit.dart' as _i2;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
 import '../../presentation/features/library/cubit/library_cubit.dart' as _i592;
 import '../../presentation/features/player/cubit/player_cubit.dart' as _i949;
+import '../../presentation/features/settings/cubit/settings_cubit.dart'
+    as _i350;
 import 'register_module.dart' as _i291;
 
 const String _dev = 'dev';
@@ -65,6 +72,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i706.Uuid>(() => registerModule.uuid);
   gh.lazySingleton<_i971.BookRemoteDataSource>(
     () => _i971.BookRemoteDataSourceImpl(gh<_i454.SupabaseClient>()),
+  );
+  gh.lazySingleton<_i493.UserProfileRemoteDataSource>(
+    () => _i493.UserProfileRemoteDataSourceImpl(gh<_i454.SupabaseClient>()),
   );
   gh.lazySingleton<_i992.PersonalDocumentRemoteDataSource>(
     () => _i992.PersonalDocumentRemoteDataSourceImpl(
@@ -87,10 +97,21 @@ _i174.GetIt init(
       remoteDataSource: gh<_i716.AuthRemoteDataSource>(),
     ),
   );
+  gh.lazySingleton<_i587.UserProfileRepository>(
+    () => _i365.UserProfileRepositoryImpl(
+      gh<_i493.UserProfileRemoteDataSource>(),
+    ),
+  );
   gh.lazySingleton<_i538.PersonalDocumentRepository>(
     () => _i422.PersonalDocumentRepositoryImpl(
       gh<_i992.PersonalDocumentRemoteDataSource>(),
     ),
+  );
+  gh.lazySingleton<_i629.GetUserProfileUsecase>(
+    () => _i629.GetUserProfileUsecase(gh<_i587.UserProfileRepository>()),
+  );
+  gh.lazySingleton<_i733.UpdateUserProfileUsecase>(
+    () => _i733.UpdateUserProfileUsecase(gh<_i587.UserProfileRepository>()),
   );
   gh.lazySingleton<_i971.GoogleSignInUseCase>(
     () => _i971.GoogleSignInUseCase(gh<_i1073.AuthRepository>()),
@@ -132,12 +153,18 @@ _i174.GetIt init(
       gh<_i538.PersonalDocumentRepository>(),
     ),
   );
+  gh.lazySingleton<_i45.DeleteDocumentUsecase>(
+    () => _i45.DeleteDocumentUsecase(gh<_i538.PersonalDocumentRepository>()),
+  );
   gh.lazySingleton<_i1060.GetUserDocumentsUsecase>(
     () =>
         _i1060.GetUserDocumentsUsecase(gh<_i538.PersonalDocumentRepository>()),
   );
-  gh.lazySingleton<_i45.DeleteDocumentUsecase>(
-    () => _i45.DeleteDocumentUsecase(gh<_i538.PersonalDocumentRepository>()),
+  gh.factory<_i350.SettingsCubit>(
+    () => _i350.SettingsCubit(
+      gh<_i629.GetUserProfileUsecase>(),
+      gh<_i733.UpdateUserProfileUsecase>(),
+    ),
   );
   gh.factory<_i592.LibraryCubit>(
     () => _i592.LibraryCubit(

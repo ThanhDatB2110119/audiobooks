@@ -1,4 +1,4 @@
-// 
+//
 // Path: domain/repositories/user_profile_repository.dart
 
 import 'package:audiobooks/core/error/failures.dart';
@@ -21,7 +21,7 @@ abstract class UserProfileRepository {
   /// [voiceId]: Một chuỗi định danh cho giọng đọc được chọn (ví dụ: 'google-vi-female-a').
   ///
   /// Trả về [void] nếu cập nhật thành công, hoặc [Failure] nếu có lỗi.
-  Future<Either<Failure, void>> updatePreferredVoice(String voiceId);
+  // Future<Either<Failure, void>> updatePreferredVoice(String voiceId);
 
   /// Cập nhật các thông tin khác của hồ sơ người dùng.
   ///
@@ -29,8 +29,5 @@ abstract class UserProfileRepository {
   /// [avatarUrl]: URL ảnh đại diện mới (tùy chọn).
   ///
   /// Trả về [UserProfileEntity] đã được cập nhật nếu thành công, hoặc [Failure] nếu có lỗi.
-  Future<Either<Failure, UserProfileEntity>> updateUserProfile({
-    String? fullName,
-    String? avatarUrl,
-  });
+  Future<Either<Failure, void>> updateUserProfile(UserProfileEntity profile);
 }
