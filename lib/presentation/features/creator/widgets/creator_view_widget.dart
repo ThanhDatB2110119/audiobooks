@@ -1,3 +1,4 @@
+import 'package:audiobooks/presentation/features/creator/widgets/image_source_selector_button.dart';
 import 'package:flutter/material.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_cubit.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_state.dart';
@@ -243,30 +244,10 @@ class CreatorViewState extends State<CreatorView> {
                                   ),
                                 ),
                               ),
-                              // Nút Khung 4
-                              ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.textSlash,
-                                  color: Colors.black,
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.9,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  padding: const EdgeInsets.all(8.0),
-                                ),
-                                label: const Text(
-                                  'Khung 4',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
+
+                              
+                              // Nút chọn ảnh
+                              const ImageSourceSelectorButton(),
                             ],
                           ),
                         ),
