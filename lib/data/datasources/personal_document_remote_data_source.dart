@@ -54,30 +54,34 @@ class PersonalDocumentRemoteDataSourceImpl
     }
   }
 
-@override
+  @override
   Future<void> createDocumentFromUrl(String url) async {
     try {
       final user = supabaseClient.auth.currentUser;
-      if (user == null) throw ServerException( 'Người dùng chưa đăng nhập');
+      if (user == null) throw ServerException('Người dùng chưa đăng nhập');
 
       // Chèn record mới vào bảng `personal_documents`
       // Server sẽ tự xử lý việc tải và trích xuất text từ URL này
       final dataToInsert = {
         'user_id': user.id,
-        'title': 'Đang xử lý link: ${url.substring(0, 50)}...', // Tiêu đề tạm thời
+        'title':
+            'Đang xử lý link: ${url.substring(0, 50)}...', // Tiêu đề tạm thời
         'source_type': 'url', // Loại nguồn mới: url
         // Lưu URL vào cột original_source
-        'original_source': url, 
+        'original_source': url,
+        'extracted_text_url': null,
+        'generated_audio_url': null,
+        'description': null,
         // extracted_text_url sẽ được server điền vào sau khi trích xuất
         'status': 'pending',
       };
 
       await supabaseClient.from('personal_documents').insert(dataToInsert);
-
     } catch (e) {
-      throw ServerException( e.toString());
+      throw ServerException(e.toString());
     }
   }
+
   @override
   Future<void> createDocumentFromText(String text) async {
     try {
@@ -130,6 +134,7 @@ class PersonalDocumentRemoteDataSourceImpl
       throw ServerException(e.toString());
     }
   }
+
   @override
   Future<void> createDocumentFromFile(File file) async {
     try {
@@ -141,35 +146,36 @@ class PersonalDocumentRemoteDataSourceImpl
       final fileExtension = p.extension(file.path);
       final uniqueFileName = '${uuid.v4()}$fileExtension';
       final storagePath = '${user.id}/$uniqueFileName';
-      
+
       // 2. Upload file gốc lên bucket 'personal-files-uploads'
       // **QUAN TRỌNG**: Bạn cần tạo một bucket mới tên là `personal-files-uploads`
       // và thiết lập Policy cho nó giống như cách bạn đã làm với `personal-texts`.
-      await supabaseClient.storage.from('personal-files-uploads').upload(
-            storagePath,
-            file,
-          );
+      await supabaseClient.storage
+          .from('personal-files-uploads')
+          .upload(storagePath, file);
 
       // 3. Lấy URL công khai của file vừa upload
-      final fileUrl = supabaseClient.storage.from('personal-files-uploads').getPublicUrl(storagePath);
-      
+      final fileUrl = supabaseClient.storage
+          .from('personal-files-uploads')
+          .getPublicUrl(storagePath);
+
       // 4. Chèn record mới vào bảng `personal_documents`
       final dataToInsert = {
         'user_id': user.id,
         'title': 'Đang xử lý file: $originalFileName',
         'source_type': 'file',
         // Lưu URL của file gốc vào extracted_text_url để server xử lý
-        'original_source': originalFileName, 
+        'original_source': originalFileName,
         'extracted_text_url': fileUrl,
         'status': 'pending',
       };
 
       await supabaseClient.from('personal_documents').insert(dataToInsert);
-
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
+
   @override
   Future<void> deleteDocument(PersonalDocumentEntity document) async {
     try {
@@ -182,14 +188,21 @@ class PersonalDocumentRemoteDataSourceImpl
       }
 
       // 1. Lấy đường dẫn của file text/pdf/docx gốc
-      final originalFilePath = getPathFromUrl(document.extractedTextUrl, 
-          document.sourceType == SourceType.text ? 'personal-texts' : 'personal-files-uploads');
+      final originalFilePath = getPathFromUrl(
+        document.extractedTextUrl,
+        document.sourceType == SourceType.text
+            ? 'personal-texts'
+            : 'personal-files-uploads',
+      );
       if (originalFilePath != null) {
         pathsToDelete.add(originalFilePath);
       }
-      
+
       // 2. Lấy đường dẫn của file audio đã tạo
-      final audioFilePath = getPathFromUrl(document.generatedAudioUrl, 'personal-audios');
+      final audioFilePath = getPathFromUrl(
+        document.generatedAudioUrl,
+        'personal-audios',
+      );
       if (audioFilePath != null) {
         pathsToDelete.add(audioFilePath);
       }
@@ -200,15 +213,26 @@ class PersonalDocumentRemoteDataSourceImpl
         print('Deleting files from storage: $pathsToDelete');
         // Supabase cho phép xóa nhiều file cùng lúc trong MỘT bucket
         // Chúng ta cần gọi riêng cho từng loại bucket
-        final textPath = pathsToDelete.firstWhere((p) => p.contains('.txt') || p.contains('.pdf') || p.contains('.docx'), orElse: () => '');
-        final audioPath = pathsToDelete.firstWhere((p) => p.contains('.mp3'), orElse: () => '');
+        final textPath = pathsToDelete.firstWhere(
+          (p) =>
+              p.contains('.txt') || p.contains('.pdf') || p.contains('.docx'),
+          orElse: () => '',
+        );
+        final audioPath = pathsToDelete.firstWhere(
+          (p) => p.contains('.mp3'),
+          orElse: () => '',
+        );
 
-        if(textPath.isNotEmpty) {
-           final bucketName = document.sourceType == SourceType.text ? 'personal-texts' : 'personal-uploads';
-           await supabaseClient.storage.from(bucketName).remove([textPath]);
+        if (textPath.isNotEmpty) {
+          final bucketName = document.sourceType == SourceType.text
+              ? 'personal-texts'
+              : 'personal-uploads';
+          await supabaseClient.storage.from(bucketName).remove([textPath]);
         }
-        if(audioPath.isNotEmpty) {
-           await supabaseClient.storage.from('personal-audios').remove([audioPath]);
+        if (audioPath.isNotEmpty) {
+          await supabaseClient.storage.from('personal-audios').remove([
+            audioPath,
+          ]);
         }
       }
 
@@ -217,7 +241,6 @@ class PersonalDocumentRemoteDataSourceImpl
           .from('personal_documents')
           .delete()
           .eq('id', document.id);
-
     } catch (e) {
       throw ServerException(e.toString());
     }

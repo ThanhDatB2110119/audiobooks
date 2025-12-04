@@ -299,11 +299,10 @@ serve(async (req) => {
     const originalSource = record.original_source;
     const userId = record.user_id;
 
-    if (
-      !documentId || !uploadedFileUrl || !userId || !sourceType ||
-      !originalSource
-    ) {
-      throw new Error("Missing required data in webhook payload.");
+    if (!documentId || !userId || !sourceType) {
+      throw new Error(
+        "Missing core data in webhook payload (id, user_id, or source_type).",
+      );
     }
 
     console.log(`Processing document ID: ${documentId}`);
