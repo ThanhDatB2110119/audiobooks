@@ -36,7 +36,7 @@
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { JSDOM } from "jsdom";
+import { DOMParser } from "deno-dom";
 import { Readability } from "readability";
 
 // Lấy các biến môi trường
@@ -325,13 +325,22 @@ serve(async (req) => {
       try {
         // 1. Tải HTML từ URL
         const response = await fetch(originalSource);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch URL with status: ${response.status}`,
+          );
+        }
         const html = await response.text();
 
         // 2. Tạo một môi trường DOM ảo
-        const doc = new JSDOM(html, { url: originalSource });
+        const doc = new DOMParser().parseFromString(html, "text/html");
+
+        if (!doc) {
+          throw new Error("Failed to parse HTML document.");
+        }
 
         // 3. Sử dụng Readability để trích xuất bài viết
-        const reader = new Readability(doc.window.document);
+        const reader = new Readability(doc);
         const article = reader.parse();
 
         if (!article || !article.textContent) {
@@ -341,7 +350,7 @@ serve(async (req) => {
         }
 
         // article.textContent đã là text thuần, không cần xóa HTML
-        rawText = article.textContent;
+        rawText = article.textContent.trim();
         console.log("Content extracted from URL successfully.");
       } catch (extractError) {
         // Kiểm tra xem extractError có phải là một instance của Error hay không
