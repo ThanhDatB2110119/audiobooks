@@ -36,6 +36,7 @@
 import { serve } from "std/http/server.ts";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { extract } from "@extractus/article-extractor";
 
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -291,10 +292,16 @@ serve(async (req) => {
     // 1. Lấy record từ request body mà Database Webhook gửi
     const { record } = await req.json();
     documentId = record.id;
-    const textUrl = record.extracted_text_url;
+    const uploadedFileUrl = record.extracted_text_url;
+    const sourceType = record.source_type;
+    // `original_source` sẽ chứa URL web, hoặc tên file gốc
+    const originalSource = record.original_source;
     const userId = record.user_id;
 
-    if (!documentId || !textUrl || !userId) {
+    if (
+      !documentId || !uploadedFileUrl || !userId || !sourceType ||
+      !originalSource
+    ) {
       throw new Error("Missing required data in webhook payload.");
     }
 
@@ -302,7 +309,7 @@ serve(async (req) => {
 
     // 2. Cập nhật status thành "processing" để người dùng biết
     await updateDocumentStatus(supabaseAdmin, documentId, "processing");
-
+    let rawText = "";
     // 3. Tải nội dung text từ Supabase Storage
     // const textResponse = await fetch(textUrl);
     // if (!textResponse.ok) {
@@ -312,63 +319,91 @@ serve(async (req) => {
     // console.log("Text downloaded successfully.");
 
     // 3. Tải nội dung text từ Supabase Storage
-    const urlParts = textUrl.split("/");
-    const bucketName = urlParts[urlParts.length - 3];
-    const filePath = urlParts.slice(urlParts.length - 2).join("/");
-
-    console.log(`Downloading from bucket: ${bucketName}, path: ${filePath}`);
-
-    const { data: fileBlob, error: downloadError } = await supabaseAdmin.storage
-      .from(bucketName)
-      .download(filePath);
-
-    if (downloadError) throw downloadError;
-    if (!fileBlob) throw new Error("Downloaded file is null.");
-
-    console.log("Initial file downloaded successfully.");
-
-    let rawText = "";
-
-    // Phân luồng xử lý dựa trên bucket chứa file
-    if (bucketName === "personal-files-uploads") {
-      // LUỒNG MỚI: XỬ LÝ FILE PDF/DOCX
-      console.log("Detected uploaded file. Extracting text...");
-      if (!CLOUDMERSIVE_API_KEY) {
-        throw new Error("CLOUDMERSIVE_API_KEY is not set.");
+    if (sourceType === "url") {
+      // --- LUỒNG MỚI: XỬ LÝ TỪ URL ---
+      console.log(`Extracting content from URL: ${originalSource}`);
+      try {
+        const article = await extract(originalSource);
+        if (!article || !article.content) {
+          throw new Error("Could not extract main content from the URL.");
+        }
+        // Chuyển đổi HTML của nội dung bài viết thành text thuần
+        rawText = article.content.replace(/<[^>]*>/g, "\n").replace(
+          /\s{2,}/g,
+          " ",
+        ).trim();
+        console.log("Content extracted from URL successfully.");
+      } catch (extractError) {
+        const errorMessage = extractError instanceof Error
+          ? extractError.message
+          : String(extractError);
+        throw new Error(`Failed to extract article: ${errorMessage}`);
+      }
+    } else if (sourceType === "file") {
+      // --- LUỒNG CŨ: XỬ LÝ TỪ FILE (PDF/DOCX/TXT) ---
+      // Kiểm tra xem có URL file đã upload không
+      if (!uploadedFileUrl) {
+        throw new Error("File source type but no uploaded file URL found.");
       }
 
-      const formData = new FormData();
-      formData.append("inputFile", fileBlob);
+      // Tải file từ Supabase Storage (logic này giữ nguyên)
+      const urlParts = uploadedFileUrl.split("/");
+      const bucketName = urlParts[urlParts.length - 3];
+      const filePath = urlParts.slice(urlParts.length - 2).join("/");
 
-      // Gọi API của Cloudmersive để tự động nhận diện và chuyển đổi sang text
-      const extractResponse = await fetch(
-        "https://api.cloudmersive.com/convert/autodetect/to/txt",
-        {
-          method: "POST",
-          headers: { "Apikey": CLOUDMERSIVE_API_KEY },
-          body: formData,
-        },
-      );
+      console.log(`Downloading from bucket: ${bucketName}, path: ${filePath}`);
 
-      if (!extractResponse.ok) {
-        const errorText = await extractResponse.text();
-        throw new Error(`Cloudmersive API failed: ${errorText}`);
+      const { data: fileBlob, error: downloadError } = await supabaseAdmin
+        .storage
+        .from(bucketName)
+        .download(filePath);
+
+      if (downloadError) throw downloadError;
+      if (!fileBlob) throw new Error("Downloaded file is null.");
+
+      console.log("Initial file downloaded successfully.");
+
+      // Phân luồng phụ dựa trên bucket để trích xuất text (logic này giữ nguyên)
+      if (bucketName === "personal-files-uploads") {
+        console.log(
+          "Detected uploaded file. Extracting text via Cloudmersive...",
+        );
+        if (!CLOUDMERSIVE_API_KEY) {
+          throw new Error("CLOUDMERSIVE_API_KEY is not set.");
+        }
+        const formData = new FormData();
+        formData.append("inputFile", fileBlob);
+        const extractResponse = await fetch(
+          "https://api.cloudmersive.com/convert/autodetect/to/txt",
+          {
+            method: "POST",
+            headers: { "Apikey": CLOUDMERSIVE_API_KEY },
+            body: formData,
+          },
+        );
+        if (!extractResponse.ok) {
+          throw new Error(
+            `Cloudmersive API failed: ${await extractResponse.text()}`,
+          );
+        }
+        rawText = await extractResponse.text();
+        console.log("Text extracted from file successfully.");
+      } else if (bucketName === "personal-texts") {
+        console.log("Detected pasted text. Reading content...");
+        rawText = await fileBlob.text();
+        console.log("Text loaded from .txt file successfully.");
+      } else {
+        throw new Error(
+          `Unknown or unhandled bucket for file source: ${bucketName}`,
+        );
       }
-
-      rawText = await extractResponse.text();
-      console.log("Text extracted from file successfully.");
-    } else if (bucketName === "personal-texts") {
-      // LUỒNG CŨ: XỬ LÝ FILE .TXT TỪ VĂN BẢN DÁN VÀO
-      console.log("Detected pasted text. Reading content...");
-      rawText = await fileBlob.text();
-      console.log("Text loaded from .txt file successfully.");
     } else {
-      throw new Error(`Unknown or unhandled bucket: ${bucketName}`);
+      throw new Error(`Unsupported source type: ${sourceType}`);
     }
     // Sau khi có text thô, gọi Gemini để làm sạch nó
     const originalText = await extractMainContent(rawText);
     console.log("Text cleaned successfully.");
-    
+
     // 4. (AI BƯỚC 1) Gọi Gemini để tạo tựa đề và mô tả
     const { title, description } = await generateTitleAndDescription(
       originalText,
