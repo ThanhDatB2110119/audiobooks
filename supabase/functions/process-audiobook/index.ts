@@ -38,6 +38,8 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DOMParser } from "deno-dom";
 import { Readability } from "readability";
+import { encode } from "encode";
+
 
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -285,27 +287,31 @@ async function extractTextFromImage(imageBlob: Blob): Promise<string> {
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  // Sử dụng model có khả năng nhận diện hình ảnh
+  // Sử dụng model có khả năng nhận diện hình ảnh, ví dụ 'gemini-1.5-pro-latest'
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-  // Chuyển đổi Blob thành chuỗi Base64
+  // 1. Chuyển đổi Blob thành ArrayBuffer
   const image_bytes = await imageBlob.arrayBuffer();
-  const base64Image = btoa(String.fromCharCode(...new Uint8Array(image_bytes)));
 
-  const prompt =
-    "Trích xuất tất cả văn bản có trong hình ảnh này. Chỉ trả về phần văn bản, không thêm bất kỳ lời giải thích nào. Loại bỏ các thành phần không liên quan đến nội dung văn bản.";
+  // 2. Sử dụng hàm `encode` từ thư viện chuẩn của Deno để chuyển đổi an toàn
+  // thay vì dùng btoa và spread operator.
+  const base64Image = encode(image_bytes);
 
+  const prompt = "Trích xuất tất cả văn bản có trong hình ảnh này. Chỉ trả về phần văn bản, không thêm bất kỳ lời giải thích nào. Loại bỏ các thành phần không phải nội dung văn bản.";
+  
   const imagePart = {
     inlineData: {
-      mimeType: imageBlob.type, // e.g., "image/png" or "image/jpeg"
+      mimeType: imageBlob.type,
       data: base64Image,
     },
   };
-
+  
+  console.log("Sending image to Gemini Vision...");
+  
   const result = await model.generateContent([prompt, imagePart]);
   const response = result.response;
   const text = response.text();
-
+  
   return text;
 }
 // --- MAIN FUNCTION ---
