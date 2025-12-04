@@ -103,6 +103,9 @@ class SettingsPage extends StatelessWidget {
 
   // Hàm hiển thị bottom sheet chọn giọng đọc
   void _showVoiceSelector(BuildContext context, String? currentVoice) {
+    // Lấy Cubit từ context
+    final settingsCubit = context.read<SettingsCubit>();
+
     // Danh sách các giọng đọc. Key là tên hiển thị, Value là ID mà Google TTS yêu cầu.
     final Map<String, String> voiceOptions = {
       'Giọng Nữ Miền Bắc (Chuẩn)': 'vi-VN-Standard-A',
@@ -113,40 +116,63 @@ class SettingsPage extends StatelessWidget {
       'Giọng Nam Cao Cấp (Wavenet)': 'vi-VN-Wavenet-B',
     };
 
+    // ======================= THAY ĐỔI: SỬ DỤNG BLOCBUILDER BÊN TRONG BOTTOMSHEET =======================
+    // Điều này đảm bảo rằng mỗi khi state thay đổi (sau khi chọn giọng mới),
+    // bottom sheet sẽ được rebuild lại với giá trị `groupValue` chính xác,
+    // ngay cả khi nó chưa được đóng.
     showModalBottomSheet(
       context: context,
       builder: (sheetContext) {
-        return ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Chọn giọng đọc',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            ...voiceOptions.entries.map((entry) {
-              final displayName = entry.key;
-              final voiceId = entry.value;
-              final currentVoice = voiceId;
+        return BlocBuilder<SettingsCubit, SettingsState>(
+          // Chỉ định cubit đã được cung cấp ở trên
+          bloc: settingsCubit,
+          builder: (context, state) {
+            // Lấy giá trị `preferredVoice` mới nhất từ state
+            final String? activeVoice = (state is SettingsLoaded)
+                ? state.userProfile.preferredVoice
+                : currentVoice;
 
-              return RadioListTile<String>(
-                title: Text(displayName),
-                value: voiceId,
-                groupValue: currentVoice,
-                onChanged: (newValue) {
-                  if (newValue != null) {
-                    context.read<SettingsCubit>().updatePreferredVoice(
-                      newValue,
-                    );
-                    Navigator.of(sheetContext).pop();
-                  }
-                },
-                activeColor: Theme.of(context).colorScheme.primary,
-              );
-            }),
-          ],
+            return ListView(
+              shrinkWrap: true,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                  child: Text(
+                    'Chọn giọng đọc',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                // Tạo các RadioListTile từ map
+                ...voiceOptions.entries.map((entry) {
+                  final displayName = entry.key;
+                  final voiceId = entry.value;
+
+                  return RadioListTile<String>(
+                    title: Text(displayName),
+                    // `value` là giá trị riêng của nút radio này
+                    value: voiceId,
+                    // `groupValue` là giá trị hiện tại của cả nhóm
+                    // ignore: deprecated_member_use
+                    groupValue: activeVoice,
+                    // ignore: deprecated_member_use
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        // Gọi cubit để cập nhật giọng đọc
+                        settingsCubit.updatePreferredVoice(newValue);
+                        // Thêm một độ trễ nhỏ trước khi đóng để người dùng thấy được lựa chọn của mình
+                        Future.delayed(const Duration(milliseconds: 250), () {
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(sheetContext).pop();
+                        });
+                      }
+                    },
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  );
+                }),
+                const SizedBox(height: 16),
+              ],
+            );
+          },
         );
       },
     );
