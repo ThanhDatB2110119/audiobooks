@@ -8,6 +8,8 @@ import 'package:audiobooks/domain/usecases/upload_avatar_usecase.dart';
 import 'package:audiobooks/presentation/features/settings/cubit/profile_edit_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:image/image.dart' as img;
 
 @injectable
 class ProfileEditCubit extends Cubit<ProfileEditState> {
@@ -26,13 +28,23 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
   }
 
   Future<void> saveChanges(String newFullName) async {
+  
     emit(state.copyWith(status: ProfileEditStatus.loading));
 
     String? newAvatarUrl = state.userProfile?.avatarUrl;
 
     // 1. Nếu có ảnh mới được chọn, upload nó lên
     if (state.selectedAvatar != null) {
-      final uploadResult = await _uploadAvatarUsecase(state.selectedAvatar!);
+      print("Compressing image...");
+      final compressedImageFile = await _compressImage(state.selectedAvatar!);
+      if (compressedImageFile == null) {
+        emit(state.copyWith(status: ProfileEditStatus.error, errorMessage: "Không thể xử lý ảnh."));
+        return;
+      }
+      print("Image compressed successfully.");
+
+      // 2. Upload ảnh đã nén
+      final uploadResult = await _uploadAvatarUsecase(compressedImageFile);
       print('Upload Avatar Result: ${uploadResult.isRight()}');
       final success = uploadResult.fold(
         (failure) {
@@ -83,4 +95,28 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
         },
       );
     }
+
+    Future<File?> _compressImage(File file) async {
+    try {
+      // Đọc file ảnh vào bộ nhớ
+      final image = img.decodeImage(await file.readAsBytes());
+      if (image == null) return null;
+
+      // Thay đổi kích thước ảnh, giữ nguyên tỷ lệ, với chiều rộng tối đa là 512px
+      final resizedImage = img.copyResize(image, width: 512);
+
+      // Lấy thư mục tạm để lưu file đã nén
+      final tempDir = await getTemporaryDirectory();
+      final compressedFilePath = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final compressedFile = File(compressedFilePath);
+
+      // Ghi dữ liệu ảnh đã nén (định dạng JPG với chất lượng 85%) vào file mới
+      await compressedFile.writeAsBytes(img.encodeJpg(resizedImage, quality: 85));
+
+      return compressedFile;
+    } catch (e) {
+      print("Error compressing image: $e");
+      return null;
+    }
+  }
   }
