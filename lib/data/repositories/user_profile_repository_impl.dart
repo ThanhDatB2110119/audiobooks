@@ -1,5 +1,7 @@
 // data/repositories/user_profile_repository_impl.dart
 
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:audiobooks/core/error/exceptions.dart';
@@ -31,6 +33,15 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
       final profileModel = UserProfileModel.fromEntity(profile);
       await remoteDataSource.updateUserProfile(profileModel);
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure( e.message));
+    }
+  }
+   @override
+  Future<Either<Failure, String>> uploadAvatar(File imageFile) async {
+    try {
+      final avatarUrl = await remoteDataSource.uploadAvatar(imageFile);
+      return Right(avatarUrl);
     } on ServerException catch (e) {
       return Left(ServerFailure( e.message));
     }

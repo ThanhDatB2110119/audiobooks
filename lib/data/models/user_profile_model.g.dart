@@ -9,15 +9,15 @@ part of 'user_profile_model.dart';
 UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
     UserProfileModel(
       id: json['id'] as String,
-      fullName: json['fullName'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
-      preferredVoice: json['preferredVoice'] as String?,
+      fullName: json['full_name'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+      preferredVoice: json['preferred_voice'] as String?,
     );
 
 Map<String, dynamic> _$UserProfileModelToJson(UserProfileModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'fullName': instance.fullName,
-      'avatarUrl': instance.avatarUrl,
-      'preferredVoice': instance.preferredVoice,
+      'full_name': instance.fullName,
+      'avatar_url': instance.avatarUrl,
+      'preferred_voice': instance.preferredVoice,
     };

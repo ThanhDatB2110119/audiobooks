@@ -1,11 +1,13 @@
 // presentation/features/settings/pages/settings_page.dart
 
 import 'package:audiobooks/presentation/features/settings/cubit/settings_state.dart';
+import 'package:audiobooks/presentation/features/settings/widgets/user_profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:audiobooks/presentation/features/auth/widgets/sign_out_button.dart';
 import 'package:audiobooks/presentation/features/settings/cubit/settings_cubit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -31,18 +33,11 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   const SizedBox(height: 20),
                   // Phần thông tin user
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        (profile.avatarUrl != null &&
-                            profile.avatarUrl!.isNotEmpty)
-                        ? NetworkImage(profile.avatarUrl!)
-                        : null,
-                    child:
-                        (profile.avatarUrl == null ||
-                            profile.avatarUrl!.isEmpty)
-                        ? const Icon(Icons.person, size: 50)
-                        : null,
+                  Center(
+                    child: UserProfileAvatar(
+                      radius: 50,
+                      imageUrl: profile.avatarUrl,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -77,8 +72,14 @@ class SettingsPage extends StatelessWidget {
                     leading: const Icon(Icons.edit),
                     title: const Text('Chỉnh sửa hồ sơ'),
                     trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      // context.push('/settings/profile-edit');
+                    onTap: () async {
+                      final result = await context.push<bool>(
+                        '/settings/profile-edit',
+                        extra: state.userProfile,
+                      );
+                      if (result == true && context.mounted) {
+                        context.read<SettingsCubit>().loadUserProfile();
+                      }
                     },
                   ),
 

@@ -43,6 +43,7 @@ import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
 import '../../domain/usecases/update_user_profile_usecase.dart' as _i733;
+import '../../domain/usecases/upload_avatar_usecase.dart' as _i214;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
 import '../../presentation/features/book_detail/cubit/book_details_cubit.dart'
     as _i970;
@@ -50,6 +51,8 @@ import '../../presentation/features/creator/cubit/creator_cubit.dart' as _i2;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
 import '../../presentation/features/library/cubit/library_cubit.dart' as _i592;
 import '../../presentation/features/player/cubit/player_cubit.dart' as _i949;
+import '../../presentation/features/settings/cubit/profile_edit_cubit.dart'
+    as _i393;
 import '../../presentation/features/settings/cubit/settings_cubit.dart'
     as _i350;
 import 'register_module.dart' as _i291;
@@ -113,6 +116,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i733.UpdateUserProfileUsecase>(
     () => _i733.UpdateUserProfileUsecase(gh<_i587.UserProfileRepository>()),
   );
+  gh.lazySingleton<_i214.UploadAvatarUsecase>(
+    () => _i214.UploadAvatarUsecase(gh<_i587.UserProfileRepository>()),
+  );
   gh.lazySingleton<_i971.GoogleSignInUseCase>(
     () => _i971.GoogleSignInUseCase(gh<_i1073.AuthRepository>()),
   );
@@ -130,6 +136,12 @@ _i174.GetIt init(
     () => _i224.AuthCubit(
       gh<_i971.GoogleSignInUseCase>(),
       gh<_i514.GoogleSignOutUseCase>(),
+    ),
+  );
+  gh.factory<_i393.ProfileEditCubit>(
+    () => _i393.ProfileEditCubit(
+      gh<_i733.UpdateUserProfileUsecase>(),
+      gh<_i214.UploadAvatarUsecase>(),
     ),
   );
   gh.lazySingleton<_i813.GetAllBooksUsecase>(

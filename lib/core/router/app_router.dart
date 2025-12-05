@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:audiobooks/core/injection/injection_container.dart' as di;
 import 'package:audiobooks/core/utils/logger.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
+import 'package:audiobooks/domain/entities/user_profile_entity.dart';
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
 import 'package:audiobooks/presentation/features/creator/pages/creator_page.dart';
 import 'package:audiobooks/presentation/features/library/pages/library_page.dart';
 import 'package:audiobooks/presentation/features/player/pages/player_page.dart';
+import 'package:audiobooks/presentation/features/settings/pages/profile_edit_page.dart';
 import 'package:audiobooks/presentation/features/settings/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -141,6 +143,25 @@ class AppRouter {
                   appLogger.i('Điều hướng tới trang Settings');
                   return const SettingsPage();
                 },
+                routes: [
+                  GoRoute(
+                    path: 'profile-edit', // URL sẽ là /settings/profile-edit
+                    name: 'profileEdit',
+                    builder: (context, state) {
+                      // Lấy profile hiện tại từ extra để trang edit có dữ liệu ban đầu
+                      final userProfile = state.extra as UserProfileEntity?;
+                      if (userProfile == null) {
+                        // Xử lý trường hợp không có dữ liệu, có thể quay lại hoặc báo lỗi
+                        return const Scaffold(
+                          body: Center(
+                            child: Text('Lỗi: Thiếu thông tin hồ sơ.'),
+                          ),
+                        );
+                      }
+                      return ProfileEditPage(initialProfile: userProfile);
+                    },
+                  ),
+                ],
               ),
             ],
           ),
