@@ -7,6 +7,10 @@ abstract class BookRemoteDataSource {
   Future<List<BookModel>> getBooks({String? categoryId});
 
   Future<BookModel> getBookById(String id);
+  Future<bool> isBookSaved(String bookId);
+  Future<void> addBookToLibrary(String bookId);
+  Future<void> removeBookFromLibrary(String bookId);
+  Future<List<BookModel>> getSavedBooks();
 }
 
 @LazySingleton(as: BookRemoteDataSource)
@@ -78,5 +82,48 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       print('======================================');
       throw ServerException('Failed to fetch book: $e');
     }
+  }
+  
+  @override
+  Future<bool> isBookSaved(String bookId) async {
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) return false;
+    final response = await supabaseClient
+        .from('user_library')
+        .select('book_id')
+        .eq('user_id', user.id)
+        .eq('book_id', bookId)
+        .limit(1);
+    return response.isNotEmpty;
+  }
+
+  @override
+  Future<void> addBookToLibrary(String bookId) async {
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) throw ServerException('User not authenticated');
+    await supabaseClient.from('user_library').insert({'user_id': user.id, 'book_id': bookId});
+  }
+
+  @override
+  Future<void> removeBookFromLibrary(String bookId) async {
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) throw ServerException( 'User not authenticated');
+    await supabaseClient.from('user_library').delete().match({'user_id': user.id, 'book_id': bookId});
+  }
+
+  @override
+  Future<List<BookModel>> getSavedBooks() async {
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) return [];
+    
+    // Query JOIN mạnh mẽ của Supabase
+    final response = await supabaseClient
+        .from('user_library')
+        .select('books(*, categories(name))') // Lấy tất cả thông tin từ bảng books liên quan
+        .eq('user_id', user.id);
+
+    return (response as List)
+        .map((item) => BookModel.fromJson(item['books']))
+        .toList();
   }
 }

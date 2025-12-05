@@ -36,6 +36,26 @@ class BookDetailsPage extends StatelessWidget {
                 return const Text('Đang tải...');
               },
             ),
+            actions: [
+              BlocBuilder<BookDetailsCubit, BookDetailsState>(
+                builder: (context, state) {
+                  if (state is BookDetailsLoaded) {
+                    return IconButton(
+                      icon: Icon(
+                        state.isSaved
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () =>
+                          context.read<BookDetailsCubit>().toggleSaveStatus(),
+                      tooltip: state.isSaved ? 'Bỏ lưu' : 'Lưu sách',
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
           ),
           body: BlocBuilder<BookDetailsCubit, BookDetailsState>(
             builder: (context, state) {

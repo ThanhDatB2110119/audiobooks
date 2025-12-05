@@ -2,11 +2,15 @@
 
 import 'dart:async';
 
+import 'package:audiobooks/core/error/failures.dart';
+import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:audiobooks/domain/usecases/delete_document_usecase.dart';
+import 'package:audiobooks/domain/usecases/get_saved_books_usecase.dart';
 import 'package:audiobooks/domain/usecases/get_user_documents_usecase.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,11 +18,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class LibraryCubit extends Cubit<LibraryState> {
   final GetUserDocumentsUsecase _getUserDocumentsUsecase;
   final DeleteDocumentUsecase _deleteDocumentUsecase;
+  final GetSavedBooksUsecase _getSavedBooksUsecase;
   final SupabaseClient _supabaseClient;
   RealtimeChannel? _realtimeChannel;
 
-  LibraryCubit(this._getUserDocumentsUsecase, this._deleteDocumentUsecase, this._supabaseClient)
-    : super(LibraryInitial()) {
+  LibraryCubit(
+    this._getUserDocumentsUsecase,
+    this._deleteDocumentUsecase,
+    this._getSavedBooksUsecase,
+    this._supabaseClient,
+  ) : super(LibraryInitial()) {
     _listenToDocumentChanges();
   }
 
@@ -44,24 +53,30 @@ class LibraryCubit extends Cubit<LibraryState> {
               '--- Realtime Update Detected! Payload: ${payload.newRecord} ---',
             );
             // Khi có thay đổi, gọi lại hàm fetch dữ liệu
-            fetchUserDocuments();
+            fetchAllLibraryContent();
           },
         )
         .subscribe(); // Hàm subscribe() bây giờ được gọi ở cuối
   }
 
-Future<void> deleteDocument(PersonalDocumentEntity document) async {
+  Future<void> deleteDocument(PersonalDocumentEntity document) async {
     // Lấy state hiện tại để có thể giữ lại danh sách trong khi chờ đợi
     final currentState = state;
     if (currentState is! LibraryLoaded) return; // Chỉ xóa khi đã có danh sách
 
     // 1. Lạc quan: Xóa item khỏi UI ngay lập tức để có phản hồi nhanh
     // Tạo một danh sách mới không chứa document cần xóa
-    final optimisticList = List<PersonalDocumentEntity>.from(currentState.myDocuments)
-      ..removeWhere((d) => d.id == document.id);
-      
+    final optimisticList = List<PersonalDocumentEntity>.from(
+      currentState.myDocuments,
+    )..removeWhere((d) => d.id == document.id);
+
     // Cập nhật UI ngay với danh sách đã được lọc
-    emit(LibraryLoaded(myDocuments: optimisticList));
+    emit(
+      LibraryLoaded(
+        myDocuments: optimisticList,
+        savedBooks: currentState.savedBooks,
+      ),
+    );
 
     // 2. Gọi API để xóa trên backend
     final result = await _deleteDocumentUsecase(document);
@@ -72,17 +87,25 @@ Future<void> deleteDocument(PersonalDocumentEntity document) async {
         // - Hiển thị lỗi
         emit(LibraryError(failure.message));
         // - Khôi phục lại danh sách ban đầu để người dùng biết là đã thất bại
-        emit(LibraryLoaded(myDocuments: currentState.myDocuments)); 
+        emit(currentState);
       },
       (_) {
         // 3b. Nếu xóa thành công:
         // - Phát ra state thành công để hiển thị SnackBar
-        emit(LibraryActionSuccess(
-          message: 'Đã xóa thành công!',
-          currentDocuments: optimisticList, // Truyền danh sách mới
-        ));
+        emit(
+          LibraryActionSuccess(
+            message: 'Đã xóa thành công!',
+            currentDocuments: optimisticList,
+            currentSavedBooks: currentState.savedBooks, // Truyền danh sách mới
+          ),
+        );
         // - Giữ nguyên state LibraryLoaded với danh sách đã được lọc
-        emit(LibraryLoaded(myDocuments: optimisticList));
+        emit(
+          LibraryLoaded(
+            myDocuments: optimisticList,
+            savedBooks: currentState.savedBooks,
+          ),
+        );
       },
     );
   }
@@ -97,16 +120,50 @@ Future<void> deleteDocument(PersonalDocumentEntity document) async {
     return super.close();
   }
 
-  Future<void> fetchUserDocuments() async {
+  // Future<void> fetchUserDocuments() async {
+  //   if (state is! LibraryLoaded) {
+  //     emit(LibraryLoading());
+  //   }
+
+  //   final result = await _getUserDocumentsUsecase();
+
+  //   result.fold(
+  //     (failure) => emit(LibraryError(failure.message)),
+  //     (documents) => emit(LibraryLoaded(myDocuments: documents)),
+  //   );
+  // }
+
+  Future<void> fetchAllLibraryContent() async {
     if (state is! LibraryLoaded) {
       emit(LibraryLoading());
     }
 
-    final result = await _getUserDocumentsUsecase();
+    // Lấy cả hai danh sách song song
+    final results = await Future.wait([
+      _getUserDocumentsUsecase(),
+      _getSavedBooksUsecase(),
+    ]);
+    if (isClosed) return;
+    final myDocsResult =
+        results[0] as Either<Failure, List<PersonalDocumentEntity>>;
+    final savedBooksResult = results[1] as Either<Failure, List<BookEntity>>;
 
-    result.fold(
-      (failure) => emit(LibraryError(failure.message)),
-      (documents) => emit(LibraryLoaded(myDocuments: documents)),
-    );
+    // Xử lý kết quả
+    myDocsResult.fold((failure) { if (!isClosed) emit(LibraryError(failure.message));
+    },
+     (myDocs,) {
+      savedBooksResult.fold(
+        (failure) { if (!isClosed) {
+          emit(
+          LibraryLoaded(myDocuments: myDocs, savedBooks: []));
+        } 
+          }, // Tạm thời trả về rỗng nếu lỗi
+        (savedBooks) {
+          if (!isClosed) {
+            emit(LibraryLoaded(myDocuments: myDocs, savedBooks: savedBooks));
+          }
+        },
+      );
+    });
   }
 }

@@ -128,7 +128,7 @@ class AppRouter {
                 name: 'library',
                 builder: (context, state) {
                   appLogger.i('Điều hướng tới trang Library');
-                  return const LibraryPage();
+                  return const LibraryPageContainer();
                 },
               ),
             ],

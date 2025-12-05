@@ -8,4 +8,8 @@ abstract class BookRepository {
   Future<Either<Failure, List<BookEntity>>> getBooks({String? categoryId});
 
   Future<Either<Failure, BookEntity>> getBookById(int id);
+  Future<Either<Failure, bool>> isBookSaved(String bookId);
+  Future<Either<Failure, void>> addBookToLibrary(String bookId);
+  Future<Either<Failure, void>> removeBookFromLibrary(String bookId);
+  Future<Either<Failure, List<BookEntity>>> getSavedBooks();
 }

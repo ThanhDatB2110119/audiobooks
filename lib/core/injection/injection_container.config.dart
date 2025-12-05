@@ -32,16 +32,20 @@ import '../../domain/repositories/auth_repository.dart' as _i1073;
 import '../../domain/repositories/book_repository.dart' as _i135;
 import '../../domain/repositories/personal_document_repository.dart' as _i538;
 import '../../domain/repositories/user_profile_repository.dart' as _i587;
+import '../../domain/usecases/add_book_to_library_usecase.dart' as _i1006;
+import '../../domain/usecases/check_book_saved_status_usecase.dart' as _i457;
 import '../../domain/usecases/create_document_from_file_usecase.dart' as _i342;
 import '../../domain/usecases/create_document_from_text_usecase.dart' as _i631;
 import '../../domain/usecases/create_document_from_url_usecase.dart' as _i218;
 import '../../domain/usecases/delete_document_usecase.dart' as _i45;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
 import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
+import '../../domain/usecases/get_saved_books_usecase.dart' as _i220;
 import '../../domain/usecases/get_user_documents_usecase.dart' as _i1060;
 import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
+import '../../domain/usecases/remove_book_from_library_usecase.dart' as _i264;
 import '../../domain/usecases/update_user_profile_usecase.dart' as _i733;
 import '../../domain/usecases/upload_avatar_usecase.dart' as _i214;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
@@ -144,11 +148,23 @@ _i174.GetIt init(
       gh<_i214.UploadAvatarUsecase>(),
     ),
   );
+  gh.lazySingleton<_i1006.AddBookToLibraryUsecase>(
+    () => _i1006.AddBookToLibraryUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i457.CheckBookSavedStatusUsecase>(
+    () => _i457.CheckBookSavedStatusUsecase(gh<_i135.BookRepository>()),
+  );
   gh.lazySingleton<_i813.GetAllBooksUsecase>(
     () => _i813.GetAllBooksUsecase(gh<_i135.BookRepository>()),
   );
   gh.lazySingleton<_i494.GetBookDetailsUsecase>(
     () => _i494.GetBookDetailsUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i220.GetSavedBooksUsecase>(
+    () => _i220.GetSavedBooksUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i264.RemoveBookFromLibraryUsecase>(
+    () => _i264.RemoveBookFromLibraryUsecase(gh<_i135.BookRepository>()),
   );
   gh.lazySingleton<_i342.CreateDocumentFromFileUsecase>(
     () => _i342.CreateDocumentFromFileUsecase(
@@ -182,17 +198,23 @@ _i174.GetIt init(
     () => _i592.LibraryCubit(
       gh<_i1060.GetUserDocumentsUsecase>(),
       gh<_i45.DeleteDocumentUsecase>(),
+      gh<_i220.GetSavedBooksUsecase>(),
       gh<_i454.SupabaseClient>(),
     ),
-  );
-  gh.factory<_i970.BookDetailsCubit>(
-    () => _i970.BookDetailsCubit(gh<_i494.GetBookDetailsUsecase>()),
   );
   gh.factory<_i2.CreatorCubit>(
     () => _i2.CreatorCubit(
       gh<_i631.CreateDocumentFromTextUsecase>(),
       gh<_i342.CreateDocumentFromFileUsecase>(),
       gh<_i218.CreateDocumentFromUrlUsecase>(),
+    ),
+  );
+  gh.factory<_i970.BookDetailsCubit>(
+    () => _i970.BookDetailsCubit(
+      gh<_i494.GetBookDetailsUsecase>(),
+      gh<_i457.CheckBookSavedStatusUsecase>(),
+      gh<_i1006.AddBookToLibraryUsecase>(),
+      gh<_i264.RemoveBookFromLibraryUsecase>(),
     ),
   );
   gh.factory<_i900.HomeCubit>(

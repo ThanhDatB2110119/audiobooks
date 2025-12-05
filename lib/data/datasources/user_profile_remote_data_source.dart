@@ -62,7 +62,7 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
       // **QUAN TRỌNG**: Tạo bucket 'avatars' và thiết lập Policy cho phép
       // người dùng upload/update/select file trong thư mục của chính họ.
       // 1. Upload file
-      final response = await supabaseClient.storage
+      await supabaseClient.storage
           .from('avatars')
           .upload(
             filePath,
