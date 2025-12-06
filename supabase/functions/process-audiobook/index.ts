@@ -80,11 +80,16 @@ async function generateTitleAndDescription(
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   //gemini-2.5-pro
   const prompt = `
-    Dựa vào đoạn văn bản sau, hãy tạo ra một tựa đề ngắn gọn (dưới 10 từ) và một đoạn mô tả hấp dẫn (dưới 50 từ).
-    Hãy trả lời bằng một đối tượng JSON hợp lệ, không có bất kỳ văn bản nào khác bao quanh.
-    Đối tượng JSON phải có hai key là "title" và "description".
+    Bạn là một trợ lý biên tập am hiểu văn học Việt Nam. Nhiệm vụ của bạn là phân tích đoạn văn bản dưới đây và thực hiện theo các bước sau:
 
-    Văn bản: """
+    1.  **Ưu tiên nhận dạng:** Đầu tiên, hãy kiểm tra xem nội dung văn bản có khớp với một câu chuyện cổ tích, truyện ngụ ngôn, tác phẩm văn học, hoặc bài thơ nổi tiếng nào của Việt Nam không (ví dụ: "Cây tre trăm đốt", "Tấm Cám", "Truyện Kiều", "Chí Phèo"...).
+    2.  **Quyết định tựa đề:**
+        *   **NẾU** bạn nhận dạng được tác phẩm, hãy sử dụng tên chính xác của tác phẩm đó làm tựa đề.
+        *   **NẾU KHÔNG** nhận dạng được, hãy tự tạo một tựa đề ngắn gọn (dưới 10 từ) và phù hợp nhất với nội dung.
+    3.  **Tạo mô tả:** Dựa vào nội dung, hãy viết một đoạn mô tả ngắn gọn và hấp dẫn (dưới 50 từ).
+    4.  **Định dạng đầu ra:** Trả lời bằng một đối tượng JSON hợp lệ, không có bất kỳ văn bản nào khác bao quanh. Đối tượng JSON phải có hai key là "title" và "description".
+
+    Văn bản cần phân tích: """
     ${text.substring(0, 8000)}
     """
   `; // Giới hạn text để tránh vượt quá giới hạn token của Gemini
