@@ -188,18 +188,20 @@ _i174.GetIt init(
     () =>
         _i1060.GetUserDocumentsUsecase(gh<_i538.PersonalDocumentRepository>()),
   );
-  gh.factory<_i350.SettingsCubit>(
-    () => _i350.SettingsCubit(
-      gh<_i629.GetUserProfileUsecase>(),
-      gh<_i733.UpdateUserProfileUsecase>(),
-    ),
-  );
   gh.factory<_i592.LibraryCubit>(
     () => _i592.LibraryCubit(
       gh<_i1060.GetUserDocumentsUsecase>(),
       gh<_i45.DeleteDocumentUsecase>(),
       gh<_i220.GetSavedBooksUsecase>(),
+      gh<_i264.RemoveBookFromLibraryUsecase>(),
+      gh<_i1006.AddBookToLibraryUsecase>(),
       gh<_i454.SupabaseClient>(),
+    ),
+  );
+  gh.factory<_i350.SettingsCubit>(
+    () => _i350.SettingsCubit(
+      gh<_i629.GetUserProfileUsecase>(),
+      gh<_i733.UpdateUserProfileUsecase>(),
     ),
   );
   gh.factory<_i2.CreatorCubit>(

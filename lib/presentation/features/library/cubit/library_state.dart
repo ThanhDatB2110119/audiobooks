@@ -1,5 +1,7 @@
 // presentation/features/library/cubit/library_state.dart
 
+import 'dart:ui';
+
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:equatable/equatable.dart';
@@ -39,10 +41,12 @@ class LibraryActionSuccess extends LibraryState {
   // Giữ lại danh sách hiện tại để UI không bị gián đoạn
   final List<PersonalDocumentEntity> currentDocuments;
   final List<BookEntity> currentSavedBooks;
+  final VoidCallback? undoAction;
   const LibraryActionSuccess({
     required this.message,
     required this.currentDocuments,
     required this.currentSavedBooks,
+    this.undoAction,
   });
 
   @override

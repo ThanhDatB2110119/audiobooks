@@ -81,6 +81,14 @@ class _LibraryPageState extends State<LibraryPage>
                 SnackBar(
                   content: Text(state.message),
                   backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 4),
+                  action: state.undoAction != null
+                      ? SnackBarAction(
+                          label: 'Hoàn tác',
+                          textColor: Colors.white,
+                          onPressed: state.undoAction!,
+                        )
+                      : null,
                 ),
               );
             } else if (state is LibraryError) {
@@ -94,6 +102,7 @@ class _LibraryPageState extends State<LibraryPage>
           },
           child: TabBarView(
             controller: _tabController,
+            // physics: const NeverScrollableScrollPhysics(),
             children: const [
               // Cả hai widget này giờ đều nằm dưới BlocProvider và có thể truy cập Cubit.
               SavedBooksTabView(),

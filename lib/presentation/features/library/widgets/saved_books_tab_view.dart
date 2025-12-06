@@ -24,30 +24,25 @@ class SavedBooksTabView extends StatelessWidget {
         // ---- Xử lý trạng thái tải thành công ----
         if (state is LibraryLoaded) {
           // 1. Kiểm tra xem danh sách sách đã lưu có rỗng không
-          if (state.savedBooks.isEmpty) {
-            // Nếu rỗng, hiển thị giao diện "Chưa có sách"
-            return const _EmptySavedBooksView();
-          }
-
-          // 2. Nếu có dữ liệu, hiển thị danh sách
           return RefreshIndicator(
             onRefresh: () async {
-              // Khi người dùng kéo để làm mới, gọi lại hàm fetch tổng
               await context.read<LibraryCubit>().fetchAllLibraryContent();
             },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              itemCount: state.savedBooks.length,
-              itemBuilder: (context, index) {
-                final book = state.savedBooks[index];
-                // Sử dụng một widget item được thiết kế riêng
-                return _SavedBookListItem(
-                  book: book,
-                  allSavedBooks: state.savedBooks,
-                  currentIndex: index,
-                );
-              },
-            ),
+            // Nếu danh sách rỗng, hiển thị widget rỗng CÓ THỂ CUỘN
+            child: state.savedBooks.isEmpty
+                ? const _ScrollableEmptySavedBooksView() // <-- Widget mới
+                : ListView.builder(
+                    // Nếu có dữ liệu, hiển thị ListView như cũ
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: state.savedBooks.length,
+                    itemBuilder: (context, index) {
+                      return _SavedBookListItem(
+                        book: state.savedBooks[index],
+                        allSavedBooks: state.savedBooks,
+                        currentIndex: index,
+                      );
+                    },
+                  ),
           );
         }
 
@@ -107,10 +102,7 @@ class _SavedBookListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
+        contentPadding: const EdgeInsets.fromLTRB(16.0, 8.0, 4.0, 8.0),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(4.0),
           child: Image.network(
@@ -130,6 +122,15 @@ class _SavedBookListItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(book.author),
+        trailing: IconButton(
+          icon: const Icon(Icons.bookmark_remove_outlined),
+          color: Colors.grey[600],
+          tooltip: 'Bỏ lưu',
+          onPressed: () {
+            // Gọi cubit để thực hiện hành động bỏ lưu
+            context.read<LibraryCubit>().removeSavedBook(book);
+          },
+        ),
         onTap: () {
           // Điều hướng đến PlayerPage, truyền vào danh sách sách đã lưu
           context.push(
@@ -138,6 +139,28 @@ class _SavedBookListItem extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _ScrollableEmptySavedBooksView extends StatelessWidget {
+  const _ScrollableEmptySavedBooksView();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          // Luôn cho phép cuộn, ngay cả khi nội dung không vượt quá màn hình
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            // Đảm bảo widget con chiếm ít nhất toàn bộ chiều cao của viewport
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child:
+                const _EmptySavedBooksView(), // Tái sử dụng widget hiển thị rỗng cũ
+          ),
+        );
+      },
     );
   }
 }

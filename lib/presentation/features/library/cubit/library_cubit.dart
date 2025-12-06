@@ -5,9 +5,11 @@ import 'dart:async';
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
+import 'package:audiobooks/domain/usecases/add_book_to_library_usecase.dart';
 import 'package:audiobooks/domain/usecases/delete_document_usecase.dart';
 import 'package:audiobooks/domain/usecases/get_saved_books_usecase.dart';
 import 'package:audiobooks/domain/usecases/get_user_documents_usecase.dart';
+import 'package:audiobooks/domain/usecases/remove_book_from_library_usecase.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dartz/dartz.dart';
@@ -19,6 +21,8 @@ class LibraryCubit extends Cubit<LibraryState> {
   final GetUserDocumentsUsecase _getUserDocumentsUsecase;
   final DeleteDocumentUsecase _deleteDocumentUsecase;
   final GetSavedBooksUsecase _getSavedBooksUsecase;
+  final RemoveBookFromLibraryUsecase _removeBookFromLibraryUsecase;
+  final AddBookToLibraryUsecase _addBookToLibraryUsecase;
   final SupabaseClient _supabaseClient;
   RealtimeChannel? _realtimeChannel;
 
@@ -26,6 +30,8 @@ class LibraryCubit extends Cubit<LibraryState> {
     this._getUserDocumentsUsecase,
     this._deleteDocumentUsecase,
     this._getSavedBooksUsecase,
+    this._removeBookFromLibraryUsecase,
+    this._addBookToLibraryUsecase,
     this._supabaseClient,
   ) : super(LibraryInitial()) {
     _listenToDocumentChanges();
@@ -165,5 +171,62 @@ class LibraryCubit extends Cubit<LibraryState> {
         },
       );
     });
+  }
+
+  Future<void> removeSavedBook(BookEntity bookToRemove) async {
+    final currentState = state;
+    if (currentState is! LibraryLoaded) return;
+
+    // 1. Lạc quan: Xóa sách khỏi danh sách UI ngay lập tức
+    final optimisticList = List<BookEntity>.from(currentState.savedBooks)
+      ..removeWhere((book) => book.id == bookToRemove.id);
+
+    // Cập nhật UI với danh sách mới
+    emit(LibraryLoaded(
+      myDocuments: currentState.myDocuments,
+      savedBooks: optimisticList,
+    ));
+
+    // 2. Gửi yêu cầu xóa đến backend
+    final result = await _removeBookFromLibraryUsecase(bookToRemove.id.toString());
+
+    result.fold(
+      (failure) {
+        // 3a. Nếu xóa thất bại:
+        // - Hiển thị lỗi (BlocListener sẽ bắt)
+        emit(LibraryError(failure.message));
+        // - Khôi phục lại state cũ hoàn toàn
+        emit(currentState);
+      },
+      (_) {
+        // 3b. Nếu xóa thành công, phát ra state để hiển thị SnackBar
+        emit(LibraryActionSuccess(
+          message: 'Đã bỏ lưu "${bookToRemove.title}"',
+          currentDocuments: currentState.myDocuments,
+          currentSavedBooks: optimisticList,
+          // Thêm một callback "Hoàn tác"
+          undoAction: () => addSavedBook(bookToRemove),
+        ));
+        // Giữ nguyên state Loaded với danh sách đã cập nhật
+        emit(LibraryLoaded(
+            myDocuments: currentState.myDocuments, savedBooks: optimisticList));
+      },
+    );
+  }
+
+  /// (Hàm hỗ trợ cho Hoàn tác) Thêm lại một cuốn sách đã bỏ lưu
+  Future<void> addSavedBook(BookEntity bookToAdd) async {
+    final currentState = state;
+    if (currentState is! LibraryLoaded) return;
+
+    // Lạc quan: Thêm lại sách vào UI
+    final optimisticList = List<BookEntity>.from(currentState.savedBooks)..add(bookToAdd);
+    // Có thể sắp xếp lại danh sách ở đây nếu cần
+    
+    emit(LibraryLoaded(myDocuments: currentState.myDocuments, savedBooks: optimisticList));
+    
+    // Gọi API để thêm lại sách vào DB
+    await _addBookToLibraryUsecase(bookToAdd.id.toString());
+    // Không cần xử lý lỗi phức tạp cho hành động hoàn tác
   }
 }
