@@ -40,7 +40,6 @@ import { DOMParser } from "deno-dom";
 import { Readability } from "readability";
 import { encode } from "encode";
 
-
 // Lấy các biến môi trường
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GOOGLE_TTS_API_KEY = Deno.env.get("GOOGLE_TTS_API_KEY");
@@ -154,7 +153,7 @@ async function extractMainContent(rawText: string): Promise<string> {
 /**
  * Chuyển văn bản dài thành audio, chia nhỏ và ghép lại thủ công.
  */
-async function textToSpeech(text: string): Promise<Blob> {
+async function textToSpeech(text: string,preferredVoice?: string | null): Promise<Blob> {
   if (!GOOGLE_TTS_API_KEY) {
     throw new Error("GOOGLE_TTS_API_KEY is not set in environment variables.");
   }
@@ -187,9 +186,12 @@ async function textToSpeech(text: string): Promise<Blob> {
   const chunksToProcess = textChunks.slice(0, 3); // Giới hạn xử lý tối đa 3 đoạn để thử nghiệm
   for (let i = 0; i < chunksToProcess.length; i++) {
     console.log(`Processing audio chunk ${i + 1}/${chunksToProcess.length}...`);
+
+    const selectedVoiceName = preferredVoice || "vi-VN-Standard-A"; // Giọng Nữ Miền Bắc làm mặc định
+    console.log(`Using voice: ${selectedVoiceName}`);
     const requestBody = {
       input: { text: chunksToProcess[i] },
-      voice: { languageCode: "vi-VN", name: "vi-VN-Chirp3-HD-Iapetus" },
+      voice: { languageCode: "vi-VN", name: selectedVoiceName },
       audioConfig: { audioEncoding: "MP3" },
     };
 
@@ -297,21 +299,22 @@ async function extractTextFromImage(imageBlob: Blob): Promise<string> {
   // thay vì dùng btoa và spread operator.
   const base64Image = encode(image_bytes);
 
-  const prompt = "Trích xuất tất cả văn bản có trong hình ảnh này. Chỉ trả về phần văn bản, không thêm bất kỳ lời giải thích nào. Loại bỏ các thành phần không phải nội dung văn bản.";
-  
+  const prompt =
+    "Trích xuất tất cả văn bản có trong hình ảnh này. Chỉ trả về phần văn bản, không thêm bất kỳ lời giải thích nào. Loại bỏ các thành phần không phải nội dung văn bản.";
+
   const imagePart = {
     inlineData: {
       mimeType: imageBlob.type,
       data: base64Image,
     },
   };
-  
+
   console.log("Sending image to Gemini Vision...");
-  
+
   const result = await model.generateContent([prompt, imagePart]);
   const response = result.response;
   const text = response.text();
-  
+
   return text;
 }
 // --- MAIN FUNCTION ---
@@ -475,6 +478,28 @@ serve(async (req) => {
     const originalText = await extractMainContent(rawText);
     console.log("Text cleaned successfully.");
 
+    console.log("Fetching user's preferred voice...");
+    let preferredVoice: string | null = null;
+
+    // Query bảng profiles để lấy giọng đọc của user
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("preferred_voice")
+      .eq("id", userId)
+      .single(); // Lấy duy nhất 1 record
+
+    if (profileError) {
+      console.warn(
+        `Could not fetch profile for user ${userId}:`,
+        profileError.message,
+      );
+      // Không ném lỗi, chỉ cảnh báo và tiếp tục với giọng đọc mặc định
+    } else if (profile && profile.preferred_voice) {
+      preferredVoice = profile.preferred_voice;
+      console.log(`Found preferred voice: ${preferredVoice}`);
+    } else {
+      console.log("No preferred voice set for user. Using default.");
+    }
     // 4. (AI BƯỚC 1) Gọi Gemini để tạo tựa đề và mô tả
     const { title, description } = await generateTitleAndDescription(
       originalText,
@@ -483,7 +508,7 @@ serve(async (req) => {
     console.log(`Generated Description: ${description}`);
 
     // 5. (AI BƯỚC 2) Gọi dịch vụ TTS để tạo audio
-    const audioBlob = await textToSpeech(originalText);
+    const audioBlob = await textToSpeech(originalText, preferredVoice);
     console.log("Audio generated successfully.");
 
     // 6. Upload file audio lên Storage
