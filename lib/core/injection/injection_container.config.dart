@@ -59,6 +59,7 @@ import '../../presentation/features/settings/cubit/profile_edit_cubit.dart'
     as _i393;
 import '../../presentation/features/settings/cubit/settings_cubit.dart'
     as _i350;
+import '../event/library_events.dart' as _i32;
 import 'register_module.dart' as _i291;
 
 const String _dev = 'dev';
@@ -188,6 +189,12 @@ _i174.GetIt init(
     () =>
         _i1060.GetUserDocumentsUsecase(gh<_i538.PersonalDocumentRepository>()),
   );
+  gh.factory<_i350.SettingsCubit>(
+    () => _i350.SettingsCubit(
+      gh<_i629.GetUserProfileUsecase>(),
+      gh<_i733.UpdateUserProfileUsecase>(),
+    ),
+  );
   gh.factory<_i592.LibraryCubit>(
     () => _i592.LibraryCubit(
       gh<_i1060.GetUserDocumentsUsecase>(),
@@ -195,20 +202,8 @@ _i174.GetIt init(
       gh<_i220.GetSavedBooksUsecase>(),
       gh<_i264.RemoveBookFromLibraryUsecase>(),
       gh<_i1006.AddBookToLibraryUsecase>(),
+      gh<_i32.LibraryEventBus>(),
       gh<_i454.SupabaseClient>(),
-    ),
-  );
-  gh.factory<_i350.SettingsCubit>(
-    () => _i350.SettingsCubit(
-      gh<_i629.GetUserProfileUsecase>(),
-      gh<_i733.UpdateUserProfileUsecase>(),
-    ),
-  );
-  gh.factory<_i2.CreatorCubit>(
-    () => _i2.CreatorCubit(
-      gh<_i631.CreateDocumentFromTextUsecase>(),
-      gh<_i342.CreateDocumentFromFileUsecase>(),
-      gh<_i218.CreateDocumentFromUrlUsecase>(),
     ),
   );
   gh.factory<_i970.BookDetailsCubit>(
@@ -217,6 +212,14 @@ _i174.GetIt init(
       gh<_i457.CheckBookSavedStatusUsecase>(),
       gh<_i1006.AddBookToLibraryUsecase>(),
       gh<_i264.RemoveBookFromLibraryUsecase>(),
+      gh<_i32.LibraryEventBus>(),
+    ),
+  );
+  gh.factory<_i2.CreatorCubit>(
+    () => _i2.CreatorCubit(
+      gh<_i631.CreateDocumentFromTextUsecase>(),
+      gh<_i342.CreateDocumentFromFileUsecase>(),
+      gh<_i218.CreateDocumentFromUrlUsecase>(),
     ),
   );
   gh.factory<_i900.HomeCubit>(

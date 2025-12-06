@@ -169,7 +169,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceVariant.withOpacity(0.3),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: SingleChildScrollView(
@@ -399,7 +399,7 @@ class _PlayerPageState extends State<PlayerPage> {
                     selectedColor: Theme.of(buildContext).colorScheme.primary,
                     backgroundColor: Theme.of(
                       buildContext,
-                    ).colorScheme.surfaceVariant,
+                    ).colorScheme.surfaceContainerHighest,
                     pressElevation: 5,
                   );
                 }).toList(),

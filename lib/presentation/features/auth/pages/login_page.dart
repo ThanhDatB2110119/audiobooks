@@ -91,7 +91,7 @@ class LoginPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: (theme.brightness == Brightness.dark ? Colors.white : Colors.black).withOpacity(0.7),
+                            color: (theme.brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: 0.7),
                           fontSize: 12,
                         ),
                         children: [

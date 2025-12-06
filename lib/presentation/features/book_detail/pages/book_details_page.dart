@@ -126,7 +126,7 @@ class BookDetailsPage extends StatelessWidget {
                           textStyle: const TextStyle(fontSize: 18),
                         ),
                         onPressed: () {
-                          // TODO: Điều hướng tới màn hình Player
+                          //Điều hướng tới màn hình Player
                           context.push(
                             '/player',
                             extra: {'books': books, 'index': currentIndex},

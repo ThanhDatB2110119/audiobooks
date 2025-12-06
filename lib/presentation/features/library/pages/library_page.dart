@@ -1,5 +1,7 @@
 // presentation/features/library/pages/library_page.dart
 
+import 'dart:async';
+
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:audiobooks/presentation/features/library/widgets/my_books_tab_view.dart';
 import 'package:audiobooks/presentation/features/library/widgets/saved_books_tab_view.dart';
@@ -77,25 +79,42 @@ class _LibraryPageState extends State<LibraryPage>
         body: BlocListener<LibraryCubit, LibraryState>(
           listener: (context, state) {
             if (state is LibraryActionSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 4),
-                  action: state.undoAction != null
-                      ? SnackBarAction(
-                          label: 'Hoàn tác',
-                          textColor: Colors.white,
-                          onPressed: state.undoAction!,
-                        )
-                      : null,
-                ),
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+              // Tạo một SnackBar
+              final snackBar = SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                // KHÔNG dùng duration ở đây
+                action: state.undoAction != null
+                    ? SnackBarAction(
+                        label: 'Hoàn tác',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          // Khi nhấn hoàn tác, hãy ẩn snackbar ngay
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          state.undoAction!();
+                        },
+                      )
+                    : null,
               );
+
+              // Hiển thị SnackBar và lấy về controller của nó
+              final controller = ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(snackBar);
+
+              // Tạo một Timer để tự động ẩn SnackBar sau 4 giây
+              Timer(const Duration(seconds: 4), () {
+                // Dùng controller để ẩn chính xác SnackBar này
+                controller.close();
+              });
             } else if (state is LibraryError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
                   backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
                 ),
               );
             }

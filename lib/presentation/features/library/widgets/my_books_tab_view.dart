@@ -169,7 +169,7 @@ class _MyBookListItem extends StatelessWidget {
                 );
 
                 // Nếu người dùng xác nhận, gọi cubit để xóa
-                if (confirm == true) {
+                if (confirm == true && context.mounted) {
                   context.read<LibraryCubit>().deleteDocument(document);
                 }
               },
@@ -216,7 +216,7 @@ class _MyBookListItem extends StatelessWidget {
                   '/player',
                   extra: {'books': bookEntities, 'index': currentIndex},
                 );
-                // TODO: Điều hướng đến PlayerPage khi sách đã hoàn thành
+                // Điều hướng đến PlayerPage khi sách đã hoàn thành
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Sẽ phát sách: ${document.title}')),
                 );

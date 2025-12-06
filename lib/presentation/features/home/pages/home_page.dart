@@ -100,8 +100,9 @@ class HomePage extends StatelessWidget {
                                                 child,
                                                 loadingProgress,
                                               ) {
-                                                if (loadingProgress == null)
+                                                if (loadingProgress == null) {
                                                   return child;
+                                                }
                                                 return Shimmer.fromColors(
                                                   baseColor: Colors.grey[300]!,
                                                   highlightColor:

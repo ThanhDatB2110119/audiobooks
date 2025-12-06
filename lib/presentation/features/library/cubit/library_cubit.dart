@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:audiobooks/core/error/failures.dart';
+import 'package:audiobooks/core/event/library_events.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:audiobooks/domain/usecases/add_book_to_library_usecase.dart';
@@ -23,6 +24,8 @@ class LibraryCubit extends Cubit<LibraryState> {
   final GetSavedBooksUsecase _getSavedBooksUsecase;
   final RemoveBookFromLibraryUsecase _removeBookFromLibraryUsecase;
   final AddBookToLibraryUsecase _addBookToLibraryUsecase;
+  final LibraryEventBus _libraryEventBus;
+  StreamSubscription? _libraryEventsSubscription;
   final SupabaseClient _supabaseClient;
   RealtimeChannel? _realtimeChannel;
 
@@ -32,9 +35,11 @@ class LibraryCubit extends Cubit<LibraryState> {
     this._getSavedBooksUsecase,
     this._removeBookFromLibraryUsecase,
     this._addBookToLibraryUsecase,
+    this._libraryEventBus,
     this._supabaseClient,
   ) : super(LibraryInitial()) {
     _listenToDocumentChanges();
+     _listenToLibraryEvents();
   }
 
   void _listenToDocumentChanges() {
@@ -63,6 +68,14 @@ class LibraryCubit extends Cubit<LibraryState> {
           },
         )
         .subscribe(); // Hàm subscribe() bây giờ được gọi ở cuối
+  }
+
+ void _listenToLibraryEvents() {
+    _libraryEventsSubscription = _libraryEventBus.stream.listen((_) {
+      print('--- Library Event Bus fired! Refetching all content... ---');
+      // Khi nhận được sự kiện, gọi hàm fetch
+      fetchAllLibraryContent();
+    });
   }
 
   Future<void> deleteDocument(PersonalDocumentEntity document) async {
@@ -121,8 +134,9 @@ class LibraryCubit extends Cubit<LibraryState> {
     // Rất quan trọng: Hủy subscription khi Cubit bị đóng để tránh rò rỉ bộ nhớ
     if (_realtimeChannel != null) {
       _supabaseClient.removeChannel(_realtimeChannel!);
-      print('--- Realtime Channel Removed ---');
     }
+    _libraryEventsSubscription?.cancel();
+    print('--- Realtime Channel Removed ---');
     return super.close();
   }
 

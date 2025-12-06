@@ -34,9 +34,8 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
           .map((bookJson) => BookModel.fromJson(bookJson))
           .toList();
     } on PostgrestException catch (e, stackTrace) {
-      // ignore: avoid_print
+   
       print('========== SUPABASE ERROR ==========');
-      // ignore: avoid_print
       print('Message: ${e.message}');
       print('Code: ${e.code}');
       print('Details: ${e.details}');

@@ -101,6 +101,8 @@ class CreatorViewState extends State<CreatorView> {
                               // Nút Nhập link
                               ElevatedButton.icon(
                                 onPressed: () async {
+                                  final creatorCubit = builderContext
+                                      .read<CreatorCubit>();
                                   final String? url = await showInputDialog(
                                     context: context,
                                     title: 'Nhập link tài liệu',
@@ -124,9 +126,7 @@ class CreatorViewState extends State<CreatorView> {
                                   if (!mounted) return;
                                   if (url != null && url.isNotEmpty) {
                                     // Gọi Cubit để bắt đầu xử lý
-                                    context.read<CreatorCubit>().createFromUrl(
-                                      url,
-                                    );
+                                    creatorCubit.createFromUrl(url);
                                   }
                                 },
                                 icon: const FaIcon(
@@ -134,8 +134,8 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.9,
+                                    backgroundColor: Colors.white.withValues(
+                                    alpha: 0.9,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -160,6 +160,7 @@ class CreatorViewState extends State<CreatorView> {
 
                                   // Gọi dialog của bạn để hiển thị trình chọn file.
                                   // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
+                                  final scaffoldMessenger = ScaffoldMessenger.of(context);
                                   showUploadFileDialog(context).then((
                                     selectedFile,
                                   ) {
@@ -176,9 +177,8 @@ class CreatorViewState extends State<CreatorView> {
                                     } else {
                                       // Người dùng đã nhấn nút "Hủy" hoặc đóng dialog.
                                       // Hiển thị một SnackBar ngắn gọn để thông báo.
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
+                                      if (!mounted) return;
+                                      scaffoldMessenger.showSnackBar(
                                         const SnackBar(
                                           content: Text(
                                             'Đã hủy thao tác chọn file.',
@@ -194,8 +194,8 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.9,
+                                    backgroundColor: Colors.white.withValues(
+                                    alpha: 0.9,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -228,8 +228,8 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.9,
+                                    backgroundColor: Colors.white.withValues(
+                                    alpha: 0.9,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -245,7 +245,6 @@ class CreatorViewState extends State<CreatorView> {
                                 ),
                               ),
 
-                              
                               // Nút chọn ảnh
                               const ImageSourceSelectorButton(),
                             ],
