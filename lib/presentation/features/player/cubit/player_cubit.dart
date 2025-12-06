@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -7,7 +8,7 @@ import 'package:just_audio/just_audio.dart';
 
 part 'player_state.dart';
 
-@injectable
+@singleton
 class PlayerCubit extends Cubit<PlayerState> {
   final AudioPlayer _audioPlayer;
   StreamSubscription? _durationSubscription;
@@ -24,42 +25,52 @@ class PlayerCubit extends Cubit<PlayerState> {
     _playerStateSubscription = _audioPlayer.playerStateStream.listen((
       playerState,
     ) {
-      final isPlaying = playerState.playing;
+      // Lấy trạng thái xử lý và trạng thái phát
       final processingState = playerState.processingState;
+      final isPlaying = playerState.playing;
 
+      // Xác định PlayerStatus mới dựa trên thông tin từ AudioPlayer
+      PlayerStatus newStatus;
       if (processingState == ProcessingState.loading ||
           processingState == ProcessingState.buffering) {
-        emit(state.copyWith(status: PlayerStatus.loading));
+        newStatus = PlayerStatus.loading;
       } else if (!isPlaying) {
-        // Chỉ cập nhật thành paused nếu audio đã sẵn sàng (không phải initial/completed)
-        if (processingState != ProcessingState.completed &&
-            processingState != ProcessingState.idle) {
-          emit(state.copyWith(status: PlayerStatus.paused));
+        // Nếu không phát, có thể là do paused, completed hoặc stopped
+        if (state.status == PlayerStatus.stopped) {
+          newStatus = PlayerStatus.stopped;
+        } else if (processingState == ProcessingState.completed) {
+          // Khi một bài hát kết thúc, chúng ta sẽ xử lý nó ở dưới
+          newStatus = PlayerStatus.completed;
+        } else {
+          newStatus = PlayerStatus.paused;
         }
-      } else if (processingState != ProcessingState.completed) {
-        emit(state.copyWith(status: PlayerStatus.playing));
       } else {
-        // Khi audio chạy xong, seek về đầu và pause
-        _audioPlayer.seek(Duration.zero);
-        _audioPlayer.pause();
-        emit(
-          state.copyWith(
-            status: PlayerStatus.completed,
-            position: Duration.zero,
-          ),
-        );
+        // Nếu đang phát
+        newStatus = PlayerStatus.playing;
+      }
+
+      // Phát ra state mới
+      emit(state.copyWith(status: newStatus));
+
+      // Xử lý logic khi một bài hát kết thúc
+      // Chúng ta làm việc này sau khi emit state `completed`
+      if (processingState == ProcessingState.completed) {
+        // ignore: avoid_print
+        print("--- Track Completed. Attempting to play next. ---");
+        // Gọi hàm tự động chuyển bài
+        playNext();
       }
     });
 
     _durationSubscription = _audioPlayer.durationStream.listen((duration) {
-      emit(state.copyWith(duration: duration ?? Duration.zero));
+      if (!isClosed) emit(state.copyWith(duration: duration ?? Duration.zero));
     });
 
     _positionSubscription = _audioPlayer.positionStream.listen((position) {
-      emit(state.copyWith(position: position));
+      if (!isClosed) emit(state.copyWith(position: position));
     });
     _speedSubscription = _audioPlayer.speedStream.listen((speed) {
-      emit(state.copyWith(speed: speed));
+      if (!isClosed) emit(state.copyWith(speed: speed));
     });
   }
 
@@ -128,6 +139,56 @@ class PlayerCubit extends Cubit<PlayerState> {
     }
   }
 
+  Future<void> startNewPlaylist(List<BookEntity> books, int startIndex) async {
+    if (books.isEmpty) return;
+
+    emit(
+      state.copyWith(
+        playlist: books,
+        currentIndex: startIndex,
+        currentBook: books[startIndex],
+        status: PlayerStatus.loading,
+      ),
+    );
+
+    await _audioPlayer.setUrl(books[startIndex].audioUrl);
+    _audioPlayer.play();
+  }
+
+  /// Phát sách tiếp theo trong danh sách
+  Future<void> playNext() async {
+    if (state.currentIndex < state.playlist.length - 1) {
+      final nextIndex = state.currentIndex + 1;
+      await startNewPlaylist(state.playlist, nextIndex);
+    } else {
+      // Đã hết playlist, dừng lại
+      stop();
+    }
+  }
+
+  /// Phát sách trước đó trong danh sách
+  Future<void> playPrevious() async {
+    if (state.currentIndex > 0) {
+      final prevIndex = state.currentIndex - 1;
+      await startNewPlaylist(state.playlist, prevIndex);
+    }
+  }
+
+  /// Dừng phát hoàn toàn và xóa state
+  Future<void> stop() async {
+    await _audioPlayer.stop();
+    emit(
+      state.copyWith(
+        status: PlayerStatus.stopped,
+        clearCurrentBook: true, // Xóa sách hiện tại
+        playlist: [],
+        currentIndex: -1,
+        position: Duration.zero,
+        duration: Duration.zero,
+      ),
+    );
+  }
+
   /// Tua lùi 5 giây.
   void seekBackward() {
     final newPosition = _audioPlayer.position - const Duration(seconds: 5);
@@ -152,7 +213,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
     _speedSubscription?.cancel();
-
+    _audioPlayer.dispose();
     return super.close();
   }
 }

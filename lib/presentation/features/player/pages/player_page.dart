@@ -1,88 +1,68 @@
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-// GoRouter không cần thiết ở đây nữa
-// import 'package:go_router/go_router.dart';
 
-class PlayerPage extends StatefulWidget {
-  final List<BookEntity> books;
-  final int initialIndex;
-
-  const PlayerPage({
-    super.key,
-    required this.books,
-    required this.initialIndex,
-  });
-  @override
-  State<PlayerPage> createState() => _PlayerPageState();
-}
-
-class _PlayerPageState extends State<PlayerPage> {
-  // ======================= THAY ĐỔI 1: TÁCH CUBIT RA NGOÀI BUILD =======================
-  // Chúng ta sẽ tự quản lý vòng đời của Cubit thay vì phụ thuộc vào BlocProvider
-  late final PlayerCubit _playerCubit;
-  // ====================================================================================
-
-  // Quản lý index và sách hiện tại trong state của widget
-  late int currentIndex;
-  late BookEntity currentBook;
-
-  @override
-  void initState() {
-    super.initState();
-    currentIndex = widget.initialIndex;
-    currentBook = widget.books[currentIndex];
-
-    // Khởi tạo Cubit và tải audio ngay trong initState
-    _playerCubit = GetIt.instance<PlayerCubit>();
-    _playerCubit.loadAudio(currentBook.audioUrl, autoplay: true);
-  }
-
-  // ======================= THAY ĐỔI 2: TỰ DỌN DẸP CUBIT =======================
-  // Khi widget này bị hủy (ví dụ khi người dùng nhấn Back), chúng ta phải tự gọi close()
-  @override
-  void dispose() {
-    _playerCubit.close();
-    super.dispose();
-  }
+class PlayerPage extends StatelessWidget {
+  const PlayerPage({super.key});
+  // Constructor không cần nhận tham số nữa.
   // ====================================================================================
 
   @override
   Widget build(BuildContext context) {
-    // Kiểm tra xem đây có phải là sách cá nhân không dựa vào đường dẫn ảnh
-    final bool isPersonalBook = currentBook.coverImageUrl.startsWith('assets/');
-    // ======================= THAY ĐỔI 3: DÙNG BLOCPROVIDER.VALUE =======================
-    // Chúng ta không `create` cubit mới nữa, mà `cung cấp` (provide)
-    // cubit mà chúng ta đã tạo trong initState.
-    return BlocProvider.value(
-      value: _playerCubit,
-      // ====================================================================================
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(currentBook.title, overflow: TextOverflow.ellipsis),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
-            // Dựa vào loại sách để build layout tương ứng
-            child: isPersonalBook
-                ? _buildPersonalBookLayout(context) // Layout cho sách cá nhân
-                : _buildStandardBookLayout(context), // Layout cho sách có sẵn
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        // Chỉ bọc widget Text trong BlocBuilder để nó tự cập nhật
+        title: BlocBuilder<PlayerCubit, PlayerState>(
+          // buildWhen để tối ưu, chỉ build lại khi sách thay đổi
+          buildWhen: (previous, current) =>
+              previous.currentBook != current.currentBook,
+          builder: (context, state) {
+            return Text(
+              state.currentBook?.title ?? 'Trình phát',
+              overflow: TextOverflow.ellipsis,
+            );
+          },
         ),
+      ),
+      // body của Scaffold sẽ là một BlocBuilder để xử lý các trạng thái chính
+      body: BlocBuilder<PlayerCubit, PlayerState>(
+        // buildWhen để tối ưu, chỉ build lại khi status hoặc sách thay đổi
+        buildWhen: (previous, current) =>
+            previous.status != current.status ||
+            previous.currentBook != current.currentBook,
+        builder: (context, state) {
+          final BookEntity? currentBook = state.currentBook;
+
+          // Xử lý trạng thái dừng hoặc không có sách
+          if (state.status == PlayerStatus.stopped || currentBook == null) {
+            return const Center(
+              child: Text(
+                "Không có sách nào đang phát.",
+                style: TextStyle(fontSize: 18),
+              ),
+            );
+          }
+
+          // Nếu có sách, gọi hàm helper để build UI tương ứng
+          return _buildPlayerUI(context, currentBook);
+        },
       ),
     );
   }
 
+  // Hàm helper để build UI chính, tránh lặp code
+  Widget _buildPlayerUI(BuildContext context, BookEntity book) {
+    final bool isPersonalBook = book.coverImageUrl.startsWith('assets/');
+
+    return isPersonalBook
+        ? _buildPersonalBookLayout(context, book)
+        : _buildStandardBookLayout(context, book);
+  }
+
   // / Widget này sẽ kiểm tra xem `imageUrl` là một URL http hay một đường dẫn asset
   // / và hiển thị widget tương ứng.
-  Widget _buildCoverImage(String imageUrl) {
+  Widget _buildCoverImage(BuildContext context, String imageUrl) {
     final isNetworkImage = imageUrl.startsWith('http');
 
     return Stack(
@@ -127,7 +107,7 @@ class _PlayerPageState extends State<PlayerPage> {
           width: 300,
           child: Builder(
             builder: (overlayContext) {
-              return _buildSeekOverlay(overlayContext);
+              return _buildSeekOverlay(context);
             },
           ),
         ),
@@ -136,13 +116,13 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   /// Layout này có phần mô tả cuộn được và các thành phần khác được cố định.
-  Widget _buildPersonalBookLayout(BuildContext context) {
+  Widget _buildPersonalBookLayout(BuildContext context, BookEntity book) {
     return Column(
       children: [
         // --- PHẦN CỐ ĐỊNH Ở TRÊN ---
         const SizedBox(height: 20),
         Text(
-          currentBook.title,
+          book.title,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -150,7 +130,7 @@ class _PlayerPageState extends State<PlayerPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          currentBook.author, // 'Tài liệu cá nhân'
+          book.author, // 'Tài liệu cá nhân'
           style: Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
@@ -174,7 +154,7 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    currentBook.description,
+                    book.description,
                     style: Theme.of(
                       context,
                     ).textTheme.bodyLarge?.copyWith(height: 1.6),
@@ -203,16 +183,16 @@ class _PlayerPageState extends State<PlayerPage> {
   }
 
   /// Layout này hiển thị ảnh bìa và đã được fix lỗi khoảng trống thừa.
-  Widget _buildStandardBookLayout(BuildContext context) {
+  Widget _buildStandardBookLayout(BuildContext context, BookEntity book) {
     return SingleChildScrollView(
       child: Column(
         // Xóa mainAxisAlignment để nội dung bắt đầu từ trên cùng
         children: [
           const SizedBox(height: 20),
-          _buildCoverImage(currentBook.coverImageUrl),
+          _buildCoverImage(context, book.coverImageUrl),
           const SizedBox(height: 32),
           Text(
-            currentBook.title,
+            book.title,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -220,7 +200,7 @@ class _PlayerPageState extends State<PlayerPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            currentBook.author,
+            book.author,
             style: Theme.of(context).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
@@ -247,7 +227,9 @@ class _PlayerPageState extends State<PlayerPage> {
                 state.duration.inSeconds.toDouble(),
               ),
               onChanged: (value) {
-                _playerCubit.seek(Duration(seconds: value.toInt()));
+                context.read<PlayerCubit>().seek(
+                  Duration(seconds: value.toInt()),
+                );
               },
             ),
             Padding(
@@ -268,24 +250,33 @@ class _PlayerPageState extends State<PlayerPage> {
 
   /// Widget cho các nút Play/Pause, Next, Previous...
   Widget _buildPlayerControls(BuildContext context) {
+    // Sử dụng BlocBuilder để rebuild widget mỗi khi state thay đổi
     return BlocBuilder<PlayerCubit, PlayerState>(
+      // buildWhen có thể giúp tối ưu, chỉ rebuild khi các thuộc tính liên quan thay đổi
+      buildWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.currentIndex != current.currentIndex,
       builder: (context, state) {
-        if (state.status == PlayerStatus.loading ||
-            state.status == PlayerStatus.loaded) {
+        // ---- Xử lý trạng thái Loading ----
+        if (state.status == PlayerStatus.loading) {
           return const SizedBox(
-            height: 70,
+            height: 70, // Giữ chiều cao để layout không bị "nhảy"
             child: Center(child: CircularProgressIndicator()),
           );
         }
+
+        // ---- Lấy các thông tin cần thiết từ state ----
         final isPlaying = state.status == PlayerStatus.playing;
-        // ... trong hàm _buildPlayerControls ...
+        final cubit = context.read<PlayerCubit>();
+
+        // Kiểm tra xem có thể tua tới/lui được không
+        final canGoNext = state.currentIndex < state.playlist.length - 1;
+        final canGoPrevious = state.currentIndex > 0;
+
+        // ---- Build UI ----
         return FittedBox(
-          // FittedBox sẽ đảm bảo Row và các nút bên trong không bao giờ bị overflow.
-          // Nó sẽ tự động scale nhỏ mọi thứ lại nếu cần.
-          fit: BoxFit.scaleDown, // Đảm bảo nó chỉ scale nhỏ, không phóng to
-          // =================================================================================
+          fit: BoxFit.scaleDown,
           child: Row(
-            // Sử dụng MainAxisAlignment.center và SizedBox để kiểm soát khoảng cách chính xác
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -293,13 +284,14 @@ class _PlayerPageState extends State<PlayerPage> {
               IconButton(
                 icon: const Icon(Icons.replay, size: 28.0),
                 tooltip: 'Phát lại từ đầu',
-                onPressed: () => _playerCubit.replay(),
+                onPressed: () => cubit.replay(),
               ),
 
               // Nút Previous
               IconButton(
                 icon: const Icon(Icons.skip_previous, size: 36.0),
-                onPressed: currentIndex > 0 ? () => _changeTrack(-1) : null,
+                // Vô hiệu hóa nút nếu không thể tua lùi
+                onPressed: canGoPrevious ? () => cubit.playPrevious() : null,
               ),
 
               // Thêm SizedBox để tạo khoảng cách
@@ -307,7 +299,7 @@ class _PlayerPageState extends State<PlayerPage> {
 
               // Nút Play/Pause
               IconButton(
-                iconSize: 64.0, // Đặt kích thước ở đây
+                iconSize: 64.0,
                 icon: Icon(
                   isPlaying
                       ? Icons.pause_circle_filled
@@ -316,9 +308,9 @@ class _PlayerPageState extends State<PlayerPage> {
                 ),
                 onPressed: () {
                   if (isPlaying) {
-                    _playerCubit.pause();
+                    cubit.pause();
                   } else {
-                    _playerCubit.play();
+                    cubit.play();
                   }
                 },
               ),
@@ -329,9 +321,8 @@ class _PlayerPageState extends State<PlayerPage> {
               // Nút Next
               IconButton(
                 icon: const Icon(Icons.skip_next, size: 36.0),
-                onPressed: currentIndex < widget.books.length - 1
-                    ? () => _changeTrack(1)
-                    : null,
+                // Vô hiệu hóa nút nếu không thể tua tới
+                onPressed: canGoNext ? () => cubit.playNext() : null,
               ),
 
               // Nút Speed
@@ -339,6 +330,8 @@ class _PlayerPageState extends State<PlayerPage> {
                 icon: const Icon(Icons.speed, size: 28.0),
                 tooltip: 'Thay đổi tốc độ',
                 onPressed: () {
+                  // `_showSpeedSelector` là một hàm trong class PlayerPage,
+                  // nó cần context để hoạt động.
                   _showSpeedSelector(context);
                 },
               ),
@@ -430,27 +423,6 @@ class _PlayerPageState extends State<PlayerPage> {
       ],
     );
   }
-
-  // ======================= THAY ĐỔI 4: VIẾT LẠI HOÀN TOÀN HÀM _changeTrack =======================
-  void _changeTrack(int direction) {
-    // Tính toán index mới
-    final newIndex = currentIndex + direction;
-
-    // Kiểm tra xem index có hợp lệ không
-    if (newIndex < 0 || newIndex >= widget.books.length) {
-      return;
-    }
-
-    // Cập nhật state của widget
-    setState(() {
-      currentIndex = newIndex;
-      currentBook = widget.books[currentIndex];
-    });
-
-    // Ra lệnh cho Cubit đang tồn tại tải audio mới
-    _playerCubit.loadAudio(currentBook.audioUrl, autoplay: true);
-  }
-  // ===============================================================================================
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

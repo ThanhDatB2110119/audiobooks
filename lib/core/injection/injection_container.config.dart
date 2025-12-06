@@ -134,7 +134,7 @@ _i174.GetIt init(
     () => _i83.BookRepositoryImpl(gh<_i971.BookRemoteDataSource>()),
     registerFor: {_prod},
   );
-  gh.factory<_i949.PlayerCubit>(
+  gh.singleton<_i949.PlayerCubit>(
     () => _i949.PlayerCubit(gh<_i501.AudioPlayer>()),
   );
   gh.lazySingleton<_i224.AuthCubit>(

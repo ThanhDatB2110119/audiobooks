@@ -1,5 +1,6 @@
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
+import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
 import 'package:flutter/material.dart';
 // ======================= THÊM CÁC IMPORT CẦN THIẾT =======================
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -133,10 +134,18 @@ class _SavedBookListItem extends StatelessWidget {
         ),
         onTap: () {
           // Điều hướng đến PlayerPage, truyền vào danh sách sách đã lưu
-          context.push(
-            '/player',
-            extra: {'books': allSavedBooks, 'index': currentIndex},
+          context.read<PlayerCubit>().startNewPlaylist(
+            allSavedBooks,
+            currentIndex,
           );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Bắt đầu phát...'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          // Có thể điều hướng đến PlayerPage ngay sau đó nếu muốn
+          // context.push('/player');
         },
       ),
     );

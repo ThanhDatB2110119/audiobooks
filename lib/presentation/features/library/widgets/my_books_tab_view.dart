@@ -1,6 +1,6 @@
-
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:audiobooks/presentation/features/library/utils/mapper.dart';
+import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
 import 'package:flutter/material.dart';
 // ======================= THÊM CÁC IMPORT CẦN THIẾT =======================
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +8,7 @@ import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_cubit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
 class MyBooksTabView extends StatelessWidget {
   const MyBooksTabView({super.key});
 
@@ -207,18 +208,23 @@ class _MyBookListItem extends StatelessWidget {
         onTap: isCompleted
             ? () {
                 // 1. Chuyển đổi toàn bộ danh sách PersonalDocumentEntity sang BookEntity
+                //    Logic này vẫn cần thiết để tạo playlist cho PlayerCubit.
                 final bookEntities = allDocuments
                     .map((doc) => doc.toBookEntity())
                     .toList();
 
-                // 2. Điều hướng đến PlayerPage, truyền vào danh sách đã chuyển đổi và index hiện tại
-                context.push(
-                  '/player',
-                  extra: {'books': bookEntities, 'index': currentIndex},
+                // 2. Ra lệnh cho PlayerCubit singleton bắt đầu phát playlist này
+                context.read<PlayerCubit>().startNewPlaylist(
+                  bookEntities,
+                  currentIndex,
                 );
-                // Điều hướng đến PlayerPage khi sách đã hoàn thành
+
+                // 3. (Tùy chọn) Hiển thị SnackBar xác nhận
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Sẽ phát sách: ${document.title}')),
+                  const SnackBar(
+                    content: Text('Bắt đầu phát sách của bạn...'),
+                    duration: Duration(seconds: 2),
+                  ),
                 );
               }
             : null, // Vô hiệu hóa onTap nếu chưa hoàn thành

@@ -1,6 +1,7 @@
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_cubit.dart';
 import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_state.dart';
+import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -42,9 +43,7 @@ class BookDetailsPage extends StatelessWidget {
                   if (state is BookDetailsLoaded) {
                     return IconButton(
                       icon: Icon(
-                        state.isSaved
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
+                        state.isSaved ? Icons.bookmark : Icons.bookmark_border,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       onPressed: () =>
@@ -127,15 +126,26 @@ class BookDetailsPage extends StatelessWidget {
                         ),
                         onPressed: () {
                           //Điều hướng tới màn hình Player
-                          context.push(
-                            '/player',
-                            extra: {'books': books, 'index': currentIndex},
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Sẽ mở màn hình Player...'),
-                            ),
-                          );
+                          final currentState = context
+                              .read<BookDetailsCubit>()
+                              .state;
+
+                          // Đảm bảo state là Loaded và có dữ liệu sách
+                          if (currentState is BookDetailsLoaded) {
+                            // 1. Ra lệnh cho PlayerCubit (singleton) bắt đầu phát.
+                            // Vì chỉ có 1 cuốn sách, chúng ta tạo một playlist chỉ chứa cuốn sách đó.
+                            context.read<PlayerCubit>().startNewPlaylist([
+                              currentState.book,
+                            ], 0);
+
+                            // 2. Hiển thị thông báo cho người dùng
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Bắt đầu phát...'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Phát sách'),

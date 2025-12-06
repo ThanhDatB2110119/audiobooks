@@ -44,20 +44,7 @@ class AppRouter {
         builder: (context, state) {
           // Lấy object `book` được truyền qua tham số `extra` khi gọi `context.push`.
           // Đây là cách để truyền các đối tượng phức tạp mà không cần đưa lên URL.
-          final extraData = state.extra as Map<String, dynamic>?;
-
-          if (extraData == null) {
-            return const Scaffold(
-              body: Center(child: Text('Lỗi: Dữ liệu sách không hợp lệ.')),
-            );
-          }
-
-          final books = extraData['books'] as List<BookEntity>;
-          final initialIndex = extraData['index'] as int;
-          appLogger.i(
-            'Điều hướng tới trang Player với sách: ${books[initialIndex].title}',
-          );
-          return PlayerPage(books: books, initialIndex: initialIndex);
+          return const PlayerPage();
         },
       ),
       StatefulShellRoute.indexedStack(

@@ -1,5 +1,7 @@
+import 'package:audiobooks/presentation/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+// ===============================================================
 
 class MainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -19,56 +21,52 @@ class MainShell extends StatelessWidget {
       extendBody: true,
       body: navigationShell,
       resizeToAvoidBottomInset: false,
-      //floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: Container(
-      //   height: 56,
-      //   width: 56,
-      //   decoration: BoxDecoration(
-      //     shape: BoxShape.circle,
-      //     gradient: LinearGradient(
-      //       colors: [PrimaryColors.shade600, PrimaryColors.shade500],
-      //       begin: Alignment.topCenter,
-      //       end: Alignment.bottomCenter,
-      //     ),
-      //   ),
-      //   child: FloatingActionButton(
-      //     onPressed: () {},
-      //     backgroundColor: Colors.transparent,
-      //     splashColor: Colors.transparent,
-      //     highlightElevation: 0,
-      //     focusColor: Colors.transparent,
-      //     hoverColor: Colors.transparent,
-      //     foregroundColor: Colors.transparent,
-      //     elevation: 0,
-      //     shape: const CircleBorder(),
-      //     child: const Icon(Icons.add_rounded, color: Colors.white, size: 50),
-      //   ),
-      // ),
+      // ======================= THAY ĐỔI LỚN TẠI ĐÂY =======================
+      // Thay thế BottomAppBar bằng một Column chứa MiniPlayer và BottomAppBar.
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize
+            .min, // Cực kỳ quan trọng, để Column chỉ chiếm chiều cao cần thiết
+        children: [
+          // Lớp trên: Mini Player sẽ hiển thị ở đây
+          const MiniPlayer(),
 
-      // BottomAppBar
-      bottomNavigationBar: BottomAppBar(
-        //shape: const CircularNotchedRectangle(),
-        //notchMargin: 8.0,
-        height: 60,
-        color: Colors.white,
-        child: Row(
-          children: [
-            _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
-            _buildNavItem(Icons.create_outlined, Icons.create, 'Creator', 1),
-            // const SizedBox(width: 40),
-            _buildNavItem(
-              Icons.library_books_outlined,
-              Icons.library_books,
-              'Library',
-              2,
+          // Lớp dưới: BottomAppBar của bạn giữ nguyên
+          BottomAppBar(
+            height: 60,
+            color: Colors.transparent,
+            // Thêm padding bằng 0 để loại bỏ khoảng trống thừa (nếu có)
+            padding: EdgeInsets.zero,
+            child: Row(
+              children: [
+                _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
+                _buildNavItem(
+                  Icons.create_outlined,
+                  Icons.create,
+                  'Creator',
+                  1,
+                ),
+                _buildNavItem(
+                  Icons.library_books_outlined,
+                  Icons.library_books,
+                  'Library',
+                  2,
+                ),
+                _buildNavItem(
+                  Icons.person_outline,
+                  Icons.person,
+                  'Profile',
+                  3,
+                ), // Đổi tên 'Page 4' thành 'Profile' cho rõ nghĩa
+              ],
             ),
-            _buildNavItem(Icons.person_outline, Icons.person, 'Page 4', 3),
-          ],
-        ),
+          ),
+        ],
       ),
+      // ====================================================================
     );
   }
 
+  // Hàm _buildNavItem không có gì thay đổi
   Widget _buildNavItem(
     IconData icon,
     IconData selectedIcon,
@@ -80,7 +78,7 @@ class MainShell extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           isSelected ? selectedIcon : icon,
-          // color: isSelected ? PrimaryColors.shade600 : NeutralColors.shade300,
+          color: isSelected ? Colors.blue : Colors.black, // Ví dụ thêm màu
         ),
         onPressed: () => _onTap(index),
       ),
