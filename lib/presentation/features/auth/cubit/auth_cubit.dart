@@ -4,6 +4,7 @@ import 'package:audiobooks/domain/usecases/google_sign_out_usecase.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_state.dart';
 
@@ -11,7 +12,10 @@ part 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   final GoogleSignInUseCase _googleSignInUseCase;
   final GoogleSignOutUseCase _googleSignOutUseCase;
-  AuthCubit(this._googleSignInUseCase, this._googleSignOutUseCase) : super(AuthInitial());
+  AuthCubit(this._googleSignInUseCase, this._googleSignOutUseCase)
+    : super(AuthInitial()) {
+    _checkInitialSession();
+  }
 
   Future<void> googleSignInRequested() async {
     emit(AuthLoading());
@@ -34,9 +38,28 @@ class AuthCubit extends Cubit<AuthState> {
       }
     });
   }
-Future<void> signOutRequested(
-   
-  ) async {
+
+  void _checkInitialSession() {
+    final currentSession = Supabase.instance.client.auth.currentSession;
+
+    if (currentSession != null) {
+      print('--- Session restored. User is authenticated. ---');
+
+      // ======================= SỬA LỖI TẠI ĐÂY =======================
+      // 1. Lấy đối tượng User của Supabase
+      final supabaseUser = currentSession.user;
+      // 2. Chuyển đổi nó thành UserEntity của chúng ta
+      final userEntity = UserEntity.fromSupabaseUser(supabaseUser);
+      // 3. Truyền UserEntity vào state
+      emit(AuthAuthenticated(userEntity));
+      // ===============================================================
+    } else {
+      print('--- No active session. User is unauthenticated. ---');
+      emit(AuthUnauthenticated());
+    }
+  }
+
+  Future<void> signOutRequested() async {
     emit(AuthLoading()); // Chuyển sang trạng thái loading
 
     final result = await _googleSignOutUseCase();
@@ -54,5 +77,4 @@ Future<void> signOutRequested(
       },
     );
   }
-  
 }
