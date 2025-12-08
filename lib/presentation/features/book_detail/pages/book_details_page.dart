@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-
 class BookDetailsPage extends StatelessWidget {
   final String bookId;
 
@@ -134,9 +133,10 @@ class BookDetailsPage extends StatelessWidget {
                           if (currentState is BookDetailsLoaded) {
                             // 1. Ra lệnh cho PlayerCubit (singleton) bắt đầu phát.
                             // Vì chỉ có 1 cuốn sách, chúng ta tạo một playlist chỉ chứa cuốn sách đó.
-                            context.read<PlayerCubit>().startNewPlaylist([
-                              currentState.book,
-                            ], 0);
+                            context.read<PlayerCubit>().startNewPlaylist(
+                              books,
+                              currentIndex,
+                            );
 
                             // 2. Hiển thị thông báo cho người dùng
                             ScaffoldMessenger.of(context).showSnackBar(

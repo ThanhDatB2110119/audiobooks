@@ -74,7 +74,7 @@ class AppRouter {
                       final String? bookId = state.pathParameters['bookId'];
                       final extraData = state.extra as Map<String, dynamic>?;
                       // Kiểm tra null để đảm bảo an toàn
-                      if (bookId == null || extraData == null) {
+                      if (bookId == null || extraData == null || extraData['books'] == null || extraData['index'] == null) {
                         return const Scaffold(
                           body: Center(
                             child: Text('Lỗi: Thiếu thông tin sách.'),
