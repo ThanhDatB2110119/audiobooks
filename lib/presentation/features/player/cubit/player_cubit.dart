@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audiobooks/domain/entities/book_entity.dart';
+import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -11,13 +12,16 @@ part 'player_state.dart';
 @singleton
 class PlayerCubit extends Cubit<PlayerState> {
   final AudioPlayer _audioPlayer;
+  final AuthCubit _authCubit;
+  StreamSubscription? _authSubscription;
   StreamSubscription? _durationSubscription;
   StreamSubscription? _positionSubscription;
   StreamSubscription? _playerStateSubscription;
   StreamSubscription? _speedSubscription;
 
-  PlayerCubit(this._audioPlayer) : super(const PlayerState()) {
+  PlayerCubit(this._audioPlayer, this._authCubit) : super(const PlayerState()) {
     _listenToPlayerChanges();
+    _listenToAuthState();
   }
 
   void _listenToPlayerChanges() {
@@ -74,6 +78,20 @@ class PlayerCubit extends Cubit<PlayerState> {
     });
   }
 
+  /// Lắng nghe sự thay đổi trạng thái xác thực.
+  void _listenToAuthState() {
+    // Lắng nghe stream của AuthCubit
+    _authSubscription = _authCubit.stream.listen((authState) {
+      // Nếu người dùng không còn được xác thực (ví dụ: đã đăng xuất)
+      if (authState is! AuthAuthenticated) {
+        print(
+          '--- Auth state changed to unauthenticated. Stopping player. ---',
+        );
+        // Gọi hàm stop để dừng nhạc và xóa state
+        stop();
+      }
+    });
+  }
   // ======================= THAY ĐỔI 1: CẬP NHẬT PHƯƠNG THỨC loadAudio =======================
   // File cũ:
   // Future<void> loadAudio(String url) async {
@@ -213,6 +231,7 @@ class PlayerCubit extends Cubit<PlayerState> {
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
     _speedSubscription?.cancel();
+    _authSubscription?.cancel();
     _audioPlayer.dispose();
     return super.close();
   }
