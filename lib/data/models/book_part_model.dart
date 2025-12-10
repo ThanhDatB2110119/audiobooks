@@ -3,7 +3,7 @@ import '../../domain/entities/book_part_entity.dart';
 
 part 'book_part_model.g.dart';
 
-@JsonSerializable(createToJson: true) 
+@JsonSerializable(createFactory: false, explicitToJson: true) 
 class BookPartModel extends BookPartEntity {
   const BookPartModel({
     required super.id,
