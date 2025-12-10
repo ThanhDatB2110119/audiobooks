@@ -41,6 +41,7 @@ import '../../domain/usecases/delete_document_usecase.dart' as _i45;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
 import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
 import '../../domain/usecases/get_book_parts_usecase.dart' as _i937;
+import '../../domain/usecases/get_categories_usecase.dart' as _i943;
 import '../../domain/usecases/get_saved_books_usecase.dart' as _i220;
 import '../../domain/usecases/get_user_documents_usecase.dart' as _i1060;
 import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
@@ -168,6 +169,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i937.GetBookPartsUsecase>(
     () => _i937.GetBookPartsUsecase(gh<_i135.BookRepository>()),
   );
+  gh.lazySingleton<_i943.GetCategoriesUsecase>(
+    () => _i943.GetCategoriesUsecase(gh<_i135.BookRepository>()),
+  );
   gh.lazySingleton<_i342.CreateDocumentFromFileUsecase>(
     () => _i342.CreateDocumentFromFileUsecase(
       gh<_i538.PersonalDocumentRepository>(),
@@ -218,7 +222,10 @@ _i174.GetIt init(
     ),
   );
   gh.factory<_i900.HomeCubit>(
-    () => _i900.HomeCubit(gh<_i813.GetAllBooksUsecase>()),
+    () => _i900.HomeCubit(
+      gh<_i813.GetAllBooksUsecase>(),
+      gh<_i943.GetCategoriesUsecase>(),
+    ),
   );
   gh.factory<_i970.BookDetailsCubit>(
     () => _i970.BookDetailsCubit(
