@@ -5,7 +5,6 @@ import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 
 class BookDetailsPage extends StatelessWidget {
   final String bookId;
@@ -229,7 +228,7 @@ class BookDetailsPage extends StatelessWidget {
                                         .startNewPlaylist(playlist, index);
 
                                     // 4. Điều hướng đến trang Player
-                                    context.push('/player');
+                                    // context.push('/player');
                                   },
                                 );
                               },

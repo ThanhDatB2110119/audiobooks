@@ -1,12 +1,13 @@
 import 'package:audiobooks/core/error/exceptions.dart';
 import 'package:audiobooks/data/models/book_model.dart';
 import 'package:audiobooks/data/models/book_part_model.dart';
+import 'package:audiobooks/data/models/category_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class BookRemoteDataSource {
   Future<List<BookModel>> getBooks({String? categoryId});
-
+  Future<List<CategoryModel>> getCategories();
   Future<BookModel> getBookById(String id);
   Future<bool> isBookSaved(String bookId);
   Future<List<BookPartModel>> getBookParts(String bookId);
@@ -36,7 +37,6 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
           .map((bookJson) => BookModel.fromJson(bookJson))
           .toList();
     } on PostgrestException catch (e, stackTrace) {
-   
       print('========== SUPABASE ERROR ==========');
       print('Message: ${e.message}');
       print('Code: ${e.code}');
@@ -55,8 +55,22 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
     }
   }
 
-
 @override
+  Future<List<CategoryModel>> getCategories() async {
+    try {
+      final response = await supabaseClient
+          .from('categories')
+          .select()
+          .order('name', ascending: true); // Sắp xếp theo tên
+
+      return (response as List)
+          .map((data) => CategoryModel.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+  @override
   Future<List<BookPartModel>> getBookParts(String bookId) async {
     try {
       final response = await supabaseClient
@@ -64,11 +78,14 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
           .select()
           .eq('book_id', bookId)
           .order('part_number', ascending: true);
-      return (response as List).map((data) => BookPartModel.fromJson(data)).toList();
+      return (response as List)
+          .map((data) => BookPartModel.fromJson(data))
+          .toList();
     } catch (e) {
-      throw ServerException( e.toString());
+      throw ServerException(e.toString());
     }
   }
+
   @override
   Future<BookModel> getBookById(String id) async {
     try {
@@ -98,7 +115,7 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       throw ServerException('Failed to fetch book: $e');
     }
   }
-  
+
   @override
   Future<bool> isBookSaved(String bookId) async {
     final user = supabaseClient.auth.currentUser;
@@ -116,25 +133,33 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
   Future<void> addBookToLibrary(String bookId) async {
     final user = supabaseClient.auth.currentUser;
     if (user == null) throw ServerException('User not authenticated');
-    await supabaseClient.from('user_library').insert({'user_id': user.id, 'book_id': bookId});
+    await supabaseClient.from('user_library').insert({
+      'user_id': user.id,
+      'book_id': bookId,
+    });
   }
 
   @override
   Future<void> removeBookFromLibrary(String bookId) async {
     final user = supabaseClient.auth.currentUser;
-    if (user == null) throw ServerException( 'User not authenticated');
-    await supabaseClient.from('user_library').delete().match({'user_id': user.id, 'book_id': bookId});
+    if (user == null) throw ServerException('User not authenticated');
+    await supabaseClient.from('user_library').delete().match({
+      'user_id': user.id,
+      'book_id': bookId,
+    });
   }
 
   @override
   Future<List<BookModel>> getSavedBooks() async {
     final user = supabaseClient.auth.currentUser;
     if (user == null) return [];
-    
+
     // Query JOIN mạnh mẽ của Supabase
     final response = await supabaseClient
         .from('user_library')
-        .select('books(*, categories(name))') // Lấy tất cả thông tin từ bảng books liên quan
+        .select(
+          'books(*, categories(name))',
+        ) // Lấy tất cả thông tin từ bảng books liên quan
         .eq('user_id', user.id);
 
     return (response as List)

@@ -4,6 +4,7 @@ import 'package:audiobooks/data/datasources/book_remote_data_source.dart';
 import 'package:audiobooks/data/repositories/mock_book_repository_impl.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/domain/entities/book_part_entity.dart';
+import 'package:audiobooks/domain/entities/category_entity.dart';
 import 'package:audiobooks/domain/repositories/book_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
@@ -28,6 +29,15 @@ class BookRepositoryImpl implements BookRepository {
     }
   }
 
+@override
+  Future<Either<Failure, List<CategoryEntity>>> getCategories() async {
+    try {
+      final categories = await remoteDataSource.getCategories();
+      return Right(categories);
+    } on ServerException catch (e) {
+      return Left(ServerFailure( e.message));
+    }
+  }
   @override
   Future<Either<Failure, BookEntity>> getBookById(int id) async {
     try {

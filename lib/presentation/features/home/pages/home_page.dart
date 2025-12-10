@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
     //    - Dùng toán tử `..` (cascade) để gọi `fetchBooks()` ngay sau khi Cubit được tạo.
     //      Điều này giúp tải dữ liệu ngay khi màn hình được build.
     return BlocProvider(
-      create: (_) => GetIt.instance<HomeCubit>()..fetchBooks(),
+      create: (_) => GetIt.instance<HomeCubit>()..fetchData(),
       child: SafeArea(
         child: Scaffold(
           appBar: PreferredSize(
@@ -54,8 +54,84 @@ class HomePage extends StatelessWidget {
               if (state is HomeLoaded) {
                 // Hiển thị danh sách sách
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Danh sách sách hoặc thông báo không có sách
+                    // --- Thanh lọc thể loại ---
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      child: Text(
+                        'Thể loại',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+
+                    // Widget Wrap sẽ tự động sắp xếp các widget con của nó theo hàng ngang,
+                    // và sẽ "wrap" (xuống dòng) khi không còn đủ không gian.
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Builder(
+                        builder: (context) {
+                          // Lấy danh sách các chip từ state
+                          final List<Widget> allChips = [
+                            _buildChip(
+                              context,
+                              state,
+                              label: 'Tất cả',
+                              categoryId: null,
+                            ),
+                            ...state.categories.map(
+                              (category) => _buildChip(
+                                context,
+                                state,
+                                label: category.name,
+                                categoryId: category.id,
+                              ),
+                            ),
+                          ];
+
+                          // Logic để chia các chip thành 3 hàng
+                          const int numberOfRows = 3;
+                          List<List<Widget>> columns = List.generate(
+                            (allChips.length / numberOfRows).ceil(),
+                            (_) => [],
+                          );
+                          for (int i = 0; i < allChips.length; i++) {
+                            columns[i % columns.length].add(
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 6.0,
+                                ), // Khoảng cách giữa các chip trong 1 cột
+                                child: allChips[i],
+                              ),
+                            );
+                          }
+
+                          // Hiển thị các cột chip
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: columns.map((chipColumn) {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  right: 6.0,
+                                ), // Khoảng cách giữa các cột
+                                child: IntrinsicWidth(
+                                  // Làm cho chiều rộng của cột bằng với chip dài nhất
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .stretch, // Các chip trong cột sẽ dài bằng nhau
+                                    children: chipColumn,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ),
+                    const Divider(height: 24),
+
+                    // --- Danh sách sách ---
                     Expanded(
                       child: state.books.isEmpty
                           ? Center(
@@ -176,7 +252,7 @@ class HomePage extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           // Cho phép người dùng thử tải lại
-                          context.read<HomeCubit>().fetchBooks();
+                          context.read<HomeCubit>().fetchData();
                         },
                         child: const Text('Thử lại'),
                       ),
@@ -190,6 +266,54 @@ class HomePage extends StatelessWidget {
                 child: Text('Chào mừng bạn đến với ứng dụng!'),
               );
             },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Hàm helper để tạo một ChoiceChip đã được tùy chỉnh
+  Widget _buildChip(
+    BuildContext context,
+    HomeLoaded state, {
+    required String label,
+    required String? categoryId,
+  }) {
+    final isSelected = state.selectedCategoryId == categoryId;
+
+    // Sử dụng InkWell để có hiệu ứng gợn sóng khi nhấn
+    return InkWell(
+      // Bọc trong BorderRadius để hiệu ứng gợn sóng cũng được bo tròn
+      borderRadius: BorderRadius.circular(20.0),
+      onTap: () {
+        // Chỉ kích hoạt hành động nếu chip chưa được chọn
+        if (!isSelected) {
+          context.read<HomeCubit>().filterByCategory(categoryId);
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(
+          milliseconds: 200,
+        ), // Thêm hiệu ứng chuyển màu mượt mà
+        // --- Widget Container để vẽ giao diện cho Chip ---
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey[700],
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Center(
+          // Căn giữa Text bên trong
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            textAlign: TextAlign.center, // Căn giữa cho text nhiều dòng
+            maxLines: 1, // Đảm bảo text không xuống dòng
+            overflow: TextOverflow.ellipsis, // Thêm ... nếu text quá dài
           ),
         ),
       ),

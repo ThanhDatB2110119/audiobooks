@@ -10,7 +10,13 @@ class GetAllBooksUsecase {
 
   GetAllBooksUsecase(this.repository);
 
-  Future<Either<Failure, List<BookEntity>>> call() async {
-    return await repository.getBooks();
+  Future<Either<Failure, List<BookEntity>>> call({String? categoryId}) async {
+    // Truyền categoryId xuống cho repository.
+    return await repository.getBooks(categoryId: categoryId);
   }
+}
+
+class GetAllBooksParams {
+  final String? categoryId;
+  GetAllBooksParams({this.categoryId});
 }
