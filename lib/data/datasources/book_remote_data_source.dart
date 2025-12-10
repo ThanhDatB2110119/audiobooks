@@ -1,5 +1,6 @@
 import 'package:audiobooks/core/error/exceptions.dart';
 import 'package:audiobooks/data/models/book_model.dart';
+import 'package:audiobooks/data/models/book_part_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,6 +9,7 @@ abstract class BookRemoteDataSource {
 
   Future<BookModel> getBookById(String id);
   Future<bool> isBookSaved(String bookId);
+  Future<List<BookPartModel>> getBookParts(String bookId);
   Future<void> addBookToLibrary(String bookId);
   Future<void> removeBookFromLibrary(String bookId);
   Future<List<BookModel>> getSavedBooks();
@@ -53,6 +55,20 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
     }
   }
 
+
+@override
+  Future<List<BookPartModel>> getBookParts(String bookId) async {
+    try {
+      final response = await supabaseClient
+          .from('book_parts')
+          .select()
+          .eq('book_id', bookId)
+          .order('part_number', ascending: true);
+      return (response as List).map((data) => BookPartModel.fromJson(data)).toList();
+    } catch (e) {
+      throw ServerException( e.toString());
+    }
+  }
   @override
   Future<BookModel> getBookById(String id) async {
     try {

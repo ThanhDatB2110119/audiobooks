@@ -1,5 +1,6 @@
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
+import 'package:audiobooks/domain/entities/book_part_entity.dart';
 import 'package:audiobooks/domain/entities/mock_books.dart';
 import 'package:audiobooks/domain/repositories/book_repository.dart';
 import 'package:dartz/dartz.dart';
@@ -72,5 +73,13 @@ class MockBookRepositoryImpl implements BookRepository {
     _savedBookIds.remove(bookId);
     await Future.delayed(const Duration(milliseconds: 200));
     return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, List<BookPartEntity>>> getBookParts(String bookId) async {
+    print('Mock: Getting book parts for $bookId');
+    await Future.delayed(const Duration(milliseconds: 300));
+    // Return empty list or mock data as needed
+    return const Right([]);
   }
 }

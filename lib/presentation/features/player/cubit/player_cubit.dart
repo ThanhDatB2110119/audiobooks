@@ -158,19 +158,53 @@ class PlayerCubit extends Cubit<PlayerState> {
   }
 
   Future<void> startNewPlaylist(List<BookEntity> books, int startIndex) async {
-    if (books.isEmpty) return;
+    // Kiểm tra đầu vào hợp lệ
+    if (books.isEmpty || startIndex < 0 || startIndex >= books.length) return;
+
+    final bookToPlay = books[startIndex];
+
+    // --- BƯỚC KIỂM TRA QUAN TRỌNG NHẤT ---
+    // Kiểm tra xem sách được chọn có URL audio hợp lệ hay không
+    if (bookToPlay.audioUrl == null || bookToPlay.audioUrl!.isEmpty) {
+      // Nếu không có URL, phát ra state lỗi và dừng lại
+      emit(
+        state.copyWith(
+          status: PlayerStatus.error,
+          errorMessage: 'Không tìm thấy file audio cho phần này.',
+        ),
+      );
+      return;
+    }
+
+    // Nếu code chạy đến đây, chúng ta chắc chắn 100% rằng `bookToPlay.audioUrl` không phải là null.
 
     emit(
       state.copyWith(
         playlist: books,
         currentIndex: startIndex,
-        currentBook: books[startIndex],
+        currentBook: bookToPlay,
         status: PlayerStatus.loading,
+        position: Duration.zero,
+        duration: Duration.zero,
       ),
     );
 
-    await _audioPlayer.setUrl(books[startIndex].audioUrl);
-    _audioPlayer.play();
+    try {
+      // Bây giờ chúng ta có thể dùng toán tử `!` (bang operator) một cách an toàn
+      // để khẳng định với Dart rằng `audioUrl` không phải là null.
+      await _audioPlayer.setUrl(bookToPlay.audioUrl!);
+
+      await _audioPlayer.setSpeed(state.speed);
+      _audioPlayer.play();
+    } catch (e) {
+      // Xử lý lỗi nếu setUrl thất bại (ví dụ: URL không hợp lệ)
+      emit(
+        state.copyWith(
+          status: PlayerStatus.error,
+          errorMessage: 'Lỗi khi tải audio. Vui lòng kiểm tra lại đường dẫn.',
+        ),
+      );
+    }
   }
 
   /// Phát sách tiếp theo trong danh sách
@@ -206,6 +240,33 @@ class PlayerCubit extends Cubit<PlayerState> {
       ),
     );
   }
+  // Future<void> startNewPlaylist(List<BookEntity> books, int startIndex) async {
+  //     if (books.isEmpty || startIndex < 0 || startIndex >= books.length) return;
+
+  //     final bookToPlay = books[startIndex];
+  //     // Kiểm tra xem sách có URL audio không
+  //     if (bookToPlay.audioUrl == null || bookToPlay.audioUrl!.isEmpty) {
+  //       emit(state.copyWith(status: PlayerStatus.error, errorMessage: 'Không tìm thấy file audio cho phần này.'));
+  //       return;
+  //     }
+
+  //     emit(state.copyWith(
+  //       playlist: books,
+  //       currentIndex: startIndex,
+  //       currentBook: bookToPlay,
+  //       status: PlayerStatus.loading,
+  //       position: Duration.zero, // Reset vị trí khi bắt đầu bài mới
+  //       duration: Duration.zero,
+  //     ));
+
+  //     try {
+  //       await _audioPlayer.setUrl(bookToPlay.audioUrl!);
+  //       await _audioPlayer.setSpeed(state.speed); // Đảm bảo tốc độ được giữ nguyên
+  //       _audioPlayer.play();
+  //     } catch (e) {
+  //        emit(state.copyWith(status: PlayerStatus.error, errorMessage: 'Lỗi khi tải audio.'));
+  //     }
+  //   }
 
   /// Tua lùi 5 giây.
   void seekBackward() {

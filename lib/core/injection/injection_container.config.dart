@@ -40,6 +40,7 @@ import '../../domain/usecases/create_document_from_url_usecase.dart' as _i218;
 import '../../domain/usecases/delete_document_usecase.dart' as _i45;
 import '../../domain/usecases/get_all_books_usecase.dart' as _i813;
 import '../../domain/usecases/get_book_details_usecase.dart' as _i494;
+import '../../domain/usecases/get_book_parts_usecase.dart' as _i937;
 import '../../domain/usecases/get_saved_books_usecase.dart' as _i220;
 import '../../domain/usecases/get_user_documents_usecase.dart' as _i1060;
 import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
@@ -164,6 +165,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i264.RemoveBookFromLibraryUsecase>(
     () => _i264.RemoveBookFromLibraryUsecase(gh<_i135.BookRepository>()),
   );
+  gh.lazySingleton<_i937.GetBookPartsUsecase>(
+    () => _i937.GetBookPartsUsecase(gh<_i135.BookRepository>()),
+  );
   gh.lazySingleton<_i342.CreateDocumentFromFileUsecase>(
     () => _i342.CreateDocumentFromFileUsecase(
       gh<_i538.PersonalDocumentRepository>(),
@@ -203,15 +207,6 @@ _i174.GetIt init(
       gh<_i454.SupabaseClient>(),
     ),
   );
-  gh.factory<_i970.BookDetailsCubit>(
-    () => _i970.BookDetailsCubit(
-      gh<_i494.GetBookDetailsUsecase>(),
-      gh<_i457.CheckBookSavedStatusUsecase>(),
-      gh<_i1006.AddBookToLibraryUsecase>(),
-      gh<_i264.RemoveBookFromLibraryUsecase>(),
-      gh<_i32.LibraryEventBus>(),
-    ),
-  );
   gh.singleton<_i949.PlayerCubit>(
     () => _i949.PlayerCubit(gh<_i501.AudioPlayer>(), gh<_i224.AuthCubit>()),
   );
@@ -224,6 +219,16 @@ _i174.GetIt init(
   );
   gh.factory<_i900.HomeCubit>(
     () => _i900.HomeCubit(gh<_i813.GetAllBooksUsecase>()),
+  );
+  gh.factory<_i970.BookDetailsCubit>(
+    () => _i970.BookDetailsCubit(
+      gh<_i494.GetBookDetailsUsecase>(),
+      gh<_i457.CheckBookSavedStatusUsecase>(),
+      gh<_i1006.AddBookToLibraryUsecase>(),
+      gh<_i264.RemoveBookFromLibraryUsecase>(),
+      gh<_i32.LibraryEventBus>(),
+      gh<_i937.GetBookPartsUsecase>(),
+    ),
   );
   return getIt;
 }

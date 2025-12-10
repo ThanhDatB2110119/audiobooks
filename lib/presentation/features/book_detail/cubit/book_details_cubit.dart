@@ -3,9 +3,11 @@
 import 'package:audiobooks/core/error/failures.dart';
 import 'package:audiobooks/core/event/library_events.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
+import 'package:audiobooks/domain/entities/book_part_entity.dart';
 import 'package:audiobooks/domain/usecases/add_book_to_library_usecase.dart';
 import 'package:audiobooks/domain/usecases/check_book_saved_status_usecase.dart';
 import 'package:audiobooks/domain/usecases/get_book_details_usecase.dart';
+import 'package:audiobooks/domain/usecases/get_book_parts_usecase.dart';
 import 'package:audiobooks/domain/usecases/remove_book_from_library_usecase.dart';
 import 'package:audiobooks/presentation/features/book_detail/cubit/book_details_state.dart';
 import 'package:dartz/dartz.dart';
@@ -17,6 +19,7 @@ class BookDetailsCubit extends Cubit<BookDetailsState> {
   final GetBookDetailsUsecase getBookDetailsUsecase;
   final CheckBookSavedStatusUsecase _checkBookSavedStatusUsecase;
   final AddBookToLibraryUsecase _addBookToLibraryUsecase;
+  final GetBookPartsUsecase _getBookPartsUsecase;
   final RemoveBookFromLibraryUsecase _removeBookFromLibraryUsecase;
   final LibraryEventBus _libraryEventBus;
   BookDetailsCubit(
@@ -25,6 +28,7 @@ class BookDetailsCubit extends Cubit<BookDetailsState> {
     this._addBookToLibraryUsecase,
     this._removeBookFromLibraryUsecase,
     this._libraryEventBus,
+    this._getBookPartsUsecase,
   ) : super(BookDetailsInitial());
 
   Future<void> fetchBookDetails(String id) async {
@@ -33,21 +37,27 @@ class BookDetailsCubit extends Cubit<BookDetailsState> {
     final results = await Future.wait([
       getBookDetailsUsecase(id),
       _checkBookSavedStatusUsecase(id),
+      _getBookPartsUsecase(id),
     ]);
 
+    if (isClosed) return;
     final bookResult = results[0] as Either<Failure, BookEntity>;
     final isSavedResult = results[1] as Either<Failure, bool>;
+    final partsResult = results[2] as Either<Failure, List<BookPartEntity>>;
 
-    bookResult.fold((failure) => emit(BookDetailsError(failure.message)), (
-      book,
-    ) {
-      isSavedResult.fold(
-        (failure) => emit(
-          BookDetailsLoaded(book, isSaved: false),
-        ), // Mặc định là chưa lưu nếu lỗi
-        (isSaved) => emit(BookDetailsLoaded(book, isSaved: isSaved)),
-      );
-    });
+    await bookResult.fold(
+      (failure) async => emit(BookDetailsError(failure.message)),
+      (book) async {
+        final isSaved = isSavedResult.getOrElse(() => false);
+        final parts = partsResult.getOrElse(
+          () => [],
+        ); // Lấy parts hoặc danh sách rỗng nếu lỗi
+
+        // Gộp thông tin sách và các phần của nó
+        final bookWithParts = book.copyWith(parts: parts);
+        emit(BookDetailsLoaded(bookWithParts, isSaved: isSaved));
+      },
+    );
   }
 
   Future<void> toggleSaveStatus() async {
