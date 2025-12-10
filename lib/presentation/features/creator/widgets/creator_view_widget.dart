@@ -82,7 +82,6 @@ class CreatorViewState extends State<CreatorView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height: 190,
                         margin: const EdgeInsets.all(16.0),
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
@@ -134,11 +133,12 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
+                                  backgroundColor: Colors.white.withValues(
                                     alpha: 0.9,
                                   ),
+                                  shadowColor: Colors.cyanAccent,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                   padding: const EdgeInsets.all(8.0),
                                 ),
@@ -160,7 +160,8 @@ class CreatorViewState extends State<CreatorView> {
 
                                   // Gọi dialog của bạn để hiển thị trình chọn file.
                                   // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
-                                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                  final scaffoldMessenger =
+                                      ScaffoldMessenger.of(context);
                                   showUploadFileDialog(context).then((
                                     selectedFile,
                                   ) {
@@ -194,11 +195,11 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
+                                  backgroundColor: Colors.white.withValues(
                                     alpha: 0.9,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                   padding: const EdgeInsets.all(8.0),
                                 ),
@@ -228,11 +229,11 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withValues(
+                                  backgroundColor: Colors.white.withValues(
                                     alpha: 0.9,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                   padding: const EdgeInsets.all(8.0),
                                 ),

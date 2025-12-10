@@ -19,11 +19,11 @@ class ImageSourceSelectorButton extends StatelessWidget {
       icon: const FaIcon(FontAwesomeIcons.image, color: Colors.black),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white.withValues(alpha: 0.9),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         padding: const EdgeInsets.all(8.0),
       ),
       label: const Text(
-        'Khung 4',
+        'Chọn ảnh ',
         style: TextStyle(fontSize: 14, color: Colors.black),
       ),
     );
