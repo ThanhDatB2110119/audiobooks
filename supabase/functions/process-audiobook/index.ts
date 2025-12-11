@@ -44,7 +44,7 @@ async function generateTitleAndDescription(
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
   //gemini-2.5-pro
   const prompt = `
     Bạn là một trợ lý biên tập am hiểu văn học Việt Nam. Nhiệm vụ của bạn là phân tích đoạn văn bản dưới đây và thực hiện theo các bước sau:
