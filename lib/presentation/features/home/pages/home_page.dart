@@ -26,9 +26,34 @@ class HomePage extends StatelessWidget {
               150.0,
             ), // Tăng chiều cao AppBar
             child: AppBar(
-              backgroundColor: Colors.blue, // Thêm màu nền xanh cho AppBar
+              backgroundColor: Colors.white70, // Thêm màu nền xanh cho AppBar
               // Giữ nguyên AppBar của bạn, có thể đổi title cho phù hợp hơn
-              title: const Text('Thư viện sách nói'),
+              title: GestureDetector(
+                onTap: () {
+                  // Điều hướng đến trang tìm kiếm
+                  context.push('/home/search');
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.grey),
+                      SizedBox(width: 8),
+                      Text(
+                        'Tìm kiếm sách',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               actions: const [
                 SignOutButton(), // Giữ nguyên nút SignOut của bạn
               ],

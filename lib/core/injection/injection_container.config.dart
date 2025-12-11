@@ -48,6 +48,7 @@ import '../../domain/usecases/get_user_profile_usecase.dart' as _i629;
 import '../../domain/usecases/google_sign_in_usecase.dart' as _i971;
 import '../../domain/usecases/google_sign_out_usecase.dart' as _i514;
 import '../../domain/usecases/remove_book_from_library_usecase.dart' as _i264;
+import '../../domain/usecases/search_books_usecase.dart' as _i252;
 import '../../domain/usecases/update_user_profile_usecase.dart' as _i733;
 import '../../domain/usecases/upload_avatar_usecase.dart' as _i214;
 import '../../presentation/features/auth/cubit/auth_cubit.dart' as _i224;
@@ -57,6 +58,7 @@ import '../../presentation/features/creator/cubit/creator_cubit.dart' as _i2;
 import '../../presentation/features/home/cubit/home_cubit.dart' as _i900;
 import '../../presentation/features/library/cubit/library_cubit.dart' as _i592;
 import '../../presentation/features/player/cubit/player_cubit.dart' as _i949;
+import '../../presentation/features/search/cubit/search_cubit.dart' as _i565;
 import '../../presentation/features/settings/cubit/profile_edit_cubit.dart'
     as _i393;
 import '../../presentation/features/settings/cubit/settings_cubit.dart'
@@ -172,6 +174,9 @@ _i174.GetIt init(
   gh.lazySingleton<_i943.GetCategoriesUsecase>(
     () => _i943.GetCategoriesUsecase(gh<_i135.BookRepository>()),
   );
+  gh.lazySingleton<_i252.SearchBooksUsecase>(
+    () => _i252.SearchBooksUsecase(gh<_i135.BookRepository>()),
+  );
   gh.lazySingleton<_i342.CreateDocumentFromFileUsecase>(
     () => _i342.CreateDocumentFromFileUsecase(
       gh<_i538.PersonalDocumentRepository>(),
@@ -194,6 +199,9 @@ _i174.GetIt init(
     () =>
         _i1060.GetUserDocumentsUsecase(gh<_i538.PersonalDocumentRepository>()),
   );
+  gh.factory<_i565.SearchCubit>(
+    () => _i565.SearchCubit(gh<_i252.SearchBooksUsecase>()),
+  );
   gh.factory<_i350.SettingsCubit>(
     () => _i350.SettingsCubit(
       gh<_i629.GetUserProfileUsecase>(),
@@ -214,17 +222,17 @@ _i174.GetIt init(
   gh.singleton<_i949.PlayerCubit>(
     () => _i949.PlayerCubit(gh<_i501.AudioPlayer>(), gh<_i224.AuthCubit>()),
   );
+  gh.factory<_i900.HomeCubit>(
+    () => _i900.HomeCubit(
+      gh<_i813.GetAllBooksUsecase>(),
+      gh<_i943.GetCategoriesUsecase>(),
+    ),
+  );
   gh.factory<_i2.CreatorCubit>(
     () => _i2.CreatorCubit(
       gh<_i631.CreateDocumentFromTextUsecase>(),
       gh<_i342.CreateDocumentFromFileUsecase>(),
       gh<_i218.CreateDocumentFromUrlUsecase>(),
-    ),
-  );
-  gh.factory<_i900.HomeCubit>(
-    () => _i900.HomeCubit(
-      gh<_i813.GetAllBooksUsecase>(),
-      gh<_i943.GetCategoriesUsecase>(),
     ),
   );
   gh.factory<_i970.BookDetailsCubit>(

@@ -93,4 +93,23 @@ class MockBookRepositoryImpl implements BookRepository {
     // Return empty list or mock categories as needed
     return const Right([]);
   }
+
+  @override
+  Future<Either<Failure, List<BookEntity>>> searchBooks(String query) async {
+    print('Mock: Searching books with query: $query');
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    if (query.isEmpty) {
+      return Right(mockBooks);
+    }
+
+    // Filter books by title or author containing the query
+    final results = mockBooks.where((book) {
+      final lowerQuery = query.toLowerCase();
+      return book.title.toLowerCase().contains(lowerQuery) ||
+          book.author.toLowerCase().contains(lowerQuery);
+    }).toList();
+
+    return Right(results);
+  }
 }

@@ -10,6 +10,7 @@ import 'package:audiobooks/presentation/features/book_detail/pages/book_details_
 import 'package:audiobooks/presentation/features/creator/pages/creator_page.dart';
 import 'package:audiobooks/presentation/features/library/pages/library_page.dart';
 import 'package:audiobooks/presentation/features/player/pages/player_page.dart';
+import 'package:audiobooks/presentation/features/search/pages/search_page.dart';
 import 'package:audiobooks/presentation/features/settings/pages/profile_edit_page.dart';
 import 'package:audiobooks/presentation/features/settings/pages/settings_page.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,10 @@ class AppRouter {
                       final String? bookId = state.pathParameters['bookId'];
                       final extraData = state.extra as Map<String, dynamic>?;
                       // Kiểm tra null để đảm bảo an toàn
-                      if (bookId == null || extraData == null || extraData['books'] == null || extraData['index'] == null) {
+                      if (bookId == null ||
+                          extraData == null ||
+                          extraData['books'] == null ||
+                          extraData['index'] == null) {
                         return const Scaffold(
                           body: Center(
                             child: Text('Lỗi: Thiếu thông tin sách.'),
@@ -91,6 +95,11 @@ class AppRouter {
                         currentIndex: extraData['index'] as int,
                       );
                     },
+                  ),
+                  GoRoute(
+                    path: 'search',
+                    name: 'search',
+                    builder: (context, state) => const SearchPage(),
                   ),
                 ],
               ),

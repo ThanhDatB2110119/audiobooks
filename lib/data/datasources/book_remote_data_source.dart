@@ -14,6 +14,7 @@ abstract class BookRemoteDataSource {
   Future<void> addBookToLibrary(String bookId);
   Future<void> removeBookFromLibrary(String bookId);
   Future<List<BookModel>> getSavedBooks();
+  Future<List<BookModel>> searchBooks(String query);
 }
 
 @LazySingleton(as: BookRemoteDataSource)
@@ -70,6 +71,26 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       throw ServerException(e.toString());
     }
   }
+
+  @override
+  Future<List<BookModel>> searchBooks(String query) async {
+    try {
+      // Supabase sử dụng 'plfts' (Postgres Full Text Search)
+      // `(title,author)`: tìm trong cả 2 cột title và author
+      // `'${query.trim()}:*'` : tìm kiếm các từ bắt đầu bằng query (prefix search)
+      final response = await supabaseClient
+          .from('books')
+          .select('*, categories(name)')
+          .textSearch('fts', "'${query.trim()}:*'"); // Giả sử cột fts đã được tạo
+
+      return (response as List)
+          .map((data) => BookModel.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
   @override
   Future<List<BookPartModel>> getBookParts(String bookId) async {
     try {

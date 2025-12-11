@@ -28,7 +28,15 @@ class BookRepositoryImpl implements BookRepository {
       return Left(ServerFailure('Failed to fetch books from server'));
     }
   }
-
+@override
+  Future<Either<Failure, List<BookEntity>>> searchBooks(String query) async {
+    try {
+      final books = await remoteDataSource.searchBooks(query);
+      return Right(books);
+    } on ServerException catch (e) {
+      return Left(ServerFailure( e.message));
+    }
+  }
 @override
   Future<Either<Failure, List<CategoryEntity>>> getCategories() async {
     try {
