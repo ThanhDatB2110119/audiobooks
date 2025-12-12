@@ -18,6 +18,7 @@ class ImageSourceSelectorButton extends StatelessWidget {
       },
       icon: const FaIcon(FontAwesomeIcons.image, color: Colors.black),
       style: ElevatedButton.styleFrom(
+        shadowColor: Colors.lightBlue,
         backgroundColor: Colors.white.withValues(alpha: 0.9),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         padding: const EdgeInsets.all(8.0),

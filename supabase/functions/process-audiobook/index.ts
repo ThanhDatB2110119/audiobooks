@@ -88,37 +88,37 @@ async function generateTitleAndDescription(
 /**
  * Sử dụng Gemini để trích xuất nội dung chính từ văn bản thô.
  */
-async function extractMainContent(rawText: string): Promise<string> {
-  if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not set in environment variables.");
-  }
-  console.log("Extracting main content with Gemini...");
+// async function extractMainContent(rawText: string): Promise<string> {
+//   if (!GEMINI_API_KEY) {
+//     throw new Error("GEMINI_API_KEY is not set in environment variables.");
+//   }
+//   console.log("Extracting main content with Gemini...");
 
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+//   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+//   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-  const prompt = `
-    Phân tích văn bản thô dưới đây. Nhiệm vụ của bạn là hoạt động như một bộ lọc thông minh,
-    chỉ trích xuất và trả về phần nội dung chính của bài viết hoặc câu chuyện.
-    Hãy loại bỏ tất cả các yếu tố không liên quan như:
-    - Tiêu đề, đầu trang (headers), chân trang (footers), số trang.
-    - Menu điều hướng, các liên kết "Xem thêm", "Bài viết liên quan".
-    - Tên tác giả và thông tin xuất bản nếu chúng không phải là một phần của câu chuyện.
-    - Quảng cáo, thông báo cookie, các nút kêu gọi hành động.
-    - Bình luận của người dùng.
-    Chỉ trả về phần văn bản thuần túy của nội dung chính. Không thêm bất kỳ lời giải thích nào.
+//   const prompt = `
+//     Phân tích văn bản thô dưới đây. Nhiệm vụ của bạn là hoạt động như một bộ lọc thông minh,
+//     chỉ trích xuất và trả về phần nội dung chính của bài viết hoặc câu chuyện.
+//     Hãy loại bỏ tất cả các yếu tố không liên quan như:
+//     - Tiêu đề, đầu trang (headers), chân trang (footers), số trang.
+//     - Menu điều hướng, các liên kết "Xem thêm", "Bài viết liên quan".
+//     - Tên tác giả và thông tin xuất bản nếu chúng không phải là một phần của câu chuyện.
+//     - Quảng cáo, thông báo cookie, các nút kêu gọi hành động.
+//     - Bình luận của người dùng.
+//     Chỉ trả về phần văn bản thuần túy của nội dung chính. Không thêm bất kỳ lời giải thích nào.
 
-    Văn bản thô: """
-    ${rawText.substring(0, 10000)} 
-    """
-  `; // Tăng giới hạn một chút cho bước này
+//     Văn bản thô: """
+//     ${rawText.substring(0, 10000)} 
+//     """
+//   `; // Tăng giới hạn một chút cho bước này
 
-  const result = await model.generateContent(prompt);
-  const response = result.response;
+//   const result = await model.generateContent(prompt);
+//   const response = result.response;
 
-  console.log("Main content extracted.");
-  return response.text();
-}
+//   console.log("Main content extracted.");
+//   return response.text();
+// }
 /**
  * Chuyển văn bản thành audio sử dụng Google Cloud Text-to-Speech.
  */
@@ -450,7 +450,7 @@ serve(async (req) => {
       throw new Error(`Unsupported source type: ${sourceType}`);
     }
     // Sau khi có text thô, gọi Gemini để làm sạch nó
-    const originalText = await extractMainContent(rawText);
+    const originalText = rawText
     console.log("Text cleaned successfully.");
 
     console.log("Fetching user's preferred voice...");

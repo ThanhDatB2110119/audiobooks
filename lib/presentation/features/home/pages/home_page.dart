@@ -1,4 +1,4 @@
-import 'package:audiobooks/presentation/features/auth/widgets/sign_out_button.dart';
+
 import 'package:audiobooks/presentation/features/home/cubit/home_cubit.dart';
 import 'package:audiobooks/presentation/features/home/cubit/home_state.dart';
 import 'package:flutter/material.dart';
@@ -54,9 +54,9 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              actions: const [
-                SignOutButton(), // Giữ nguyên nút SignOut của bạn
-              ],
+              // actions: const [
+              //   SignOutButton(), // Giữ nguyên nút SignOut của bạn
+              // ],
             ),
           ),
           // 2. Sử dụng BlocBuilder để lắng nghe sự thay đổi state từ HomeCubit
