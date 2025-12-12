@@ -6,6 +6,7 @@ import 'package:audiobooks/presentation/features/creator/widgets/file_picker_dia
 import 'package:audiobooks/presentation/features/creator/widgets/text_input_dialog.dart';
 import 'package:audiobooks/presentation/features/creator/widgets/url_input_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CreatorView extends StatefulWidget {
@@ -128,14 +129,12 @@ class CreatorViewState extends State<CreatorView> {
                                   creatorCubit.createFromUrl(url);
                                 }
                               },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.link,
-                                color: Colors.black,
+                              icon: SvgPicture.asset(
+                                'assets/icons/Link Chain Streamline Flex Flat.svg',
+                                height: 24,
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withValues(
-                                  alpha: 0.9,
-                                ),
+                                backgroundColor: Colors.white.withOpacity(0.9),
                                 shadowColor: Colors.lightBlue,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),

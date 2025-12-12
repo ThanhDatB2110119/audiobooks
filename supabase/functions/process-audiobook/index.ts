@@ -86,39 +86,60 @@ async function generateTitleAndDescription(
   };
 }
 /**
- * Sử dụng Gemini để trích xuất nội dung chính từ văn bản thô.
+ * Sử dụng Gemini để làm sạch và trích xuất nội dung chính từ văn bản thô.
  */
-// async function extractMainContent(rawText: string): Promise<string> {
-//   if (!GEMINI_API_KEY) {
-//     throw new Error("GEMINI_API_KEY is not set in environment variables.");
-//   }
-//   console.log("Extracting main content with Gemini...");
+async function extractMainContent(rawText: string): Promise<string> {
+  // Nếu text thô quá ngắn, không cần xử lý qua AI, trả về luôn.
+  if (rawText.length < 400) {
+    return rawText;
+  }
 
-//   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-//   const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not set in environment variables.");
+  }
 
-//   const prompt = `
-//     Phân tích văn bản thô dưới đây. Nhiệm vụ của bạn là hoạt động như một bộ lọc thông minh,
-//     chỉ trích xuất và trả về phần nội dung chính của bài viết hoặc câu chuyện.
-//     Hãy loại bỏ tất cả các yếu tố không liên quan như:
-//     - Tiêu đề, đầu trang (headers), chân trang (footers), số trang.
-//     - Menu điều hướng, các liên kết "Xem thêm", "Bài viết liên quan".
-//     - Tên tác giả và thông tin xuất bản nếu chúng không phải là một phần của câu chuyện.
-//     - Quảng cáo, thông báo cookie, các nút kêu gọi hành động.
-//     - Bình luận của người dùng.
-//     Chỉ trả về phần văn bản thuần túy của nội dung chính. Không thêm bất kỳ lời giải thích nào.
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-//     Văn bản thô: """
-//     ${rawText.substring(0, 10000)} 
-//     """
-//   `; // Tăng giới hạn một chút cho bước này
+  // Prompt mới: Ngắn gọn, súc tích và tập trung vào kết quả
+  const prompt = `
+    Nhiệm vụ: Phân tích văn bản dưới đây và trích xuất nội dung của bài viết hoặc câu chuyện.
+    Yêu cầu:
+    1. Loại bỏ hoàn toàn các thành phần phụ như menu, quảng cáo, "xem thêm", bình luận, chân trang.
+    2. Chỉ giữ lại phần thân bài chính.
+    3. Trả về văn bản thuần túy đã được làm sạch. Không thêm bất kỳ lời giải thích hay định dạng nào.
 
-//   const result = await model.generateContent(prompt);
-//   const response = result.response;
+    Văn bản cần xử lý:
+    """
+    ${rawText.substring(0, 15000)}
+    """
+  `; // Tăng giới hạn lên một chút để có ngữ cảnh tốt hơn
 
-//   console.log("Main content extracted.");
-//   return response.text();
-// }
+  try {
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const cleanedText = response.text();
+
+    // Nếu kết quả trả về quá ngắn một cách bất thường, có thể AI đã lọc sai.
+    // Trong trường hợp đó, hãy trả về text gốc để đảm bảo không mất nội dung.
+    if (cleanedText.length < rawText.length * 0.2) { // Nếu kết quả ít hơn 20% bản gốc
+      console.warn(
+        "AI cleaning resulted in unusually short text. Falling back to raw text.",
+      );
+      return rawText;
+    }
+
+    return cleanedText;
+  } catch (error) {
+    console.error(
+      "Error during Gemini content cleaning. Falling back to raw text.",
+      error,
+    );
+    // Nếu có lỗi xảy ra trong quá trình làm sạch, hãy trả về text thô ban đầu.
+    // Điều này đảm bảo ứng dụng không bị crash chỉ vì bước làm sạch thất bại.
+    return rawText;
+  }
+}
 /**
  * Chuyển văn bản thành audio sử dụng Google Cloud Text-to-Speech.
  */
@@ -450,7 +471,7 @@ serve(async (req) => {
       throw new Error(`Unsupported source type: ${sourceType}`);
     }
     // Sau khi có text thô, gọi Gemini để làm sạch nó
-    const originalText = rawText
+    const originalText = await extractMainContent(rawText);
     console.log("Text cleaned successfully.");
 
     console.log("Fetching user's preferred voice...");

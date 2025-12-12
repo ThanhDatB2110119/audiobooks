@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-
-
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -37,6 +35,7 @@ class LoginPage extends StatelessWidget {
         }
 
         return Scaffold(
+          backgroundColor: Colors.white,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -49,10 +48,12 @@ class LoginPage extends StatelessWidget {
                         children: [
                           const SizedBox(height: 40),
                           Text(
-                            'Chia sẻ khoảnh khắc hằng ngày cùng với người thân và bạn bè.',
+                            'Khám phá phiên bản sách dành riêng cho bạn',
                             textAlign: TextAlign.center,
                             style: theme.textTheme.titleLarge?.copyWith(
-                              color: theme.brightness == Brightness.dark ? Colors.white : Colors.black87,
+                              color: theme.brightness == Brightness.dark
+                                  ? Colors.black87
+                                  : Colors.blue.withValues(alpha: 0.8),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -61,10 +62,14 @@ class LoginPage extends StatelessWidget {
                             width: double.infinity,
                             height: 50,
                             child: isLoading
-                                ? const Center(child: CircularProgressIndicator())
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
                                 : OutlinedButton.icon(
                                     onPressed: () {
-                                      context.read<AuthCubit>().googleSignInRequested();
+                                      context
+                                          .read<AuthCubit>()
+                                          .googleSignInRequested();
                                     },
                                     icon: SvgPicture.asset(
                                       'assets/icons/google icon.svg',
@@ -77,7 +82,9 @@ class LoginPage extends StatelessWidget {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30),
                                       ),
-                                      side: const BorderSide(color: Colors.grey),
+                                      side: const BorderSide(
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ),
                           ),
@@ -91,26 +98,18 @@ class LoginPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                            color: (theme.brightness == Brightness.dark ? Colors.white : Colors.black).withValues(alpha: 0.7),
+                          color:
+                              (theme.brightness == Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black)
+                                  .withValues(alpha: 0.7),
                           fontSize: 12,
                         ),
                         children: [
-                          const TextSpan(text: 'Bằng cách đăng ký, bạn đồng ý với '),
-                          TextSpan(
-                            text: 'Điều khoản',
-                            style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white : Colors.black),
+                          const TextSpan(
+                            text: 'Đăng nhập để tiếp tục... ',
+                            style: TextStyle(color: Colors.lightBlue),
                           ),
-                          const TextSpan(text: ', '),
-                          TextSpan(
-                            text: 'Chính sách riêng tư',
-                            style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white : Colors.black),
-                          ),
-                          const TextSpan(text: ' và '),
-                          TextSpan(
-                            text: 'Sử dụng cookie',
-                            style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white : Colors.black),
-                          ),
-                          const TextSpan(text: ' của chúng tôi.'),
                         ],
                       ),
                     ),
