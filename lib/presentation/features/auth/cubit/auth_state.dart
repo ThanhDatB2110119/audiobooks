@@ -8,14 +8,16 @@ sealed class AuthState extends Equatable {
 }
 
 final class AuthInitial extends AuthState {}
+
 final class AuthLoading extends AuthState {}
+
 final class AuthAuthenticated extends AuthState {
   final UserEntity user;
-
-  const AuthAuthenticated(this.user);
+  final UserProfileEntity userProfile;
+  const AuthAuthenticated(this.user, this.userProfile);
 
   @override
-  List<Object> get props => [user];
+  List<Object> get props => [user, userProfile];
 }
-final class AuthUnauthenticated extends AuthState {}
 
+final class AuthUnauthenticated extends AuthState {}

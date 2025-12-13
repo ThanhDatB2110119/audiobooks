@@ -1,4 +1,5 @@
 import 'package:audiobooks/presentation/features/creator/widgets/image_source_selector_button.dart';
+import 'package:audiobooks/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_cubit.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_state.dart';
@@ -21,12 +22,31 @@ class CreatorViewState extends State<CreatorView> {
     return SafeArea(
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(150.0),
+          // Đặt chiều cao mong muốn, ví dụ: 120
+          preferredSize: const Size.fromHeight(180.0),
           child: AppBar(
-            backgroundColor: Colors.white.withValues(alpha: 0.9),
-            title: const Text('Tạo sách nói cá nhân'),
+            // Dùng FlexibleSpaceBar để nội dung có thể co giãn đẹp mắt
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.only(left: 0, bottom: 0),
+              title: const CustomAppBar(title: 'Tạo sách nói cá nhân'),
+              background: Container(
+                alignment: Alignment.bottomCenter,
+                // Dùng màu chủ đạo của theme
+                child: Text(
+                  'Tạo sách nói ở đây',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            // Đặt titleSpacing = 0 để FlexibleSpaceBar chiếm toàn bộ không gian
+            titleSpacing: 0,
           ),
         ),
+
         body: Builder(
           builder: (builderContext) {
             // ======================= THAY ĐỔI LOGIC TRONG BLOCLISTENER =======================

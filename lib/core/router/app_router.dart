@@ -145,16 +145,8 @@ class AppRouter {
                     name: 'profileEdit',
                     builder: (context, state) {
                       // Lấy profile hiện tại từ extra để trang edit có dữ liệu ban đầu
-                      final userProfile = state.extra as UserProfileEntity?;
-                      if (userProfile == null) {
-                        // Xử lý trường hợp không có dữ liệu, có thể quay lại hoặc báo lỗi
-                        return const Scaffold(
-                          body: Center(
-                            child: Text('Lỗi: Thiếu thông tin hồ sơ.'),
-                          ),
-                        );
-                      }
-                      return ProfileEditPage(initialProfile: userProfile);
+                     return const ProfileEditPage();
+
                     },
                   ),
                 ],

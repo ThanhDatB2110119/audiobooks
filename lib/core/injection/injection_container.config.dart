@@ -142,12 +142,8 @@ _i174.GetIt init(
     () => _i224.AuthCubit(
       gh<_i971.GoogleSignInUseCase>(),
       gh<_i514.GoogleSignOutUseCase>(),
-    ),
-  );
-  gh.factory<_i393.ProfileEditCubit>(
-    () => _i393.ProfileEditCubit(
+      gh<_i629.GetUserProfileUsecase>(),
       gh<_i733.UpdateUserProfileUsecase>(),
-      gh<_i214.UploadAvatarUsecase>(),
     ),
   );
   gh.lazySingleton<_i1006.AddBookToLibraryUsecase>(
@@ -162,17 +158,17 @@ _i174.GetIt init(
   gh.lazySingleton<_i494.GetBookDetailsUsecase>(
     () => _i494.GetBookDetailsUsecase(gh<_i135.BookRepository>()),
   );
-  gh.lazySingleton<_i220.GetSavedBooksUsecase>(
-    () => _i220.GetSavedBooksUsecase(gh<_i135.BookRepository>()),
-  );
-  gh.lazySingleton<_i264.RemoveBookFromLibraryUsecase>(
-    () => _i264.RemoveBookFromLibraryUsecase(gh<_i135.BookRepository>()),
-  );
   gh.lazySingleton<_i937.GetBookPartsUsecase>(
     () => _i937.GetBookPartsUsecase(gh<_i135.BookRepository>()),
   );
   gh.lazySingleton<_i943.GetCategoriesUsecase>(
     () => _i943.GetCategoriesUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i220.GetSavedBooksUsecase>(
+    () => _i220.GetSavedBooksUsecase(gh<_i135.BookRepository>()),
+  );
+  gh.lazySingleton<_i264.RemoveBookFromLibraryUsecase>(
+    () => _i264.RemoveBookFromLibraryUsecase(gh<_i135.BookRepository>()),
   );
   gh.lazySingleton<_i252.SearchBooksUsecase>(
     () => _i252.SearchBooksUsecase(gh<_i135.BookRepository>()),
@@ -221,6 +217,12 @@ _i174.GetIt init(
   );
   gh.singleton<_i949.PlayerCubit>(
     () => _i949.PlayerCubit(gh<_i501.AudioPlayer>(), gh<_i224.AuthCubit>()),
+  );
+  gh.factory<_i393.ProfileEditCubit>(
+    () => _i393.ProfileEditCubit(
+      gh<_i224.AuthCubit>(),
+      gh<_i214.UploadAvatarUsecase>(),
+    ),
   );
   gh.factory<_i900.HomeCubit>(
     () => _i900.HomeCubit(

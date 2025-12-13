@@ -2,9 +2,11 @@
 
 import 'dart:async';
 
+import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/library/cubit/library_state.dart';
 import 'package:audiobooks/presentation/features/library/widgets/my_books_tab_view.dart';
 import 'package:audiobooks/presentation/features/library/widgets/saved_books_tab_view.dart';
+import 'package:audiobooks/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 // ======================= THÊM CÁC IMPORT CẦN THIẾT =======================
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -57,10 +59,14 @@ class _LibraryPageState extends State<LibraryPage>
     return SafeArea(
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(150.0),
+          // preferredSize: const Size.fromHeight(150.0),
+          preferredSize: const Size.fromHeight(180.0),
           child: AppBar(
-            backgroundColor: Colors.blue,
-            title: const Text('Thư viện của bạn'),
+            titleSpacing: 0,
+            title: BlocBuilder<AuthCubit, AuthState>(
+              builder: (context, state) =>
+                  const CustomAppBar(title: 'Thư viện của bạn'),
+            ),
             bottom: TabBar(
               controller: _tabController,
               labelColor: Theme.of(context).colorScheme.primary,

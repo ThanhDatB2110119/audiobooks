@@ -14,7 +14,7 @@ class UserProfileAvatar extends StatelessWidget {
     this.imageUrl,
     this.imageFile,
     this.radius = 60,
-    this.onTap,
+    this.onTap, ImageProvider<Object>? imageProvider,
   });
 
   @override

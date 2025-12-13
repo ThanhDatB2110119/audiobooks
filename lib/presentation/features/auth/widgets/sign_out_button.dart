@@ -17,10 +17,12 @@ class SignOutButton extends StatelessWidget {
             content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
             actions: [
               TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.blue),
                 onPressed: () => Navigator.of(context).pop(false),
                 child: const Text('Hủy'),
               ),
               TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text('Đăng xuất'),
               ),

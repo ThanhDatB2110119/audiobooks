@@ -1,5 +1,7 @@
 import 'package:audiobooks/presentation/features/home/cubit/home_cubit.dart';
 import 'package:audiobooks/presentation/features/home/cubit/home_state.dart';
+import 'package:audiobooks/presentation/features/home/widgets/BookGridItem.dart';
+import 'package:audiobooks/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,32 +28,44 @@ class HomePage extends StatelessWidget {
             ), // Tăng chiều cao AppBar
             child: AppBar(
               backgroundColor: Colors.white70, // Thêm màu nền xanh cho AppBar
-              // Giữ nguyên AppBar của bạn, có thể đổi title cho phù hợp hơn
-              title: GestureDetector(
-                onTap: () {
-                  // Điều hướng đến trang tìm kiếm
-                  context.push('/home/search');
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.grey),
-                      SizedBox(width: 8),
-                      Text(
-                        'Tìm kiếm sách',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+              flexibleSpace: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const CustomAppBar(title: 'Thư viện của bạn'),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Điều hướng đến trang tìm kiếm
+                        context.push('/home/search');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.search, color: Colors.grey),
+                            SizedBox(width: 8),
+                            Text(
+                              'Tìm kiếm sách',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
               // actions: const [
               //   SignOutButton(), // Giữ nguyên nút SignOut của bạn
@@ -83,10 +97,12 @@ class HomePage extends StatelessWidget {
                     // --- Thanh lọc thể loại ---
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                      child: Text(
-                        'Thể loại',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+                      // child: Text(
+                      //   'Thể loại',
+                      //   style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      //     fontWeight: FontWeight.bold,
+                      //   ),
+                      // ),
                     ),
 
                     // Widget Wrap sẽ tự động sắp xếp các widget con của nó theo hàng ngang,
@@ -153,7 +169,13 @@ class HomePage extends StatelessWidget {
                         },
                       ),
                     ),
-                    const Divider(height: 24),
+                    const Divider(
+                      thickness: 1,
+                      color: Colors.lightBlue,
+                      indent: 5,
+                      endIndent: 5,
+                    ),
+                    const SizedBox(height: 4),
 
                     // --- Danh sách sách ---
                     Expanded(
@@ -174,89 +196,38 @@ class HomePage extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(8.0),
+                          : GridView.builder(
+                              padding: const EdgeInsets.all(
+                                16.0,
+                              ), // Tăng padding cho đẹp hơn
+                              // Cấu hình lưới
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, // 2 cột
+                                    crossAxisSpacing:
+                                        16.0, // Khoảng cách ngang giữa các item
+                                    mainAxisSpacing:
+                                        16.0, // Khoảng cách dọc giữa các item
+                                    childAspectRatio:
+                                        0.6, // Tỉ lệ chiều rộng / chiều cao của mỗi item.
+                                    // Điều chỉnh số này để item cao hơn hoặc thấp hơn.
+                                  ),
                               itemCount: state.books.length,
                               itemBuilder: (context, index) {
                                 final book = state.books[index];
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
-                                  ),
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.all(10.0),
-                                    leading: AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          4.0,
-                                        ),
-                                        child: Image.network(
-                                          book.coverImageUrl,
-                                          fit: BoxFit.cover,
-                                          loadingBuilder:
-                                              (
-                                                context,
-                                                child,
-                                                loadingProgress,
-                                              ) {
-                                                if (loadingProgress == null) {
-                                                  return child;
-                                                }
-                                                return Shimmer.fromColors(
-                                                  baseColor: Colors.grey[300]!,
-                                                  highlightColor:
-                                                      Colors.grey[100]!,
-                                                  child: Container(
-                                                    color: Colors.white,
-                                                  ),
-                                                ).animate().shimmer(
-                                                  duration: 800.ms,
-                                                );
-                                              },
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return const Icon(
-                                                  Icons.book,
-                                                  size: 40,
-                                                  color: Colors.grey,
-                                                );
-                                              },
-                                        ),
-                                      ),
-                                    ),
-                                    title: Text(
-                                      book.title,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    subtitle: Text(book.author),
-                                    onTap: () {
-                                      //context.push('/home/details/${book.id.toString()}');
-                                      context.push(
-                                        '/home/details/${book.id}',
-                                        extra: {
-                                          'books': state.books,
-                                          'index': index,
-                                        },
-                                      );
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Bạn đã chọn: ${book.title}',
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                // Gọi một widget item riêng để code sạch sẽ hơn
+                                return BookGridItem(
+                                  book: book,
+                                  onTap: () {
+                                    // Logic điều hướng giữ nguyên
+                                    context.push(
+                                      '/home/details/${book.id}',
+                                      extra: {
+                                        'books': state.books,
+                                        'index': index,
+                                      },
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -308,7 +279,7 @@ class HomePage extends StatelessWidget {
     // Sử dụng InkWell để có hiệu ứng gợn sóng khi nhấn
     return InkWell(
       // Bọc trong BorderRadius để hiệu ứng gợn sóng cũng được bo tròn
-      borderRadius: BorderRadius.circular(20.0),
+      borderRadius: BorderRadius.circular(10.0),
       onTap: () {
         // Chỉ kích hoạt hành động nếu chip chưa được chọn
         if (!isSelected) {
@@ -324,8 +295,8 @@ class HomePage extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? Theme.of(context).colorScheme.primary
-              : Colors.grey[700],
-          borderRadius: BorderRadius.circular(20.0),
+              : Colors.grey[800],
+          borderRadius: BorderRadius.circular(10.0),
         ),
         child: Center(
           // Căn giữa Text bên trong
