@@ -1,5 +1,6 @@
 // presentation/features/creator/cubit/creator_state.dart
 
+import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:equatable/equatable.dart';
 
 // Đánh dấu lớp là abstract để nó không thể được khởi tạo trực tiếp,
@@ -8,7 +9,7 @@ abstract class CreatorState extends Equatable {
   const CreatorState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 /// Trạng thái ban đầu của màn hình Creator.
@@ -31,6 +32,15 @@ class CreatorSuccess extends CreatorState {
 
   @override
   List<Object> get props => [message];
+}
+
+class CreatorLoaded extends CreatorState {
+  final PersonalDocumentEntity? mostRecentDocument;
+
+  const CreatorLoaded({this.mostRecentDocument});
+
+  @override
+  List<Object?> get props => [mostRecentDocument];
 }
 
 /// Trạng thái lỗi.

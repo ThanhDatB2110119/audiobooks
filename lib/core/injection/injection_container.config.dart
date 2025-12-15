@@ -224,17 +224,19 @@ _i174.GetIt init(
       gh<_i214.UploadAvatarUsecase>(),
     ),
   );
-  gh.factory<_i900.HomeCubit>(
-    () => _i900.HomeCubit(
-      gh<_i813.GetAllBooksUsecase>(),
-      gh<_i943.GetCategoriesUsecase>(),
-    ),
-  );
   gh.factory<_i2.CreatorCubit>(
     () => _i2.CreatorCubit(
       gh<_i631.CreateDocumentFromTextUsecase>(),
       gh<_i342.CreateDocumentFromFileUsecase>(),
       gh<_i218.CreateDocumentFromUrlUsecase>(),
+      gh<_i1060.GetUserDocumentsUsecase>(),
+      gh<_i32.LibraryEventBus>(),
+    ),
+  );
+  gh.factory<_i900.HomeCubit>(
+    () => _i900.HomeCubit(
+      gh<_i813.GetAllBooksUsecase>(),
+      gh<_i943.GetCategoriesUsecase>(),
     ),
   );
   gh.factory<_i970.BookDetailsCubit>(

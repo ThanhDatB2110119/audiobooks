@@ -46,6 +46,15 @@ class LoginPage extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(40),
+                            child: Image.asset(
+                              'assets/icons/512x512bb.jpg',
+                              // Đảm bảo đường dẫn này chính xác
+                              height: 150,
+                              // Điều chỉnh kích thước logo theo ý muốn
+                            ),
+                          ),
                           const SizedBox(height: 40),
                           Text(
                             'Khám phá phiên bản sách dành riêng cho bạn',

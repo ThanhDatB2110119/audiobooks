@@ -30,30 +30,26 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> googleSignInRequested() async {
     emit(AuthLoading());
-
     final result = await _googleSignInUseCase();
 
-    result.fold((failure) => emit(AuthUnauthenticated()), (user) {
-      // Trên mobile, user object sẽ có dữ liệu
-      // Trên web, nó có thể là rỗng, ta sẽ dựa vào auth state listener
-      // để chuyển sang trạng thái authenticated sau.
-      // Để đơn giản, ta có thể kiểm tra nếu user id không rỗng thì coi là thành công.
-      if (user.id.isNotEmpty) {
-        emit(AuthAuthenticated(user, UserProfileEntity(id: user.id)));
-      }
-      // Nếu không, ta có thể giữ state loading hoặc chuyển về unauthenticated,
-      // chờ listener xử lý.
-      else {
-        // Trên web, quá trình redirect đã bắt đầu, giữ loading hoặc chờ listener
-        // Không emit gì ở đây nếu ta có listener riêng
-      }
-    });
+    result.fold(
+      (failure) {
+        print("Google sign in failed: ${failure.message}");
+        emit(AuthUnauthenticated());
+      },
+      (user) async {
+        // Sau khi đăng nhập thành công, fetch profile tương ứng
+        await _fetchProfileAndAuthenticate(user as User);
+      },
+    );
   }
 
-  Future<Either<Failure, void>> updateUserProfile(UserProfileEntity updatedProfile) async {
+  Future<Either<Failure, void>> updateUserProfile(
+    UserProfileEntity updatedProfile,
+  ) async {
     final currentState = state;
     if (currentState is! AuthAuthenticated) {
-      return Left(ServerFailure( 'User not authenticated'));
+      return Left(ServerFailure('User not authenticated'));
     }
 
     // Gọi usecase để lưu thay đổi vào database
@@ -77,10 +73,13 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> updatePreferredVoice(String voiceName) async {
     final currentState = state;
     if (currentState is! AuthAuthenticated) return;
-    
+
     // Tạo entity mới chỉ với thông tin cần cập nhật
-    final profileToUpdate = UserProfileEntity(id: currentState.userProfile.id, preferredVoice: voiceName);
-    
+    final profileToUpdate = UserProfileEntity(
+      id: currentState.userProfile.id,
+      preferredVoice: voiceName,
+    );
+
     // Tạo entity đầy đủ cho UI (cập nhật lạc quan)
     final newFullProfile = UserProfileEntity(
       id: currentState.userProfile.id,
@@ -91,11 +90,11 @@ class AuthCubit extends Cubit<AuthState> {
 
     // Cập nhật UI ngay lập tức
     emit(AuthAuthenticated(currentState.user, newFullProfile));
-    
+
     // Gọi usecase để lưu thay đổi vào database (không cần chờ đợi kết quả ở UI)
     await _updateUserProfileUsecase(profileToUpdate);
   }
-  
+
   /// Phương thức để refresh lại profile từ DB, hữu ích sau khi edit xong
   Future<void> forceRefreshUserProfile() async {
     final currentState = state;
@@ -108,24 +107,16 @@ class AuthCubit extends Cubit<AuthState> {
     final currentSession = Supabase.instance.client.auth.currentSession;
 
     if (currentSession != null) {
-      print('--- Session restored. User is authenticated. ---');
+      print('--- Session restored. Fetching profile... ---');
+      // Chỉ cần gọi _fetchProfileAndAuthenticate là đủ, không emit gì thêm ở đây
       await _fetchProfileAndAuthenticate(currentSession.user);
-      // ======================= SỬA LỖI TẠI ĐÂY =======================
-      // 1. Lấy đối tượng User của Supabase
-      final supabaseUser = currentSession.user;
-      // 2. Chuyển đổi nó thành UserEntity của chúng ta
-      final userEntity = UserEntity.fromSupabaseUser(supabaseUser);
-      // 3. Truyền UserEntity vào state
-      emit(AuthAuthenticated(userEntity, UserProfileEntity(id: userEntity.id)));
-      // ===============================================================
     } else {
       print('--- No active session. User is unauthenticated. ---');
       emit(AuthUnauthenticated());
     }
   }
 
-
-Future<void> _fetchProfileAndAuthenticate(User user) async {
+  Future<void> _fetchProfileAndAuthenticate(User user) async {
     final profileResult = await _getUserProfileUsecase();
     final userEntity = UserEntity.fromSupabaseUser(user);
     profileResult.fold(
@@ -142,7 +133,7 @@ Future<void> _fetchProfileAndAuthenticate(User user) async {
       },
     );
   }
-  
+
   Future<void> signOutRequested() async {
     emit(AuthLoading()); // Chuyển sang trạng thái loading
 

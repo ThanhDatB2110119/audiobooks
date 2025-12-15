@@ -1,4 +1,5 @@
 import 'package:audiobooks/presentation/features/creator/widgets/image_source_selector_button.dart';
+import 'package:audiobooks/presentation/features/library/widgets/my_book_list_item.dart';
 import 'package:audiobooks/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:audiobooks/presentation/features/creator/cubit/creator_cubit.dart';
@@ -281,14 +282,48 @@ class CreatorViewState extends State<CreatorView> {
                       endIndent: 5,
                     ),
                     const SizedBox(height: 4),
+                    _buildMostRecentSection(),
                   ],
                 ),
               ),
+
               // ),
             );
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildMostRecentSection() {
+    return BlocBuilder<CreatorCubit, CreatorState>(
+      // Chỉ build lại section này khi state là CreatorLoaded
+      buildWhen: (previous, current) => current is CreatorLoaded,
+      builder: (context, state) {
+        if (state is CreatorLoaded && state.mostRecentDocument != null) {
+          final doc = state.mostRecentDocument!;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                textAlign: TextAlign.center,
+                ' Sách đã tạo gần đây',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              // Tái sử dụng widget _MyBookListItem từ LibraryPage
+              // Điều này đảm bảo giao diện nhất quán
+              MyBookListItem(
+                document: doc,
+                allDocuments: [doc], // Chỉ cần truyền chính nó
+                currentIndex: 0,
+              ),
+            ],
+          );
+        }
+        // Nếu không có sách nào hoặc state khác, không hiển thị gì
+        return const SizedBox.shrink();
+      },
     );
   }
 }
