@@ -65,7 +65,7 @@ class _LibraryPageState extends State<LibraryPage>
             titleSpacing: 0,
             title: BlocBuilder<AuthCubit, AuthState>(
               builder: (context, state) =>
-                  const CustomAppBar(title: 'Thư viện của bạn'),
+                  const CustomAppBar(title: 'Thư viện'),
             ),
             bottom: TabBar(
               controller: _tabController,

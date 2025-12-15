@@ -24,21 +24,43 @@ class CreatorViewState extends State<CreatorView> {
       child: Scaffold(
         appBar: PreferredSize(
           // Đặt chiều cao mong muốn, ví dụ: 120
-          preferredSize: const Size.fromHeight(150.0),
+          preferredSize: const Size.fromHeight(170.0),
           child: AppBar(
             // Dùng FlexibleSpaceBar để nội dung có thể co giãn đẹp mắt
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 0, bottom: 0),
-              title: const CustomAppBar(title: 'Tạo sách nói cá nhân'),
+              title: const CustomAppBar(title: 'Tạo sách'),
               background: Container(
                 alignment: Alignment.bottomCenter,
                 // Dùng màu chủ đạo của theme
-                child: Text(
-                  'Tạo sách nói ở đây',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 20.0,
+                  ),
+                  margin: const EdgeInsets.only(
+                    bottom: 12.0,
+                    left: 20.0,
+                    right: 20.0,
+                  ),
+                  decoration: BoxDecoration(
+                    // Màu nền xanh
+                    color: const Color.fromARGB(
+                      255,
+                      251,
+                      17,
+                      0,
+                    ), // Hoặc một màu xanh khác bạn thích
+                    // Bo tròn các góc
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Sáng tạo những cuốn sách nói dành riêng cho bạn',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -305,10 +327,26 @@ class CreatorViewState extends State<CreatorView> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                textAlign: TextAlign.center,
-                ' Sách đã tạo gần đây',
-                style: Theme.of(context).textTheme.titleLarge,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                decoration: BoxDecoration(
+                  // Màu nền xanh
+                  color: Colors.blue, // Hoặc một màu xanh khác bạn thích
+                  // Bo tròn các góc
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  textAlign: TextAlign.center,
+                  ' Sách đã tạo gần đây',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.black,
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               // Tái sử dụng widget _MyBookListItem từ LibraryPage

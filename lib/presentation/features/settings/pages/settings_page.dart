@@ -2,6 +2,7 @@
 
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/settings/widgets/user_profile_avatar.dart';
+import 'package:audiobooks/presentation/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -18,7 +19,7 @@ class SettingsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => GetIt.instance<SettingsCubit>()..loadUserProfile(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Cài đặt')),
+        appBar: const CustomAppBar(title: 'Cài đặt'),
         body: BlocBuilder<AuthCubit, AuthState>(
           builder: (context, state) {
             if (state is AuthAuthenticated) {

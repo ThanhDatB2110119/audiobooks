@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
               flexibleSpace: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const CustomAppBar(title: 'Thư viện của bạn'),
+                  const CustomAppBar(title: 'Trang chủ'),
                   const SizedBox(height: 30),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
