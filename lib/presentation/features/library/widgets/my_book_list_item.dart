@@ -37,7 +37,10 @@ class MyBookListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final (statusColor, statusIcon) = _getStatusAppearance(document.status);
     final isCompleted = document.status == ProcessingStatus.completed;
+final localCreatedAt = document.createdAt.toLocal();
 
+    // 2. Format chuỗi thời gian đã được chuyển đổi
+    final formattedDate = DateFormat('dd/MM/yyyy, HH:mm').format(localCreatedAt);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       child: ListTile(
@@ -96,9 +99,7 @@ class MyBookListItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(
-          'Tạo lúc: ${DateFormat('dd/MM/yyyy, HH:mm').format(document.createdAt)}',
-        ),
+        subtitle: Text('Tạo lúc: $formattedDate'),
         trailing: Chip(
           avatar: Icon(statusIcon, color: Colors.white, size: 16),
           label: Text(
