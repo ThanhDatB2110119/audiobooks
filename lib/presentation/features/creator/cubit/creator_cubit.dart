@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'package:audiobooks/core/event/library_events.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:audiobooks/domain/usecases/create_document_from_file_usecase.dart';
 import 'package:audiobooks/domain/usecases/create_document_from_text_usecase.dart';
@@ -22,6 +23,8 @@ class CreatorCubit extends Cubit<CreatorState> {
   final DeleteDocumentUsecase _deleteDocumentUsecase;
   final SupabaseClient _supabaseClient;
   StreamSubscription? _realtimeSubscription;
+  final LibraryEventBus _libraryEventBus;
+  StreamSubscription? _libraryEventsSubscription;
   // ... inject các usecase khác sau này
 
   CreatorCubit(
@@ -31,10 +34,12 @@ class CreatorCubit extends Cubit<CreatorState> {
     this._getUserDocumentsUsecase,
     this._supabaseClient,
     this._deleteDocumentUsecase,
+    this._libraryEventBus,
   ) : super(CreatorInitial()) {
     fetchMostRecentDocument();
     // ======================= THAY ĐỔI LOGIC LẮNG NGHE =======================
     _listenToDocumentChanges();
+    _listenToLibraryEvents();
   }
 
   Future<void> createFromText(String text) async {
@@ -53,6 +58,15 @@ class CreatorCubit extends Cubit<CreatorState> {
     );
   }
 
+  void _listenToLibraryEvents() {
+    _libraryEventsSubscription = _libraryEventBus.stream.listen((_) {
+      print(
+        '--- CreatorCubit received library change event. Refetching... ---',
+      );
+      fetchMostRecentDocument();
+    });
+  }
+
   Future<void> deleteDocument(PersonalDocumentEntity document) async {
     final result = await _deleteDocumentUsecase(document);
     result.fold(
@@ -65,7 +79,9 @@ class CreatorCubit extends Cubit<CreatorState> {
         // Xóa thành công, không cần làm gì.
         // Realtime sẽ tự động trigger `fetchMostRecentDocument` để cập nhật UI.
         // Hoặc chúng ta có thể chủ động cập nhật để có phản hồi nhanh hơn:
-        emit(const CreatorLoaded(mostRecentDocument: null)); // Tạm thời xóa khỏi UI
+        emit(
+          const CreatorLoaded(mostRecentDocument: null),
+        ); // Tạm thời xóa khỏi UI
         fetchMostRecentDocument(); // Fetch lại để lấy sách gần nhất (nếu còn)
       },
     );
@@ -92,7 +108,6 @@ class CreatorCubit extends Cubit<CreatorState> {
           // Để đơn giản, chúng ta sẽ vẫn gọi fetch.
           fetchMostRecentDocument();
         });
-        
   }
 
   Future<void> createFromFile(File file) async {
@@ -129,6 +144,7 @@ class CreatorCubit extends Cubit<CreatorState> {
   Future<void> close() {
     // ======================= HỦY SUBSCRIPTION MỚI =======================
     _realtimeSubscription?.cancel();
+    _libraryEventsSubscription?.cancel();
     // ====================================================================
     return super.close();
   }

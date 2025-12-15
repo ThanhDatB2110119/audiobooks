@@ -204,16 +204,6 @@ _i174.GetIt init(
       gh<_i733.UpdateUserProfileUsecase>(),
     ),
   );
-  gh.factory<_i2.CreatorCubit>(
-    () => _i2.CreatorCubit(
-      gh<_i631.CreateDocumentFromTextUsecase>(),
-      gh<_i342.CreateDocumentFromFileUsecase>(),
-      gh<_i218.CreateDocumentFromUrlUsecase>(),
-      gh<_i1060.GetUserDocumentsUsecase>(),
-      gh<_i454.SupabaseClient>(),
-      gh<_i45.DeleteDocumentUsecase>(),
-    ),
-  );
   gh.factory<_i592.LibraryCubit>(
     () => _i592.LibraryCubit(
       gh<_i1060.GetUserDocumentsUsecase>(),
@@ -248,6 +238,17 @@ _i174.GetIt init(
       gh<_i264.RemoveBookFromLibraryUsecase>(),
       gh<_i32.LibraryEventBus>(),
       gh<_i937.GetBookPartsUsecase>(),
+    ),
+  );
+  gh.factory<_i2.CreatorCubit>(
+    () => _i2.CreatorCubit(
+      gh<_i631.CreateDocumentFromTextUsecase>(),
+      gh<_i342.CreateDocumentFromFileUsecase>(),
+      gh<_i218.CreateDocumentFromUrlUsecase>(),
+      gh<_i1060.GetUserDocumentsUsecase>(),
+      gh<_i454.SupabaseClient>(),
+      gh<_i45.DeleteDocumentUsecase>(),
+      gh<_i32.LibraryEventBus>(),
     ),
   );
   return getIt;

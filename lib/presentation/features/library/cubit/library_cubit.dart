@@ -39,7 +39,7 @@ class LibraryCubit extends Cubit<LibraryState> {
     this._supabaseClient,
   ) : super(LibraryInitial()) {
     _listenToDocumentChanges();
-     _listenToLibraryEvents();
+    _listenToLibraryEvents();
   }
 
   void _listenToDocumentChanges() {
@@ -70,7 +70,7 @@ class LibraryCubit extends Cubit<LibraryState> {
         .subscribe(); // Hàm subscribe() bây giờ được gọi ở cuối
   }
 
- void _listenToLibraryEvents() {
+  void _listenToLibraryEvents() {
     _libraryEventsSubscription = _libraryEventBus.stream.listen((_) {
       print('--- Library Event Bus fired! Refetching all content... ---');
       // Khi nhận được sự kiện, gọi hàm fetch
@@ -111,6 +111,7 @@ class LibraryCubit extends Cubit<LibraryState> {
       (_) {
         // 3b. Nếu xóa thành công:
         // - Phát ra state thành công để hiển thị SnackBar
+        _libraryEventBus.fireLibraryChanged();
         emit(
           LibraryActionSuccess(
             message: 'Đã xóa thành công!',
@@ -169,22 +170,25 @@ class LibraryCubit extends Cubit<LibraryState> {
     final savedBooksResult = results[1] as Either<Failure, List<BookEntity>>;
 
     // Xử lý kết quả
-    myDocsResult.fold((failure) { if (!isClosed) emit(LibraryError(failure.message));
-    },
-     (myDocs,) {
-      savedBooksResult.fold(
-        (failure) { if (!isClosed) {
-          emit(
-          LibraryLoaded(myDocuments: myDocs, savedBooks: []));
-        } 
+    myDocsResult.fold(
+      (failure) {
+        if (!isClosed) emit(LibraryError(failure.message));
+      },
+      (myDocs) {
+        savedBooksResult.fold(
+          (failure) {
+            if (!isClosed) {
+              emit(LibraryLoaded(myDocuments: myDocs, savedBooks: []));
+            }
           }, // Tạm thời trả về rỗng nếu lỗi
-        (savedBooks) {
-          if (!isClosed) {
-            emit(LibraryLoaded(myDocuments: myDocs, savedBooks: savedBooks));
-          }
-        },
-      );
-    });
+          (savedBooks) {
+            if (!isClosed) {
+              emit(LibraryLoaded(myDocuments: myDocs, savedBooks: savedBooks));
+            }
+          },
+        );
+      },
+    );
   }
 
   Future<void> removeSavedBook(BookEntity bookToRemove) async {
@@ -196,13 +200,17 @@ class LibraryCubit extends Cubit<LibraryState> {
       ..removeWhere((book) => book.id == bookToRemove.id);
 
     // Cập nhật UI với danh sách mới
-    emit(LibraryLoaded(
-      myDocuments: currentState.myDocuments,
-      savedBooks: optimisticList,
-    ));
+    emit(
+      LibraryLoaded(
+        myDocuments: currentState.myDocuments,
+        savedBooks: optimisticList,
+      ),
+    );
 
     // 2. Gửi yêu cầu xóa đến backend
-    final result = await _removeBookFromLibraryUsecase(bookToRemove.id.toString());
+    final result = await _removeBookFromLibraryUsecase(
+      bookToRemove.id.toString(),
+    );
 
     result.fold(
       (failure) {
@@ -214,16 +222,22 @@ class LibraryCubit extends Cubit<LibraryState> {
       },
       (_) {
         // 3b. Nếu xóa thành công, phát ra state để hiển thị SnackBar
-        emit(LibraryActionSuccess(
-          message: 'Đã bỏ lưu "${bookToRemove.title}"',
-          currentDocuments: currentState.myDocuments,
-          currentSavedBooks: optimisticList,
-          // Thêm một callback "Hoàn tác"
-          undoAction: () => addSavedBook(bookToRemove),
-        ));
+        emit(
+          LibraryActionSuccess(
+            message: 'Đã bỏ lưu "${bookToRemove.title}"',
+            currentDocuments: currentState.myDocuments,
+            currentSavedBooks: optimisticList,
+            // Thêm một callback "Hoàn tác"
+            undoAction: () => addSavedBook(bookToRemove),
+          ),
+        );
         // Giữ nguyên state Loaded với danh sách đã cập nhật
-        emit(LibraryLoaded(
-            myDocuments: currentState.myDocuments, savedBooks: optimisticList));
+        emit(
+          LibraryLoaded(
+            myDocuments: currentState.myDocuments,
+            savedBooks: optimisticList,
+          ),
+        );
       },
     );
   }
@@ -234,11 +248,17 @@ class LibraryCubit extends Cubit<LibraryState> {
     if (currentState is! LibraryLoaded) return;
 
     // Lạc quan: Thêm lại sách vào UI
-    final optimisticList = List<BookEntity>.from(currentState.savedBooks)..add(bookToAdd);
+    final optimisticList = List<BookEntity>.from(currentState.savedBooks)
+      ..add(bookToAdd);
     // Có thể sắp xếp lại danh sách ở đây nếu cần
-    
-    emit(LibraryLoaded(myDocuments: currentState.myDocuments, savedBooks: optimisticList));
-    
+
+    emit(
+      LibraryLoaded(
+        myDocuments: currentState.myDocuments,
+        savedBooks: optimisticList,
+      ),
+    );
+
     // Gọi API để thêm lại sách vào DB
     await _addBookToLibraryUsecase(bookToAdd.id.toString());
     // Không cần xử lý lỗi phức tạp cho hành động hoàn tác
