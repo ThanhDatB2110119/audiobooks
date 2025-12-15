@@ -210,6 +210,7 @@ class PersonalDocumentRemoteDataSourceImpl
       // 3. Xóa các file trên Storage (nếu có)
       // Chúng ta sẽ xóa file từ cả 3 bucket để đảm bảo an toàn
       if (pathsToDelete.isNotEmpty) {
+        // ignore: avoid_print
         print('Deleting files from storage: $pathsToDelete');
         // Supabase cho phép xóa nhiều file cùng lúc trong MỘT bucket
         // Chúng ta cần gọi riêng cho từng loại bucket

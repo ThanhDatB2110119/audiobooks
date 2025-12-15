@@ -24,7 +24,7 @@ class CreatorViewState extends State<CreatorView> {
       child: Scaffold(
         appBar: PreferredSize(
           // Đặt chiều cao mong muốn, ví dụ: 120
-          preferredSize: const Size.fromHeight(180.0),
+          preferredSize: const Size.fromHeight(150.0),
           child: AppBar(
             // Dùng FlexibleSpaceBar để nội dung có thể co giãn đẹp mắt
             flexibleSpace: FlexibleSpaceBar(
@@ -38,7 +38,7 @@ class CreatorViewState extends State<CreatorView> {
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Colors.black87,
                   ),
                 ),
               ),
@@ -317,6 +317,11 @@ class CreatorViewState extends State<CreatorView> {
                 document: doc,
                 allDocuments: [doc], // Chỉ cần truyền chính nó
                 currentIndex: 0,
+                onDelete: (documentToDelete) {
+                  // Vì widget này nằm trong Builder có context hợp lệ,
+                  // chúng ta có thể gọi CreatorCubit một cách an toàn.
+                  context.read<CreatorCubit>().deleteDocument(documentToDelete);
+                },
               ),
             ],
           );

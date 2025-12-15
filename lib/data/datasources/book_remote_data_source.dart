@@ -2,6 +2,7 @@ import 'package:audiobooks/core/error/exceptions.dart';
 import 'package:audiobooks/data/models/book_model.dart';
 import 'package:audiobooks/data/models/book_part_model.dart';
 import 'package:audiobooks/data/models/category_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -38,25 +39,25 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
           .map((bookJson) => BookModel.fromJson(bookJson))
           .toList();
     } on PostgrestException catch (e, stackTrace) {
-      print('========== SUPABASE ERROR ==========');
-      print('Message: ${e.message}');
-      print('Code: ${e.code}');
-      print('Details: ${e.details}');
-      print('Hint: ${e.hint}');
-      print('StackTrace: $stackTrace');
-      print('====================================');
+      debugPrint('========== SUPABASE ERROR ==========');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Code: ${e.code}');
+      debugPrint('Details: ${e.details}');
+      debugPrint('Hint: ${e.hint}');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('====================================');
       throw ServerException('Failed to fetch books: ${e.message}');
     } catch (e, stackTrace) {
-      print('========== UNEXPECTED ERROR ==========');
-      print('Error: $e');
-      print('Type: ${e.runtimeType}');
-      print('StackTrace: $stackTrace');
-      print('======================================');
+      debugPrint('========== UNEXPECTED ERROR ==========');
+      debugPrint('Error: $e');
+      debugPrint('Type: ${e.runtimeType}');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('======================================');
       throw ServerException('Failed to fetch books: $e');
     }
   }
 
-@override
+  @override
   Future<List<CategoryModel>> getCategories() async {
     try {
       final response = await supabaseClient
@@ -81,7 +82,10 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
       final response = await supabaseClient
           .from('books')
           .select('*, categories(name)')
-          .textSearch('fts', "'${query.trim()}:*'"); // Giả sử cột fts đã được tạo
+          .textSearch(
+            'fts',
+            "'${query.trim()}:*'",
+          ); // Giả sử cột fts đã được tạo
 
       return (response as List)
           .map((data) => BookModel.fromJson(data))
@@ -118,21 +122,20 @@ class BookRemoteDataSourceImpl implements BookRemoteDataSource {
 
       return BookModel.fromJson(response);
     } on PostgrestException catch (e, stackTrace) {
-      // ignore: avoid_print
-      print('========== SUPABASE ERROR ==========');
-      print('Message: ${e.message}');
-      print('Code: ${e.code}');
-      print('Details: ${e.details}');
-      print('Hint: ${e.hint}');
-      print('StackTrace: $stackTrace');
-      print('====================================');
+      debugPrint('========== SUPABASE ERROR ==========');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Code: ${e.code}');
+      debugPrint('Details: ${e.details}');
+      debugPrint('Hint: ${e.hint}');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('====================================');
       throw ServerException('Failed to fetch book: ${e.message}');
     } catch (e, stackTrace) {
-      print('========== UNEXPECTED ERROR ==========');
-      print('Error: $e');
-      print('Type: ${e.runtimeType}');
-      print('StackTrace: $stackTrace');
-      print('======================================');
+      debugPrint('========== UNEXPECTED ERROR ==========');
+      debugPrint('Error: $e');
+      debugPrint('Type: ${e.runtimeType}');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('======================================');
       throw ServerException('Failed to fetch book: $e');
     }
   }

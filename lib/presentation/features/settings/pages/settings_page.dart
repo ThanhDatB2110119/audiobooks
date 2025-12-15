@@ -1,7 +1,6 @@
 // presentation/features/settings/pages/settings_page.dart
 
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
-import 'package:audiobooks/presentation/features/settings/cubit/settings_state.dart';
 import 'package:audiobooks/presentation/features/settings/widgets/user_profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

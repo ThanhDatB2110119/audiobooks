@@ -1,5 +1,6 @@
 // presentation/features/settings/cubit/profile_edit_cubit.dart
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:audiobooks/domain/entities/user_profile_entity.dart';
@@ -23,16 +24,20 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
   void init() {
     final authState = _authCubit.state;
     if (authState is AuthAuthenticated) {
-      emit(state.copyWith(
-        status: ProfileEditStatus.initial,
-        userProfile: authState.userProfile,
-      ));
+      emit(
+        state.copyWith(
+          status: ProfileEditStatus.initial,
+          userProfile: authState.userProfile,
+        ),
+      );
     } else {
       // Xử lý trường hợp không tìm thấy profile (hiếm khi xảy ra)
-      emit(state.copyWith(
-        status: ProfileEditStatus.error,
-        errorMessage: 'Không tìm thấy thông tin người dùng.',
-      ));
+      emit(
+        state.copyWith(
+          status: ProfileEditStatus.error,
+          errorMessage: 'Không tìm thấy thông tin người dùng.',
+        ),
+      );
     }
   }
 
@@ -62,7 +67,7 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
 
       return compressedFile;
     } catch (e) {
-      print("Error compressing image: $e");
+      log("Error compressing image: $e");
       return null;
     }
   }
@@ -70,17 +75,21 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
   Future<void> saveChanges(String newFullName) async {
     final authState = _authCubit.state;
     if (authState is! AuthAuthenticated) {
-      emit(state.copyWith(status: ProfileEditStatus.error, errorMessage: "Người dùng không hợp lệ"));
+      emit(
+        state.copyWith(
+          status: ProfileEditStatus.error,
+          errorMessage: "Người dùng không hợp lệ",
+        ),
+      );
       return;
     }
-    final currentProfile = authState.userProfile;
     emit(state.copyWith(status: ProfileEditStatus.loading));
 
     String? newAvatarUrl = state.userProfile?.avatarUrl;
 
     // 1. Nếu có ảnh mới được chọn, upload nó lên
     if (state.selectedAvatar != null) {
-      print("Compressing image...");
+      log("Compressing image...");
       final compressedImageFile = await _compressImage(state.selectedAvatar!);
       if (compressedImageFile == null) {
         emit(
@@ -91,10 +100,12 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
         );
         return;
       }
-      print("Image compressed successfully.");
+      log("Image compressed successfully.");
 
       // 2. Upload ảnh đã nén
       final uploadResult = await _uploadAvatarUsecase(compressedImageFile);
+      
+      // ignore: avoid_print
       print('Upload Avatar Result: ${uploadResult.isRight()}');
       final success = uploadResult.fold(
         (failure) {

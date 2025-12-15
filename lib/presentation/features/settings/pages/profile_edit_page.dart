@@ -2,13 +2,11 @@
 
 import 'dart:io';
 import 'package:audiobooks/presentation/features/settings/cubit/profile_edit_state.dart';
-import 'package:audiobooks/presentation/features/settings/widgets/user_profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:audiobooks/domain/entities/user_profile_entity.dart';
 import 'package:audiobooks/presentation/features/settings/cubit/profile_edit_cubit.dart';
 
 class ProfileEditPage extends StatefulWidget {

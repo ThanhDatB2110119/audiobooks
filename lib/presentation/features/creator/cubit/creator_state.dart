@@ -3,6 +3,8 @@
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
 import 'package:equatable/equatable.dart';
 
+
+
 // Đánh dấu lớp là abstract để nó không thể được khởi tạo trực tiếp,
 // chỉ các lớp con của nó mới có thể.
 abstract class CreatorState extends Equatable {

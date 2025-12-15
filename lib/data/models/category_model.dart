@@ -3,17 +3,15 @@ import '../../domain/entities/category_entity.dart';
 
 part 'category_model.g.dart'; // File này sẽ được tạo bởi build_runner
 
-@JsonSerializable(createToJson: false) // Chúng ta chỉ cần fromJson, không cần toJson
+@JsonSerializable(
+  createToJson: false,
+) // Chúng ta chỉ cần fromJson, không cần toJson
 class CategoryModel extends CategoryEntity {
   const CategoryModel({
-    required String id,
-    required String name,
+    required super.id,
+    required super.name,
     String? description,
-  }) : super(
-          id: id,
-          name: name,
-          description: ""
-        );
+  }) : super(description: "");
 
   // Ghi đè fromJson để đảm bảo an toàn kiểu dữ liệu
   factory CategoryModel.fromJson(Map<String, dynamic> json) {

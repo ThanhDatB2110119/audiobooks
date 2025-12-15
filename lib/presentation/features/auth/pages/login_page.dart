@@ -51,7 +51,7 @@ class LoginPage extends StatelessWidget {
                             child: Image.asset(
                               'assets/icons/512x512bb.jpg',
                               // Đảm bảo đường dẫn này chính xác
-                              height: 150,
+                              height: 140,
                               // Điều chỉnh kích thước logo theo ý muốn
                             ),
                           ),
@@ -84,7 +84,9 @@ class LoginPage extends StatelessWidget {
                                       'assets/icons/google icon.svg',
                                       height: 24,
                                     ),
-                                    label: const Text('Tiếp tục với Google'),
+                                    label: const Text(
+                                      'Đăng nhập bằng tài khoản Google',
+                                    ),
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: Colors.white,
                                       foregroundColor: Colors.black87,

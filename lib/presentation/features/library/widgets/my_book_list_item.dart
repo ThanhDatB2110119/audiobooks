@@ -1,21 +1,22 @@
-
 import 'package:audiobooks/presentation/features/library/utils/mapper.dart';
 import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
 import 'package:flutter/material.dart';
 // ======================= THÊM CÁC IMPORT CẦN THIẾT =======================
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audiobooks/domain/entities/personal_document_entity.dart';
-import 'package:audiobooks/presentation/features/library/cubit/library_cubit.dart';
 import 'package:intl/intl.dart';
 
 class MyBookListItem extends StatelessWidget {
   final PersonalDocumentEntity document;
   final List<PersonalDocumentEntity> allDocuments;
   final int currentIndex;
+  final Function(PersonalDocumentEntity) onDelete;
   const MyBookListItem({
+    super.key,
     required this.document,
     required this.allDocuments,
     required this.currentIndex,
+    required this.onDelete,
   });
 
   // Helper để lấy màu và icon cho từng status
@@ -73,8 +74,11 @@ class MyBookListItem extends StatelessWidget {
                 );
 
                 // Nếu người dùng xác nhận, gọi cubit để xóa
-                if (confirm == true && context.mounted) {
-                  context.read<LibraryCubit>().deleteDocument(document);
+                if (confirm == true) {
+                  // ======================= THAY ĐỔI TẠI ĐÂY =======================
+                  // Gọi callback function đã được truyền vào
+                  onDelete(document);
+                  // ===============================================================
                 }
               },
             ),

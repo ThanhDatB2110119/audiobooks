@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audiobooks/core/injection/injection_container.dart' as di;
 import 'package:audiobooks/core/utils/logger.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
-import 'package:audiobooks/domain/entities/user_profile_entity.dart';
 import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
