@@ -104,7 +104,7 @@ class ProfileEditCubit extends Cubit<ProfileEditState> {
 
       // 2. Upload ảnh đã nén
       final uploadResult = await _uploadAvatarUsecase(compressedImageFile);
-      
+
       // ignore: avoid_print
       print('Upload Avatar Result: ${uploadResult.isRight()}');
       final success = uploadResult.fold(

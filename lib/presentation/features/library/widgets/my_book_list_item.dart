@@ -37,10 +37,12 @@ class MyBookListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final (statusColor, statusIcon) = _getStatusAppearance(document.status);
     final isCompleted = document.status == ProcessingStatus.completed;
-final localCreatedAt = document.createdAt.toLocal();
+    final localCreatedAt = document.createdAt.toLocal();
 
     // 2. Format chuỗi thời gian đã được chuyển đổi
-    final formattedDate = DateFormat('dd/MM/yyyy, HH:mm').format(localCreatedAt);
+    final formattedDate = DateFormat(
+      'dd/MM/yyyy, HH:mm',
+    ).format(localCreatedAt);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       child: ListTile(
@@ -128,12 +130,12 @@ final localCreatedAt = document.createdAt.toLocal();
                 );
 
                 // 3. (Tùy chọn) Hiển thị SnackBar xác nhận
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Bắt đầu phát sách của bạn...'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   const SnackBar(
+                //     content: Text('Bắt đầu phát sách của bạn...'),
+                //     duration: Duration(seconds: 2),
+                //   ),
+                // );
               }
             : null, // Vô hiệu hóa onTap nếu chưa hoàn thành
       ),

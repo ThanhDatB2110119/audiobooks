@@ -109,12 +109,27 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             // --- UI CHÍNH GIỮ NGUYÊN ---
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Chỉnh sửa hồ sơ'),
+                title: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Chỉnh sửa hồ sơ',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ),
                 actions: [
                   if (isLoading)
                     const Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(color: Colors.black),
                     )
                   else
                     IconButton(
