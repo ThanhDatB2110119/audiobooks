@@ -11,7 +11,8 @@ import 'core/router/app_router.dart';
 import 'package:audiobooks/presentation/features/player/cubit/player_cubit.dart';
 // ===============================================================
 
-class MyApp extends StatelessWidget { // Giữ nguyên tên widget của bạn
+class MyApp extends StatelessWidget {
+  // Giữ nguyên tên widget của bạn
   const MyApp({super.key});
 
   @override
@@ -21,10 +22,8 @@ class MyApp extends StatelessWidget { // Giữ nguyên tên widget của bạn
     return MultiBlocProvider(
       providers: [
         // Provider cho AuthCubit (giống như cũ)
-        BlocProvider(
-          create: (context) => di.getIt<AuthCubit>(),
-        ),
-        
+        BlocProvider(create: (context) => di.getIt<AuthCubit>()),
+
         // Provider mới cho PlayerCubit
         BlocProvider(
           create: (context) => di.getIt<PlayerCubit>(),

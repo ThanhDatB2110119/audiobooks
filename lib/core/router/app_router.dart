@@ -209,7 +209,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
   GoRouterRefreshStream(Stream<dynamic> stream) {
     appLogger.i('Khởi tạo GoRouterRefreshStream');
-    notifyListeners();
+    //notifyListeners();
     _subscription = stream.asBroadcastStream().listen((_) {
       appLogger.i(
         'GoRouterRefreshStream nhận sự kiện mới, thông báo listeners',
