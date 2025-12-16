@@ -222,12 +222,12 @@ class _MyBookListItem extends StatelessWidget {
                 );
 
                 // 3. (Tùy chọn) Hiển thị SnackBar xác nhận
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Bắt đầu phát sách của bạn...'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   const SnackBar(
+                //     content: Text('Bắt đầu phát sách của bạn...'),
+                //     duration: Duration(seconds: 2),
+                //   ),
+                // );
               }
             : null, // Vô hiệu hóa onTap nếu chưa hoàn thành
       ),

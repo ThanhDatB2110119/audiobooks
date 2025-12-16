@@ -137,9 +137,9 @@ class _SavedBookListItem extends StatelessWidget {
             '/home/details/${book.id}',
             extra: {'books': allSavedBooks, 'index': currentIndex},
           );
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Bạn đã chọn: ${book.title}')));
+          // ScaffoldMessenger.of(
+          //   context,
+          // ).showSnackBar(SnackBar(content: Text('Bạn đã chọn: ${book.title}')));
           // Có thể điều hướng đến PlayerPage ngay sau đó nếu muốn
           // context.push('/player');
         },

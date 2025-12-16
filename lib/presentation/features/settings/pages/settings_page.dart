@@ -76,14 +76,10 @@ class SettingsPage extends StatelessWidget {
                   ),
 
                   const Divider(),
-                  const SizedBox(height: 40),
+                  // const SizedBox(height: 40),
 
                   // Nút đăng xuất
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child:
-                        SignOutButton(), // Tái sử dụng widget đăng xuất của bạn
-                  ),
+                  const SignOutButton(),
                 ],
               );
             }

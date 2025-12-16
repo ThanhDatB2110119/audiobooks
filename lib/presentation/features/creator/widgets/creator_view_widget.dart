@@ -47,19 +47,19 @@ class CreatorViewState extends State<CreatorView> {
                     // Màu nền xanh
                     color: const Color.fromARGB(
                       255,
-                      251,
-                      17,
-                      0,
+                      25,
+                      127,
+                      205,
                     ), // Hoặc một màu xanh khác bạn thích
                     // Bo tròn các góc
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Text(
                     'Sáng tạo những cuốn sách nói dành riêng cho bạn',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),

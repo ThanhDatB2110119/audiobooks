@@ -52,7 +52,7 @@ class _SearchPageState extends State<SearchPage> {
               controller: _controller,
               autofocus: true,
               decoration: const InputDecoration(
-                hintText: 'Tìm sách, tác giả...',
+                hintText: 'Tên sách, tác giả...',
                 border: InputBorder.none,
                 prefixIcon: Icon(Icons.search),
               ),
@@ -77,7 +77,7 @@ class _SearchPageState extends State<SearchPage> {
                     children: [
                       Icon(Icons.search, size: 80, color: Colors.grey),
                       SizedBox(height: 16),
-                      Text('Bắt đầu tìm kiếm sách nói của bạn'),
+                      Text('Nhập tên sách, tác giả để tìm kiếm'),
                     ],
                   ),
                 );
@@ -94,13 +94,20 @@ class _SearchPageState extends State<SearchPage> {
                   itemBuilder: (context, index) {
                     final book = state.results[index];
                     return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 6.0,
+                        horizontal: 8.0,
+                      ),
                       child: ListTile(
                         title: Text(book.title),
                         subtitle: Text(book.author),
                         leading: ClipRRect(
                           borderRadius: BorderRadius.circular(4.0),
-                          child: Image.network(book.coverImageUrl, width: 50, fit: BoxFit.cover),
+                          child: Image.network(
+                            book.coverImageUrl,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         onTap: () {
                           context.push(

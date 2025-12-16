@@ -8,7 +8,7 @@ class SignOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.logout),
+      icon: const Icon(Icons.logout, color: Colors.red),
       onPressed: () async {
         final shouldLogout = await showDialog<bool>(
           context: context,
