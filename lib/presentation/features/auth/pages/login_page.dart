@@ -62,7 +62,7 @@ class LoginPage extends StatelessWidget {
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: theme.brightness == Brightness.dark
                                   ? Colors.black87
-                                  : Colors.blue.withValues(alpha: 0.8),
+                                  : Colors.black.withValues(alpha: 0.8),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
