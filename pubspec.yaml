@@ -103,7 +103,8 @@ flutter_native_splash:
     image: assets/icons/512x512bb.jpg
     icon_background_color: "#ffffff"
 
-
+flutter_launcher_names:
+  name: "Audiobook"
 
 flutter_launcher_icons:
     android: true

@@ -117,195 +117,198 @@ class CreatorViewState extends State<CreatorView> {
                   }
                 });
               },
-              child: Center(
-                // ... Phần còn lại của UI giữ nguyên không thay đổi ...
-                // child: Padding(
-                // padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Container(
-                      margin: const EdgeInsets.all(5.0),
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Center(
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8.0,
-                          mainAxisSpacing: 8.0,
-                          childAspectRatio: 1.8,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(8.0),
-                          shrinkWrap: true,
-                          children: [
-                            // Nút Nhập link
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                final creatorCubit = builderContext
-                                    .read<CreatorCubit>();
-                                final String? url = await showInputDialog(
-                                  context: context,
-                                  title: 'Nhập link tài liệu',
-                                  hintText: 'Nhập URL tại đây',
-                                  confirmButtonText: 'Xác nhận',
-                                  cancelButtonText: 'Hủy',
-                                  initialValue: '',
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Vui lòng nhập URL';
-                                    }
-                                    // Kiểm tra xem có phải là một URL hợp lệ không
-                                    if (!(Uri.tryParse(value)?.isAbsolute ??
-                                        false)) {
-                                      return 'URL không hợp lệ';
-                                    }
-                                    return null;
-                                  },
-                                );
-                                if (!mounted) return;
-                                if (url != null && url.isNotEmpty) {
-                                  // Gọi Cubit để bắt đầu xử lý
-                                  creatorCubit.createFromUrl(url);
-                                }
-                              },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.link,
-                                color: Colors.black,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.9),
-                                shadowColor: Colors.lightBlue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                padding: const EdgeInsets.all(8.0),
-                              ),
-                              label: const Text(
-                                'Nhập link',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            // Nút Chọn file
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                // Lấy instance của CreatorCubit từ context.
-                                // Chúng ta lấy nó ra ngoài trước để không phải gọi lại trong .then()
-                                final creatorCubit = builderContext
-                                    .read<CreatorCubit>();
-
-                                // Gọi dialog của bạn để hiển thị trình chọn file.
-                                // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
-                                final scaffoldMessenger = ScaffoldMessenger.of(
-                                  context,
-                                );
-                                showUploadFileDialog(context).then((
-                                  selectedFile,
-                                ) {
-                                  // Sau khi dialog đóng, callback này sẽ được thực thi.
-
-                                  // Kiểm tra xem người dùng có thực sự chọn một file hay không.
-                                  if (selectedFile != null) {
-                                    // Nếu có, hãy gọi phương thức createFromFile trên Cubit
-                                    // và truyền file đã chọn vào.
-                                    creatorCubit.createFromFile(selectedFile);
-
-                                    // Không cần hiển thị SnackBar ở đây nữa, vì BlocListener
-                                    // sẽ tự động xử lý việc hiển thị phản hồi (Loading, Success, Error).
-                                  } else {
-                                    // Người dùng đã nhấn nút "Hủy" hoặc đóng dialog.
-                                    // Hiển thị một SnackBar ngắn gọn để thông báo.
-                                    if (!mounted) return;
-                                    scaffoldMessenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Đã hủy thao tác chọn file.',
-                                        ),
-                                        duration: Duration(seconds: 2),
-                                      ),
-                                    );
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  // ... Phần còn lại của UI giữ nguyên không thay đổi ...
+                  // child: Padding(
+                  // padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10),
+                      Container(
+                        margin: const EdgeInsets.all(5.0),
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Center(
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 1.8,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(8.0),
+                            shrinkWrap: true,
+                            children: [
+                              // Nút Nhập link
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  final creatorCubit = builderContext
+                                      .read<CreatorCubit>();
+                                  final String? url = await showInputDialog(
+                                    context: context,
+                                    title: 'Nhập link tài liệu',
+                                    hintText: 'Nhập URL tại đây',
+                                    confirmButtonText: 'Xác nhận',
+                                    cancelButtonText: 'Hủy',
+                                    initialValue: '',
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Vui lòng nhập URL';
+                                      }
+                                      // Kiểm tra xem có phải là một URL hợp lệ không
+                                      if (!(Uri.tryParse(value)?.isAbsolute ??
+                                          false)) {
+                                        return 'URL không hợp lệ';
+                                      }
+                                      return null;
+                                    },
+                                  );
+                                  if (!mounted) return;
+                                  if (url != null && url.isNotEmpty) {
+                                    // Gọi Cubit để bắt đầu xử lý
+                                    creatorCubit.createFromUrl(url);
                                   }
-                                });
-                              },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.folderOpen,
-                                color: Colors.black,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withValues(
-                                  alpha: 0.9,
-                                ),
-                                shadowColor: Colors.lightBlue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                padding: const EdgeInsets.all(8.0),
-                              ),
-                              label: const Text(
-                                'Chọn file',
-                                style: TextStyle(
-                                  fontSize: 14,
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.link,
                                   color: Colors.black,
                                 ),
-                              ),
-                            ),
-                            // Nút Nhập văn bản
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                showTextInputDialog(
-                                  context: builderContext,
-                                  title: 'Tạo sách nói từ văn bản',
-                                  onConfirm: (submittedText) {
-                                    builderContext
-                                        .read<CreatorCubit>()
-                                        .createFromText(submittedText);
-                                  },
-                                );
-                              },
-                              icon: const FaIcon(
-                                FontAwesomeIcons.bookOpen,
-                                color: Colors.black,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withValues(
-                                  alpha: 0.9,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white.withOpacity(0.9),
+                                  shadowColor: Colors.lightBlue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: const EdgeInsets.all(8.0),
                                 ),
-                                shadowColor: Colors.lightBlue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                label: const Text(
+                                  'Nhập link',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.all(8.0),
                               ),
-                              label: const Text(
-                                'Nhập văn bản',
-                                style: TextStyle(
-                                  fontSize: 14,
+                              // Nút Chọn file
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  // Lấy instance của CreatorCubit từ context.
+                                  // Chúng ta lấy nó ra ngoài trước để không phải gọi lại trong .then()
+                                  final creatorCubit = builderContext
+                                      .read<CreatorCubit>();
+                
+                                  // Gọi dialog của bạn để hiển thị trình chọn file.
+                                  // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
+                                  final scaffoldMessenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  showUploadFileDialog(context).then((
+                                    selectedFile,
+                                  ) {
+                                    // Sau khi dialog đóng, callback này sẽ được thực thi.
+                
+                                    // Kiểm tra xem người dùng có thực sự chọn một file hay không.
+                                    if (selectedFile != null) {
+                                      // Nếu có, hãy gọi phương thức createFromFile trên Cubit
+                                      // và truyền file đã chọn vào.
+                                      creatorCubit.createFromFile(selectedFile);
+                
+                                      // Không cần hiển thị SnackBar ở đây nữa, vì BlocListener
+                                      // sẽ tự động xử lý việc hiển thị phản hồi (Loading, Success, Error).
+                                    } else {
+                                      // Người dùng đã nhấn nút "Hủy" hoặc đóng dialog.
+                                      // Hiển thị một SnackBar ngắn gọn để thông báo.
+                                      if (!mounted) return;
+                                      scaffoldMessenger.showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Đã hủy thao tác chọn file.',
+                                          ),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  });
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.folderOpen,
                                   color: Colors.black,
                                 ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.9,
+                                  ),
+                                  shadowColor: Colors.lightBlue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: const EdgeInsets.all(8.0),
+                                ),
+                                label: const Text(
+                                  'Chọn file',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ),
-                            ),
-
-                            // Nút chọn ảnh
-                            const ImageSourceSelectorButton(),
-                          ],
+                              // Nút Nhập văn bản
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  showTextInputDialog(
+                                    context: builderContext,
+                                    title: 'Tạo sách nói từ văn bản',
+                                    onConfirm: (submittedText) {
+                                      builderContext
+                                          .read<CreatorCubit>()
+                                          .createFromText(submittedText);
+                                    },
+                                  );
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.bookOpen,
+                                  color: Colors.black,
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white.withValues(
+                                    alpha: 0.9,
+                                  ),
+                                  shadowColor: Colors.lightBlue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: const EdgeInsets.all(8.0),
+                                ),
+                                label: const Text(
+                                  'Nhập văn bản',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                
+                              // Nút chọn ảnh
+                              const ImageSourceSelectorButton(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-
-                    const Divider(
-                      thickness: 1,
-                      color: Colors.lightBlue,
-                      indent: 5,
-                      endIndent: 5,
-                    ),
-                    const SizedBox(height: 4),
-                    _buildMostRecentSection(),
-                  ],
+                
+                      const Divider(
+                        thickness: 1,
+                        color: Colors.lightBlue,
+                        indent: 5,
+                        endIndent: 5,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildMostRecentSection(),
+                    ],
+                  ),
                 ),
               ),
 
