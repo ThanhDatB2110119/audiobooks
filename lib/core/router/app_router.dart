@@ -1,9 +1,6 @@
-import 'dart:async';
 
-import 'package:audiobooks/core/injection/injection_container.dart' as di;
 import 'package:audiobooks/core/utils/logger.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
-import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
 import 'package:audiobooks/presentation/features/book_detail/pages/book_details_page.dart';
 import 'package:audiobooks/presentation/features/creator/pages/creator_page.dart';
@@ -13,7 +10,6 @@ import 'package:audiobooks/presentation/features/search/pages/search_page.dart';
 import 'package:audiobooks/presentation/features/settings/pages/profile_edit_page.dart';
 import 'package:audiobooks/presentation/features/settings/pages/settings_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audiobooks/presentation/features/home/pages/home_page.dart';
 import 'package:audiobooks/presentation/shell/main_shell.dart';

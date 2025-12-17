@@ -92,24 +92,21 @@ class BookDetailsPage extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
                               fontStyle: FontStyle.italic,
-                              color: Colors.grey[700],
+                              color: Colors.red,
                             ),
                       ),
 
                       const SizedBox(height: 12),
                       Chip(
+                        side: BorderSide(color: Colors.blue.shade700),
                         label: Text(
                           book.categoryName,
                           style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSecondaryContainer,
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.secondaryContainer,
+                        backgroundColor: Colors.blue,
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       ),
 
