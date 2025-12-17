@@ -199,10 +199,19 @@ class PlayerPage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            book.author,
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              book.author,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: 32),
           _buildSeekBar(context),
