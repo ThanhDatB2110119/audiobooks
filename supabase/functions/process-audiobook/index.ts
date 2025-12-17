@@ -444,7 +444,7 @@ serve(async (req) => {
         const formData = new FormData();
         formData.append("inputFile", fileBlob);
         const extractResponse = await fetch(
-          "https://api.cloudmersive.com/convert/autodetect/to/txt",
+          "https://api.cloudmersive.com/convert/autodetect/to/txt", 
           {
             method: "POST",
             headers: { "Apikey": CLOUDMERSIVE_API_KEY },

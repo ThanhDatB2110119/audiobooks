@@ -25,7 +25,20 @@ class AuthCubit extends Cubit<AuthState> {
     this._getUserProfileUsecase,
     this._updateUserProfileUsecase,
   ) : super(AuthInitial()) {
-    _checkInitialSession();
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final Session? session = data.session;
+      if (session != null) {
+        print(
+          '--- Supabase AuthStateChange: User is signed in. Fetching profile... ---',
+        );
+        // Khi có session, fetch profile
+        _fetchProfileAndAuthenticate(session.user);
+      } else {
+        print('--- Supabase AuthStateChange: User is signed out. ---');
+        // Khi không có session, emit unauthenticated
+        emit(AuthUnauthenticated());
+      }
+    });
   }
 
   Future<void> googleSignInRequested() async {
@@ -34,13 +47,9 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.fold(
       (failure) {
-        print("Google sign in failed: ${failure.message}");
-        emit(AuthUnauthenticated());
+        // Không emit gì, chờ listener xử lý
       },
-      (user) async {
-        // Sau khi đăng nhập thành công, fetch profile tương ứng
-        await _fetchProfileAndAuthenticate(user as User);
-      },
+      (_) {}, // Thành công, không cần làm gì cả, chờ listener
     );
   }
 
@@ -103,18 +112,18 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> _checkInitialSession() async {
-    final currentSession = Supabase.instance.client.auth.currentSession;
+  // Future<void> _checkInitialSession() async {
+  //   final currentSession = Supabase.instance.client.auth.currentSession;
 
-    if (currentSession != null) {
-      print('--- Session restored. Fetching profile... ---');
-      // Chỉ cần gọi _fetchProfileAndAuthenticate là đủ, không emit gì thêm ở đây
-      await _fetchProfileAndAuthenticate(currentSession.user);
-    } else {
-      print('--- No active session. User is unauthenticated. ---');
-      emit(AuthUnauthenticated());
-    }
-  }
+  //   if (currentSession != null) {
+  //     print('--- Session restored. Fetching profile... ---');
+  //     // Chỉ cần gọi _fetchProfileAndAuthenticate là đủ, không emit gì thêm ở đây
+  //     await _fetchProfileAndAuthenticate(currentSession.user);
+  //   } else {
+  //     print('--- No active session. User is unauthenticated. ---');
+  //     emit(AuthUnauthenticated());
+  //   }
+  // }
 
   Future<void> _fetchProfileAndAuthenticate(User user) async {
     final profileResult = await _getUserProfileUsecase();

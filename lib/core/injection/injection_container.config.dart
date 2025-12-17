@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
+import 'package:go_router/go_router.dart' as _i583;
 import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:just_audio/just_audio.dart' as _i501;
@@ -64,6 +65,7 @@ import '../../presentation/features/settings/cubit/profile_edit_cubit.dart'
 import '../../presentation/features/settings/cubit/settings_cubit.dart'
     as _i350;
 import '../event/library_events.dart' as _i32;
+import '../services/app_lifecycle_service.dart' as _i6;
 import 'register_module.dart' as _i291;
 
 const String _dev = 'dev';
@@ -82,6 +84,7 @@ _i174.GetIt init(
   gh.lazySingleton<_i116.GoogleSignIn>(() => registerModule.googleSignIn);
   gh.lazySingleton<_i501.AudioPlayer>(() => registerModule.audioPlayer);
   gh.lazySingleton<_i706.Uuid>(() => registerModule.uuid);
+  gh.lazySingleton<_i583.GoRouter>(() => registerModule.goRouter);
   gh.lazySingleton<_i971.BookRemoteDataSource>(
     () => _i971.BookRemoteDataSourceImpl(gh<_i454.SupabaseClient>()),
   );
@@ -113,6 +116,9 @@ _i174.GetIt init(
     () => _i365.UserProfileRepositoryImpl(
       gh<_i493.UserProfileRemoteDataSource>(),
     ),
+  );
+  gh.lazySingleton<_i6.AppLifecycleService>(
+    () => _i6.AppLifecycleService(gh<_i583.GoRouter>()),
   );
   gh.lazySingleton<_i538.PersonalDocumentRepository>(
     () => _i422.PersonalDocumentRepositoryImpl(

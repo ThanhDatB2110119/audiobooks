@@ -36,96 +36,117 @@ class LoginPage extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: Colors.white,
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: Image.asset(
-                              'assets/icons/512x512bb.jpg',
-                              // Đảm bảo đường dẫn này chính xác
-                              height: 140,
-                              // Điều chỉnh kích thước logo theo ý muốn
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          Text(
-                            'Khám phá phiên bản sách dành riêng cho bạn',
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.black87
-                                  : Colors.black.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 60),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator(),
-                                  )
-                                : OutlinedButton.icon(
-                                    onPressed: () {
-                                      context
-                                          .read<AuthCubit>()
-                                          .googleSignInRequested();
-                                    },
-                                    icon: SvgPicture.asset(
-                                      'assets/icons/google icon.svg',
-                                      height: 24,
-                                    ),
-                                    label: const Text(
-                                      'Đăng nhập bằng tài khoản Google',
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: Colors.black87,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      side: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
+          body: BlocListener<AuthCubit, AuthState>(
+            listener: (context, state) {
+              if (state is AuthAuthenticated) {
+                // Khi đăng nhập thành công, ra lệnh điều hướng
+                print(
+                  "--- LoginPage Listener: Authenticated. Navigating to /home ---",
+                );
+                context.go('/home');
+              } else if (state is AuthUnauthenticated) {
+                // Hiển thị lỗi nếu đăng nhập thất bại
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Đăng xuất thành công'),
+                    backgroundColor: Colors.green,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color:
-                              (theme.brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black)
-                                  .withValues(alpha: 0.7),
-                          fontSize: 12,
+                );
+              }
+            },
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: Image.asset(
+                                'assets/icons/512x512bb.jpg',
+                                // Đảm bảo đường dẫn này chính xác
+                                height: 140,
+                                // Điều chỉnh kích thước logo theo ý muốn
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+                            Text(
+                              'Khám phá phiên bản sách dành riêng cho bạn',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.black87
+                                    : Colors.black.withValues(alpha: 0.8),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 60),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: isLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: () {
+                                        context
+                                            .read<AuthCubit>()
+                                            .googleSignInRequested();
+                                      },
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/google icon.svg',
+                                        height: 24,
+                                      ),
+                                      label: const Text(
+                                        'Đăng nhập bằng tài khoản Google',
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.black87,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
+                                        ),
+                                        side: const BorderSide(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
                         ),
-                        children: [
-                          const TextSpan(
-                            text: 'Đăng nhập để tiếp tục... ',
-                            style: TextStyle(color: Colors.lightBlue),
-                          ),
-                        ],
                       ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color:
+                                (theme.brightness == Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black)
+                                    .withValues(alpha: 0.7),
+                            fontSize: 12,
+                          ),
+                          children: [
+                            const TextSpan(
+                              text: 'Đăng nhập để tiếp tục... ',
+                              style: TextStyle(color: Colors.lightBlue),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

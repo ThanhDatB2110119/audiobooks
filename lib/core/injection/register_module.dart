@@ -1,6 +1,8 @@
 // ignore_for_file: invalid_annotation_target
 
+import 'package:audiobooks/core/router/app_router.dart';
 import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,4 +27,7 @@ abstract class RegisterModule {
 
   @lazySingleton
   Uuid get uuid => const Uuid();
+
+  @lazySingleton
+  GoRouter get goRouter => AppRouter.router;
 }

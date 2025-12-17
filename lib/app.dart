@@ -5,6 +5,7 @@ import 'package:audiobooks/presentation/features/auth/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:audiobooks/core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'core/router/app_router.dart';
 
 // ======================= THÊM IMPORT MỚI =======================
@@ -34,11 +35,43 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Audiobooks',
+        title: 'Audiobook',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         themeMode: ThemeMode.light,
         routerConfig: AppRouter.router,
+
+        // builder: (context, child) {
+        //   return BlocListener<AuthCubit, AuthState>(
+        //     listenWhen: (previous, current) {
+        //       // Chỉ lắng nghe khi trạng thái xác thực thay đổi (ví dụ: từ unauthenticated -> authenticated)
+        //       // hoặc từ authenticated -> unauthenticated.
+        //       // Bỏ qua các thay đổi từ authenticated -> authenticated (như khi cập nhật profile).
+        //       return (previous is! AuthAuthenticated &&
+        //               current is AuthAuthenticated) ||
+        //           (previous is AuthAuthenticated &&
+        //               current is! AuthAuthenticated);
+        //     },
+        //     listener: (context, state) {
+        //       final router = AppRouter.router;
+        //       if (state is AuthAuthenticated) {
+        //         // Nếu đã xác thực, đi đến trang home
+        //         print(
+        //           "--- Auth Listener: Authenticated. Navigating to /home ---",
+        //         );
+        //         router.go('/home');
+        //       } else if (state is AuthUnauthenticated) {
+        //         // Nếu chưa xác thực, đi đến trang login
+        //         print(
+        //           "--- Auth Listener: Unauthenticated. Navigating to /login ---",
+        //         );
+        //         router.go('/login');
+        //       }
+        //     },
+        //     // `child` ở đây chính là các trang do GoRouter render
+        //     child: child,
+        //   );
+        // },
       ),
     );
     // ==============================================================================================
