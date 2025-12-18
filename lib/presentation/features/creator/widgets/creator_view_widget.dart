@@ -118,7 +118,6 @@ class CreatorViewState extends State<CreatorView> {
                 });
               },
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.0),
                 child: Center(
                   // ... Phần còn lại của UI giữ nguyên không thay đổi ...
                   // child: Padding(
@@ -156,7 +155,8 @@ class CreatorViewState extends State<CreatorView> {
                                     cancelButtonText: 'Hủy',
                                     initialValue: '',
                                     validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
+                                      if (value == null ||
+                                          value.trim().isEmpty) {
                                         return 'Vui lòng nhập URL';
                                       }
                                       // Kiểm tra xem có phải là một URL hợp lệ không
@@ -178,7 +178,9 @@ class CreatorViewState extends State<CreatorView> {
                                   color: Colors.black,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(0.9),
+                                  backgroundColor: Colors.white.withOpacity(
+                                    0.9,
+                                  ),
                                   shadowColor: Colors.lightBlue,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
@@ -200,23 +202,22 @@ class CreatorViewState extends State<CreatorView> {
                                   // Chúng ta lấy nó ra ngoài trước để không phải gọi lại trong .then()
                                   final creatorCubit = builderContext
                                       .read<CreatorCubit>();
-                
+
                                   // Gọi dialog của bạn để hiển thị trình chọn file.
                                   // Sử dụng .then() để xử lý kết quả trả về một cách bất đồng bộ.
-                                  final scaffoldMessenger = ScaffoldMessenger.of(
-                                    context,
-                                  );
+                                  final scaffoldMessenger =
+                                      ScaffoldMessenger.of(context);
                                   showUploadFileDialog(context).then((
                                     selectedFile,
                                   ) {
                                     // Sau khi dialog đóng, callback này sẽ được thực thi.
-                
+
                                     // Kiểm tra xem người dùng có thực sự chọn một file hay không.
                                     if (selectedFile != null) {
                                       // Nếu có, hãy gọi phương thức createFromFile trên Cubit
                                       // và truyền file đã chọn vào.
                                       creatorCubit.createFromFile(selectedFile);
-                
+
                                       // Không cần hiển thị SnackBar ở đây nữa, vì BlocListener
                                       // sẽ tự động xử lý việc hiển thị phản hồi (Loading, Success, Error).
                                     } else {
@@ -291,14 +292,14 @@ class CreatorViewState extends State<CreatorView> {
                                   ),
                                 ),
                               ),
-                
+
                               // Nút chọn ảnh
                               const ImageSourceSelectorButton(),
                             ],
                           ),
                         ),
                       ),
-                
+
                       const Divider(
                         thickness: 1,
                         color: Colors.lightBlue,
