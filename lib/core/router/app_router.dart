@@ -1,4 +1,3 @@
-
 import 'package:audiobooks/core/utils/logger.dart';
 import 'package:audiobooks/domain/entities/book_entity.dart';
 import 'package:audiobooks/presentation/features/auth/pages/login_page.dart';
@@ -68,26 +67,51 @@ class AppRouter {
                     builder: (context, state) {
                       // Lấy tham số `bookId` từ URL
                       final String? bookId = state.pathParameters['bookId'];
-                      final extraData = state.extra as Map<String, dynamic>?;
-                      // Kiểm tra null để đảm bảo an toàn
-                      if (bookId == null ||
-                          extraData == null ||
-                          extraData['books'] == null ||
-                          extraData['index'] == null) {
+                      if (bookId == null) {
                         return const Scaffold(
                           body: Center(
-                            child: Text('Lỗi: Thiếu thông tin sách.'),
+                            child: Text('Lỗi: Không tìm thấy ID sách.'),
                           ),
                         );
                       }
 
+                      // 2. Kiểm tra `state.extra` một cách an toàn
+                      final extra = state.extra;
+                      // Kiểm tra xem extra có phải là một Map hợp lệ hay không
+                      if (extra is Map<String, dynamic> &&
+                          extra.containsKey('books') &&
+                          extra.containsKey('index') &&
+                          extra['books'] is List) {
+                        // Nếu extra hợp lệ, tiến hành chuyển đổi kiểu dữ liệu
+                        try {
+                          final List<dynamic> rawBooks = extra['books'];
+                          final List<BookEntity> books = rawBooks
+                              .cast<BookEntity>(); // Dùng .cast<>()
+                          final int index = extra['index'] as int;
+
+                          appLogger.i(
+                            'Điều hướng tới trang Chi tiết sách (có extra) với ID: $bookId',
+                          );
+                          return BookDetailsPage(
+                            bookId: bookId,
+                            books: books,
+                            currentIndex: index,
+                          );
+                        } catch (e) {
+                          // Nếu có lỗi trong quá trình ép kiểu, in ra lỗi và fallback
+                          print("Error casting extra data: $e");
+                          // Rơi xuống trường hợp fallback bên dưới
+                        }
+                      }
+
+                      // 3. Trường hợp Fallback (không có extra, extra sai định dạng, hoặc ép kiểu lỗi)
                       appLogger.i(
-                        'Điều hướng tới trang Chi tiết sách với ID: $bookId',
+                        'Điều hướng tới trang Chi tiết sách (KHÔNG có extra hợp lệ) với ID: $bookId',
                       );
                       return BookDetailsPage(
                         bookId: bookId,
-                        books: extraData['books'] as List<BookEntity>,
-                        currentIndex: extraData['index'] as int,
+                        books: const [],
+                        currentIndex: 0,
                       );
                     },
                   ),
